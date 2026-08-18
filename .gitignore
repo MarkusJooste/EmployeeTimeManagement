@@ -1,0 +1,23 @@
+# Build
+bin/
+obj/
+Debug/
+Release/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Temp files
+*.log
+*.tmp
+*.temp
+*.bak
+
+# Test results
+TestResults/
+
+# Windows files
+Thumbs.db
+Desktop.ini
