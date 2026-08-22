@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using EmployeeTimeManagement.Database;
 
 namespace EmployeeTimeManagement
 {
@@ -16,7 +17,20 @@ namespace EmployeeTimeManagement
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            try
+            {
+                using (var connection = DatabaseConnection.GetConnection())
+                {
+                    MessageBox.Show(
+                        "Connected. Server version: " + connection.ServerVersion,
+                        "Database connection test");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Database connection test failed");
+            }
         }
     }
 }
