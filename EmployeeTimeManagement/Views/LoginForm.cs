@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using EmployeeTimeManagement.Controllers;
 using EmployeeTimeManagement.Models;
+using EmployeeTimeManagement.Views;
 
 namespace EmployeeTimeManagement.Views
 {
@@ -44,14 +45,25 @@ namespace EmployeeTimeManagement.Views
             }
 
             // Successful login
-            OpenDashboard(manager);
             CurrentUser.Login(manager);
+            OpenDashboard(manager);
         }
 
         private void OpenDashboard(Manager manager)
         {
-            MessageBox.Show($"Welcome, {CurrentUser.Manager.ManagerName}!","Login Successful",MessageBoxButtons.OK,MessageBoxIcon.Information);
-            // TODO: Dashboard
+            DashboardForm dashboardForm = new DashboardForm();
+
+            Hide();
+            dashboardForm.FormClosed += DashboardForm_FormClosed;
+            dashboardForm.Show();
+        }
+
+        private void DashboardForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            // When the dashboard form is closed it will show the login form again
+            Show();
+            txtPin.Clear();
+            txtPin.Focus();
         }
     }
 }
