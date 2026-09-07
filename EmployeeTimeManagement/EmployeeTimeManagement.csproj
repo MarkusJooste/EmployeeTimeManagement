@@ -222,9 +222,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\TimesheetController.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
     <Compile Include="Models\CurrentUser.cs" />
     <Compile Include="Models\Manager.cs" />
+    <Compile Include="Models\TimesheetSummary.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\DashboardForm.cs">
