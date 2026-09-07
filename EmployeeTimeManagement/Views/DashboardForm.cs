@@ -83,7 +83,7 @@ namespace EmployeeTimeManagement.Views
 
         private void btnTimesheet_Click(object sender, EventArgs e)
         {
-
+            ShowView(new TimesheetsForm());
         }
 
         private void btnReports_Click(object sender, EventArgs e)
