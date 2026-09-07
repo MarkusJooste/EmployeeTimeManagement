@@ -9,6 +9,8 @@
     <RootNamespace>EmployeeTimeManagement</RootNamespace>
     <AssemblyName>EmployeeTimeManagement</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <!-- Grants the VS "WindowsForms" project capability so WinForms item templates appear in Add > New Item. -->
+    <UseWindowsForms>true</UseWindowsForms>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
