@@ -136,8 +136,34 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
-            dgvTimesheets.DataSource = new BindingList<TimesheetSummary>(allRows);
-            ShowTotals(allRows);
+            ApplyFilter();
+        }
+
+        // Narrows the loaded rows by the search text without re-querying the database
+        private void ApplyFilter()
+        {
+            string search = txtSearch.Text.Trim();
+            List<TimesheetSummary> filtered;
+
+            if (search.Length == 0)
+            {
+                filtered = allRows;
+            }
+            else
+            {
+                filtered = allRows
+                    .Where(row => row.Name.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0
+                               || row.Surname.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                    .ToList();
+            }
+
+            dgvTimesheets.DataSource = new BindingList<TimesheetSummary>(filtered);
+            ShowTotals(filtered);
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            ApplyFilter();
         }
 
         // Summarises the displayed rows in the status label

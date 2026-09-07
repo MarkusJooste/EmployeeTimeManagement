@@ -39,6 +39,8 @@ namespace EmployeeTimeManagement.Views
             this.dtpFrom = new System.Windows.Forms.DateTimePicker();
             this.dtpTo = new System.Windows.Forms.DateTimePicker();
             this.btnApplyRange = new System.Windows.Forms.Button();
+            this.lblSearch = new System.Windows.Forms.Label();
+            this.txtSearch = new System.Windows.Forms.TextBox();
             this.lblPeriod = new System.Windows.Forms.Label();
             this.lblStatus = new System.Windows.Forms.Label();
             this.dgvTimesheets = new System.Windows.Forms.DataGridView();
@@ -56,6 +58,8 @@ namespace EmployeeTimeManagement.Views
             // pnlTop
             //
             this.pnlTop.Controls.Add(this.lblPeriod);
+            this.pnlTop.Controls.Add(this.txtSearch);
+            this.pnlTop.Controls.Add(this.lblSearch);
             this.pnlTop.Controls.Add(this.btnApplyRange);
             this.pnlTop.Controls.Add(this.dtpTo);
             this.pnlTop.Controls.Add(this.dtpFrom);
@@ -124,13 +128,30 @@ namespace EmployeeTimeManagement.Views
             this.btnApplyRange.UseVisualStyleBackColor = true;
             this.btnApplyRange.Click += new System.EventHandler(this.btnApplyRange_Click);
             //
+            // lblSearch
+            //
+            this.lblSearch.AutoSize = true;
+            this.lblSearch.Location = new System.Drawing.Point(345, 49);
+            this.lblSearch.Name = "lblSearch";
+            this.lblSearch.Size = new System.Drawing.Size(87, 13);
+            this.lblSearch.TabIndex = 6;
+            this.lblSearch.Text = "Search employee";
+            //
+            // txtSearch
+            //
+            this.txtSearch.Location = new System.Drawing.Point(438, 45);
+            this.txtSearch.Name = "txtSearch";
+            this.txtSearch.Size = new System.Drawing.Size(180, 20);
+            this.txtSearch.TabIndex = 7;
+            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            //
             // lblPeriod
             //
             this.lblPeriod.AutoSize = true;
             this.lblPeriod.Location = new System.Drawing.Point(268, 15);
             this.lblPeriod.Name = "lblPeriod";
             this.lblPeriod.Size = new System.Drawing.Size(48, 13);
-            this.lblPeriod.TabIndex = 6;
+            this.lblPeriod.TabIndex = 8;
             this.lblPeriod.Text = "lblPeriod";
             //
             // lblStatus
@@ -255,6 +276,8 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.DateTimePicker dtpFrom;
         private System.Windows.Forms.DateTimePicker dtpTo;
         private System.Windows.Forms.Button btnApplyRange;
+        private System.Windows.Forms.Label lblSearch;
+        private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.Label lblPeriod;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.DataGridView dgvTimesheets;
