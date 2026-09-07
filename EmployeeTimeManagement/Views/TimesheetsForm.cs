@@ -23,18 +23,51 @@ namespace EmployeeTimeManagement.Views
         {
             InitializeComponent();
             timesheetController = new TimesheetController();
-            ShowCurrentWeek();
+            ShowWeekly();
+        }
+
+        // Loads today only
+        private void ShowDaily()
+        {
+            HighlightPeriod(btnDaily);
+            SetPeriod(DateTime.Today, DateTime.Today);
         }
 
         // Loads the Monday to Sunday week that contains today
-        private void ShowCurrentWeek()
+        private void ShowWeekly()
         {
+            HighlightPeriod(btnWeekly);
+
             DateTime today = DateTime.Today;
             // DayOfWeek starts on Sunday, so Sunday is 6 days after the week's Monday
             int daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
             DateTime monday = today.AddDays(-daysSinceMonday);
 
             SetPeriod(monday, monday.AddDays(6));
+        }
+
+        // Loads the first to the last day of the current month
+        private void ShowMonthly()
+        {
+            HighlightPeriod(btnMonthly);
+
+            DateTime today = DateTime.Today;
+            DateTime first = new DateTime(today.Year, today.Month, 1);
+
+            SetPeriod(first, first.AddMonths(1).AddDays(-1));
+        }
+
+        // Bolds the active period button, or clears every button when a custom range is used
+        private void HighlightPeriod(Button active)
+        {
+            foreach (Button button in new[] { btnDaily, btnWeekly, btnMonthly })
+            {
+                bool isActive = button == active;
+                button.Font = new Font(button.Font, isActive ? FontStyle.Bold : FontStyle.Regular);
+                button.BackColor = isActive ? SystemColors.Highlight : SystemColors.Control;
+                button.ForeColor = isActive ? SystemColors.HighlightText : SystemColors.ControlText;
+                button.UseVisualStyleBackColor = !isActive;
+            }
         }
 
         // Sets the period being displayed and reloads the grid
@@ -44,8 +77,40 @@ namespace EmployeeTimeManagement.Views
             toDate = to.Date;
 
             lblPeriod.Text = $"{fromDate:dd MMM yyyy} - {toDate:dd MMM yyyy}";
+            dtpFrom.Value = fromDate;
+            dtpTo.Value = toDate;
 
             LoadData();
+        }
+
+        private void btnDaily_Click(object sender, EventArgs e)
+        {
+            ShowDaily();
+        }
+
+        private void btnWeekly_Click(object sender, EventArgs e)
+        {
+            ShowWeekly();
+        }
+
+        private void btnMonthly_Click(object sender, EventArgs e)
+        {
+            ShowMonthly();
+        }
+
+        private void btnApplyRange_Click(object sender, EventArgs e)
+        {
+            DateTime from = dtpFrom.Value.Date;
+            DateTime to = dtpTo.Value.Date;
+
+            if (from > to)
+            {
+                lblStatus.Text = "Start date must be before end date";
+                return;
+            }
+
+            HighlightPeriod(null);
+            SetPeriod(from, to);
         }
 
         // Fetches the summary rows for the current period and binds them to the grid
