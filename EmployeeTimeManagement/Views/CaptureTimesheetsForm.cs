@@ -65,8 +65,11 @@ namespace EmployeeTimeManagement.Views
         {
             dgvCapture.AutoGenerateColumns = false;
             dgvCapture.AllowUserToAddRows = true;
-            dgvCapture.AllowUserToDeleteRows = true;
             dgvCapture.EditMode = DataGridViewEditMode.EditOnEnter;
+
+            // Rows can be removed so a mis-added employee can be taken back. This clears
+            // the row off the screen; it never deletes a Timesheet already written.
+            dgvCapture.AllowUserToDeleteRows = true;
 
             var employeeColumn = new DataGridViewComboBoxColumn();
             employeeColumn.Name = ColumnEmployee;
@@ -124,6 +127,74 @@ namespace EmployeeTimeManagement.Views
             dgvCapture.CellValueChanged += dgvCapture_CellValueChanged;
             dgvCapture.CurrentCellDirtyStateChanged += dgvCapture_CurrentCellDirtyStateChanged;
             dgvCapture.CellEndEdit += dgvCapture_CellEndEdit;
+            dgvCapture.UserDeletingRow += dgvCapture_UserDeletingRow;
+        }
+
+        // Applies the saved-row warning to a deletion started from the keyboard.
+        private void dgvCapture_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
+        {
+            if (!ConfirmRemoval(e.Row))
+            {
+                e.Cancel = true;
+            }
+        }
+
+        // Removing an unsaved row is free, but a saved one leaves its Timesheet in the
+        // database, so make sure the manager is not expecting a delete.
+        private static bool ConfirmRemoval(DataGridViewRow row)
+        {
+            var state = row.Tag as CaptureRowState;
+
+            if (state == null || !state.IsSaved)
+            {
+                return true;
+            }
+
+            DialogResult result = MessageBox.Show(
+                "This timesheet has already been saved. Removing the row takes it off this screen, but the saved timesheet stays in the database.",
+                "Remove saved row?",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Information);
+
+            return result == DialogResult.OK;
+        }
+
+        // Deletes the row holding the highlighted cell, telling the manager to pick one
+        // first if nothing is selected.
+        private void btnRemoveRow_Click(object sender, EventArgs e)
+        {
+            DataGridViewCell cell = dgvCapture.CurrentCell;
+
+            if (cell == null || cell.RowIndex < 0)
+            {
+                MessageBox.Show(
+                    "Select a cell in the row you want to delete first.",
+                    "Nothing selected",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            DataGridViewRow row = dgvCapture.Rows[cell.RowIndex];
+
+            if (row.IsNewRow)
+            {
+                MessageBox.Show(
+                    "That is the blank row at the bottom of the grid. Select a cell in a captured row instead.",
+                    "Nothing to delete",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!ConfirmRemoval(row))
+            {
+                return;
+            }
+
+            dgvCapture.EndEdit();
+            RemoveRow(row);
+            lblStatus.Text = "Row deleted";
         }
 
         // Fetches the store's employees, or explains why capture is unavailable.

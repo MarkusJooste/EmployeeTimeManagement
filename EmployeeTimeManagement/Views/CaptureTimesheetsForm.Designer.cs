@@ -33,6 +33,7 @@ namespace EmployeeTimeManagement.Views
             this.lblDayType = new System.Windows.Forms.Label();
             this.dgvCapture = new System.Windows.Forms.DataGridView();
             this.btnSave = new System.Windows.Forms.Button();
+            this.btnRemoveRow = new System.Windows.Forms.Button();
             this.lblStatus = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCapture)).BeginInit();
             this.SuspendLayout();
@@ -87,14 +88,25 @@ namespace EmployeeTimeManagement.Views
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             //
+            // btnRemoveRow
+            //
+            this.btnRemoveRow.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnRemoveRow.Location = new System.Drawing.Point(12, 522);
+            this.btnRemoveRow.Name = "btnRemoveRow";
+            this.btnRemoveRow.Size = new System.Drawing.Size(95, 25);
+            this.btnRemoveRow.TabIndex = 5;
+            this.btnRemoveRow.Text = "Delete row";
+            this.btnRemoveRow.UseVisualStyleBackColor = true;
+            this.btnRemoveRow.Click += new System.EventHandler(this.btnRemoveRow_Click);
+            //
             // lblStatus
             //
             this.lblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblStatus.AutoSize = true;
-            this.lblStatus.Location = new System.Drawing.Point(12, 528);
+            this.lblStatus.Location = new System.Drawing.Point(115, 528);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(0, 13);
-            this.lblStatus.TabIndex = 5;
+            this.lblStatus.TabIndex = 6;
             //
             // CaptureTimesheetsForm
             //
@@ -102,6 +114,7 @@ namespace EmployeeTimeManagement.Views
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(900, 560);
             this.Controls.Add(this.lblStatus);
+            this.Controls.Add(this.btnRemoveRow);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.dgvCapture);
             this.Controls.Add(this.lblDayType);
@@ -122,6 +135,7 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Label lblDayType;
         private System.Windows.Forms.DataGridView dgvCapture;
         private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.Button btnRemoveRow;
         private System.Windows.Forms.Label lblStatus;
     }
 }
