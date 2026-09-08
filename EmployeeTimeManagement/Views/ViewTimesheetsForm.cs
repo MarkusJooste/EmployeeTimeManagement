@@ -12,14 +12,14 @@ using System.Windows.Forms;
 
 namespace EmployeeTimeManagement.Views
 {
-    public partial class TimesheetsForm : Form
+    public partial class ViewTimesheetsForm : Form
     {
         private readonly TimesheetController timesheetController;
         private List<TimesheetSummary> allRows = new List<TimesheetSummary>();
         private DateTime fromDate;
         private DateTime toDate;
 
-        public TimesheetsForm()
+        public ViewTimesheetsForm()
         {
             InitializeComponent();
             timesheetController = new TimesheetController();

@@ -81,14 +81,14 @@ namespace EmployeeTimeManagement.Views
 
         }
 
-        private void btnTimesheet_Click(object sender, EventArgs e)
+        private void btnCaptureTimesheets_Click(object sender, EventArgs e)
         {
-            ShowView(new TimesheetsForm());
+            ShowView(new CaptureTimesheetsForm());
         }
 
-        private void btnReports_Click(object sender, EventArgs e)
+        private void btnViewTimesheets_Click(object sender, EventArgs e)
         {
-
+            ShowView(new ViewTimesheetsForm());
         }
 
         private void btnLeave_Click(object sender, EventArgs e)

@@ -1,6 +1,6 @@
 namespace EmployeeTimeManagement.Views
 {
-    partial class TimesheetsForm
+    partial class ViewTimesheetsForm
     {
         /// <summary>
         /// Required designer variable.
@@ -250,7 +250,7 @@ namespace EmployeeTimeManagement.Views
             this.colPayableHours.Name = "colPayableHours";
             this.colPayableHours.ReadOnly = true;
             //
-            // TimesheetsForm
+            // ViewTimesheetsForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -258,8 +258,8 @@ namespace EmployeeTimeManagement.Views
             this.Controls.Add(this.dgvTimesheets);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.pnlTop);
-            this.Name = "TimesheetsForm";
-            this.Text = "TimesheetsForm";
+            this.Name = "ViewTimesheetsForm";
+            this.Text = "ViewTimesheetsForm";
             this.pnlTop.ResumeLayout(false);
             this.pnlTop.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTimesheets)).EndInit();

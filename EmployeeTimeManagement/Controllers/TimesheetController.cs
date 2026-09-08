@@ -143,5 +143,191 @@ ORDER BY MAX(e.Surname), MAX(e.Name);";
                 }
             }
         }
+
+        // Returns every Timesheet already stored for one employee on one WorkDate. More
+        // than one is possible: the table has no unique key on employee and date.
+        public List<Timesheet> GetByEmployeeAndDate(int employeeID, DateTime workDate)
+        {
+            const string query = @"SELECT TimesheetID, EmployeeID, WorkDate, TimeIn, TimeOut,
+       Break1Start, Break1End, Break2Start, Break2End,
+       DayType, Status, CapturedBy, BusinessDate, Notes
+FROM TBL_timesheets
+WHERE EmployeeID = @EmployeeID AND WorkDate = @WorkDate
+ORDER BY TimesheetID;";
+
+            var timesheets = new List<Timesheet>();
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                    command.Parameters.AddWithValue("@WorkDate", workDate.Date);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            timesheets.Add(ReadTimesheet(reader));
+                        }
+
+                        return timesheets;
+                    }
+                }
+            }
+        }
+
+        // Writes a whole day of Timesheets in one transaction, so a failure part way
+        // through leaves nothing behind.
+        public void Save(IEnumerable<Timesheet> timesheets)
+        {
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        foreach (Timesheet timesheet in timesheets)
+                        {
+                            if (timesheet.IsUpdate)
+                            {
+                                Update(connection, transaction, timesheet);
+                            }
+                            else
+                            {
+                                Insert(connection, transaction, timesheet);
+                            }
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        // Inserts a new Timesheet.
+        private static void Insert(MySqlConnection connection, MySqlTransaction transaction, Timesheet timesheet)
+        {
+            const string query = @"INSERT INTO TBL_timesheets
+    (EmployeeID, WorkDate, TimeIn, TimeOut, Break1Start, Break1End, Break2Start, Break2End,
+     DayType, Status, CapturedBy, BusinessDate, Notes)
+VALUES
+    (@EmployeeID, @WorkDate, @TimeIn, @TimeOut, @Break1Start, @Break1End, @Break2Start, @Break2End,
+     @DayType, @Status, @CapturedBy, @BusinessDate, @Notes);";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                AddTimesheetParameters(command, timesheet);
+                command.ExecuteNonQuery();
+
+                // Keeping the new identity means saving the same row again updates it
+                // rather than inserting a duplicate.
+                timesheet.TimesheetID = (int)command.LastInsertedId;
+            }
+        }
+
+        // Replaces a stored Timesheet, taking over CapturedBy so it records who last wrote it.
+        private static void Update(MySqlConnection connection, MySqlTransaction transaction, Timesheet timesheet)
+        {
+            const string query = @"UPDATE TBL_timesheets
+SET WorkDate = @WorkDate,
+    TimeIn = @TimeIn,
+    TimeOut = @TimeOut,
+    Break1Start = @Break1Start,
+    Break1End = @Break1End,
+    Break2Start = @Break2Start,
+    Break2End = @Break2End,
+    DayType = @DayType,
+    Status = @Status,
+    CapturedBy = @CapturedBy,
+    BusinessDate = @BusinessDate,
+    Notes = @Notes
+WHERE TimesheetID = @TimesheetID AND EmployeeID = @EmployeeID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                AddTimesheetParameters(command, timesheet);
+                command.Parameters.AddWithValue("@TimesheetID", timesheet.TimesheetID.Value);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Binds the columns shared by the insert and the update.
+        private static void AddTimesheetParameters(MySqlCommand command, Timesheet timesheet)
+        {
+            command.Parameters.AddWithValue("@EmployeeID", timesheet.EmployeeID);
+            command.Parameters.AddWithValue("@WorkDate", timesheet.WorkDate.Date);
+            command.Parameters.AddWithValue("@TimeIn", ToParameter(timesheet.TimeIn));
+            command.Parameters.AddWithValue("@TimeOut", ToParameter(timesheet.TimeOut));
+            command.Parameters.AddWithValue("@Break1Start", ToParameter(timesheet.Break1Start));
+            command.Parameters.AddWithValue("@Break1End", ToParameter(timesheet.Break1End));
+            command.Parameters.AddWithValue("@Break2Start", ToParameter(timesheet.Break2Start));
+            command.Parameters.AddWithValue("@Break2End", ToParameter(timesheet.Break2End));
+            command.Parameters.AddWithValue("@DayType", timesheet.DayType.ToDatabaseValue());
+            command.Parameters.AddWithValue("@Status", timesheet.Status.ToDatabaseValue());
+            command.Parameters.AddWithValue("@CapturedBy", timesheet.CapturedBy);
+            command.Parameters.AddWithValue("@BusinessDate", timesheet.BusinessDate.Date);
+            command.Parameters.AddWithValue("@Notes", ToParameter(timesheet.Notes));
+        }
+
+        // Converts an absent value to the DBNull the driver expects.
+        private static object ToParameter(object value)
+        {
+            if (value == null)
+            {
+                return DBNull.Value;
+            }
+
+            return value;
+        }
+
+        // Reads one TBL_timesheets row into a Timesheet.
+        private static Timesheet ReadTimesheet(MySqlDataReader reader)
+        {
+            var timesheet = new Timesheet();
+
+            timesheet.TimesheetID = reader.GetInt32(reader.GetOrdinal("TimesheetID"));
+            timesheet.EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID"));
+            timesheet.WorkDate = reader.GetDateTime(reader.GetOrdinal("WorkDate"));
+            timesheet.TimeIn = ReadTime(reader, "TimeIn");
+            timesheet.TimeOut = ReadTime(reader, "TimeOut");
+            timesheet.Break1Start = ReadTime(reader, "Break1Start");
+            timesheet.Break1End = ReadTime(reader, "Break1End");
+            timesheet.Break2Start = ReadTime(reader, "Break2Start");
+            timesheet.Break2End = ReadTime(reader, "Break2End");
+            timesheet.DayType = DayTypes.FromDatabaseValue(reader.GetString(reader.GetOrdinal("DayType")));
+            timesheet.Status = TimesheetStatuses.FromDatabaseValue(reader.GetString(reader.GetOrdinal("Status")));
+            timesheet.CapturedBy = reader.GetInt32(reader.GetOrdinal("CapturedBy"));
+            timesheet.BusinessDate = reader.GetDateTime(reader.GetOrdinal("BusinessDate"));
+
+            int notesIndex = reader.GetOrdinal("Notes");
+            if (reader.IsDBNull(notesIndex))
+            {
+                timesheet.Notes = null;
+            }
+            else
+            {
+                timesheet.Notes = reader.GetString(notesIndex);
+            }
+
+            return timesheet;
+        }
+
+        // Reads a nullable time column.
+        private static TimeSpan? ReadTime(MySqlDataReader reader, string columnName)
+        {
+            int index = reader.GetOrdinal(columnName);
+            if (reader.IsDBNull(index))
+            {
+                return null;
+            }
+
+            return reader.GetTimeSpan(index);
+        }
     }
 }

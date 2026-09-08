@@ -221,14 +221,44 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\EmployeeController.cs" />
+
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\TimesheetController.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
+    <Compile Include="Models\Timesheet.cs" />
+
+    <Compile Include="Models\TimesheetCapture.cs" />
+
+    <Compile Include="Models\Employee.cs" />
+
+    <Compile Include="Models\DayType.cs" />
+
+    <Compile Include="Models\SouthAfricanHolidays.cs" />
+
     <Compile Include="Models\CurrentUser.cs" />
     <Compile Include="Models\Manager.cs" />
     <Compile Include="Models\TimesheetSummary.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\CaptureTimesheetsForm.cs">
+
+      <SubType>Form</SubType>
+
+    </Compile>
+
+    <Compile Include="Views\CaptureTimesheetsForm.Designer.cs">
+
+      <DependentUpon>CaptureTimesheetsForm.cs</DependentUpon>
+
+    </Compile>
+
+    <Compile Include="Views\TimesheetPickerForm.cs">
+
+      <SubType>Form</SubType>
+
+    </Compile>
+
     <Compile Include="Views\DashboardForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -247,11 +277,11 @@
     <Compile Include="Views\LoginForm.Designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Views\TimesheetsForm.cs">
+    <Compile Include="Views\ViewTimesheetsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Views\TimesheetsForm.Designer.cs">
-      <DependentUpon>TimesheetsForm.cs</DependentUpon>
+    <Compile Include="Views\ViewTimesheetsForm.Designer.cs">
+      <DependentUpon>ViewTimesheetsForm.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -271,8 +301,8 @@
     <EmbeddedResource Include="Views\LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\TimesheetsForm.resx">
-      <DependentUpon>TimesheetsForm.cs</DependentUpon>
+    <EmbeddedResource Include="Views\ViewTimesheetsForm.resx">
+      <DependentUpon>ViewTimesheetsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include=".env">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
