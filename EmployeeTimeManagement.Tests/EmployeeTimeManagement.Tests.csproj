@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>EmployeeTimeManagement.Tests</RootNamespace>
+    <AssemblyName>EmployeeTimeManagement.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+
+  <!-- The seams are compiled straight into the test assembly rather than referenced.
+       The application is a legacy packages.config WinForms project that `dotnet test`
+       cannot restore, and these modules are pure logic with no WinForms or MySQL
+       dependency, so linking the source keeps the tests fast and isolated. -->
+  <ItemGroup>
+    <Compile Include="..\EmployeeTimeManagement\Models\SouthAfricanHolidays.cs" Link="Seams\SouthAfricanHolidays.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\DayType.cs" Link="Seams\DayType.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Timesheet.cs" Link="Seams\Timesheet.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\TimesheetCapture.cs" Link="Seams\TimesheetCapture.cs" />
+  </ItemGroup>
+
+</Project>
