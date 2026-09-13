@@ -73,7 +73,7 @@ namespace EmployeeTimeManagement.Views
 
         private void btnEmployees_Click(object sender, EventArgs e)
         {
-            //ShowView(new EmployeeForm))); Use this for when the form is created
+            ShowView(new EmployeesForm());
         }
 
         private void btnContracts_Click(object sender, EventArgs e)
