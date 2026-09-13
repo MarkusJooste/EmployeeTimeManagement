@@ -28,6 +28,7 @@ namespace EmployeeTimeManagement.Views
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.pnlList = new System.Windows.Forms.Panel();
             this.dgvEmployees = new System.Windows.Forms.DataGridView();
             this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -112,6 +113,8 @@ namespace EmployeeTimeManagement.Views
             this.btnSave = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.lblEditorTitle = new System.Windows.Forms.Label();
+            this.lblEditorStatus = new System.Windows.Forms.Label();
+            this.tipEditorErrors = new System.Windows.Forms.ToolTip(this.components);
             this.pnlList.SuspendLayout();
             this.pnlListTop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvEmployees)).BeginInit();
@@ -995,6 +998,7 @@ namespace EmployeeTimeManagement.Views
             //
             // pnlEditorButtons
             //
+            this.pnlEditorButtons.Controls.Add(this.lblEditorStatus);
             this.pnlEditorButtons.Controls.Add(this.btnSave);
             this.pnlEditorButtons.Controls.Add(this.btnCancel);
             this.pnlEditorButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -1012,6 +1016,19 @@ namespace EmployeeTimeManagement.Views
             this.btnSave.TabIndex = 0;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            //
+            // lblEditorStatus
+            //
+            this.lblEditorStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblEditorStatus.AutoEllipsis = true;
+            this.lblEditorStatus.ForeColor = System.Drawing.Color.Firebrick;
+            this.lblEditorStatus.Location = new System.Drawing.Point(9, 9);
+            this.lblEditorStatus.Name = "lblEditorStatus";
+            this.lblEditorStatus.Size = new System.Drawing.Size(694, 26);
+            this.lblEditorStatus.TabIndex = 2;
+            this.lblEditorStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // btnCancel
             //
@@ -1145,5 +1162,7 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Panel pnlEditorButtons;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Label lblEditorStatus;
+        private System.Windows.Forms.ToolTip tipEditorErrors;
     }
 }

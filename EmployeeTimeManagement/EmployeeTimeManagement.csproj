@@ -245,6 +245,7 @@
     <Compile Include="Models\EmployeeSpouse.cs" />
 
     <Compile Include="Models\EmployeeRecord.cs" />
+    <Compile Include="Models\EmployeeIDNumberOwner.cs" />
 
     <Compile Include="Models\MaritalStatus.cs" />
 

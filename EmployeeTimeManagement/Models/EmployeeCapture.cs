@@ -149,6 +149,29 @@ namespace EmployeeTimeManagement.Models
             return new EmployeeCaptureResult(record, errors);
         }
 
+        // Turns the database's answer about who holds an ID number into the refusal the
+        // manager sees. A holder at their own store is named, so they can go and look at
+        // that record; a holder anywhere else is not, because a collision message is no
+        // way to learn another store's staff.
+        public static EmployeeFieldError DescribeIDNumberClash(EmployeeIDNumberOwner owner, int storeID)
+        {
+            if (owner == null)
+            {
+                return null;
+            }
+
+            if (owner.StoreID == storeID)
+            {
+                return new EmployeeFieldError(
+                    "IDNumber",
+                    "This ID number is already on " + owner.FullName + "'s record at this store.");
+            }
+
+            return new EmployeeFieldError(
+                "IDNumber",
+                "This ID number already belongs to an employee at another store.");
+        }
+
         // Assembles the TBL_employees row: the personal details and the two audit fields.
         private static Employee BuildEmployee(int storeID, int capturedBy, EmployeeCaptureInput input, List<EmployeeFieldError> errors)
         {
