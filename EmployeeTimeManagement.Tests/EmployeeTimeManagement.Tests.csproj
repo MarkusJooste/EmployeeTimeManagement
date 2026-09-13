@@ -23,6 +23,15 @@
     <Compile Include="..\EmployeeTimeManagement\Models\DayType.cs" Link="Seams\DayType.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Timesheet.cs" Link="Seams\Timesheet.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\TimesheetCapture.cs" Link="Seams\TimesheetCapture.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Employee.cs" Link="Seams\Employee.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeAddress.cs" Link="Seams\EmployeeAddress.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeBank.cs" Link="Seams\EmployeeBank.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeContract.cs" Link="Seams\EmployeeContract.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeFamilyMember.cs" Link="Seams\EmployeeFamilyMember.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeSpouse.cs" Link="Seams\EmployeeSpouse.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeRecord.cs" Link="Seams\EmployeeRecord.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\MaritalStatus.cs" Link="Seams\MaritalStatus.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeCapture.cs" Link="Seams\EmployeeCapture.cs" />
   </ItemGroup>
 
 </Project>

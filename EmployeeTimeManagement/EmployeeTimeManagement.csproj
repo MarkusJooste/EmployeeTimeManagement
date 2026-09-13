@@ -234,6 +234,22 @@
 
     <Compile Include="Models\EmployeeListItem.cs" />
 
+    <Compile Include="Models\EmployeeAddress.cs" />
+
+    <Compile Include="Models\EmployeeBank.cs" />
+
+    <Compile Include="Models\EmployeeContract.cs" />
+
+    <Compile Include="Models\EmployeeFamilyMember.cs" />
+
+    <Compile Include="Models\EmployeeSpouse.cs" />
+
+    <Compile Include="Models\EmployeeRecord.cs" />
+
+    <Compile Include="Models\MaritalStatus.cs" />
+
+    <Compile Include="Models\EmployeeCapture.cs" />
+
     <Compile Include="Models\DayType.cs" />
 
     <Compile Include="Models\SouthAfricanHolidays.cs" />
