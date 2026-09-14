@@ -20,6 +20,10 @@ namespace EmployeeTimeManagement.Views
         // Every Absence loaded for the currently selected employee, before the Leave Type filter narrows it.
         private List<Absence> selectedEmployeeHistory = new List<Absence>();
 
+        // The Leave Balances currently shown, so booking can check a new request against
+        // them without recomputing from Timesheets and Absences a second time.
+        private LeaveBalanceSummary currentBalances;
+
         public LeaveForm()
         {
             InitializeComponent();
@@ -164,6 +168,8 @@ namespace EmployeeTimeManagement.Views
         // not just the final answer.
         private void ShowBalances(LeaveBalanceSummary summary)
         {
+            currentBalances = summary;
+
             PTOBalance pto = summary.PTO;
 
             lblPTOBalance.Text = string.Format(
@@ -183,6 +189,8 @@ namespace EmployeeTimeManagement.Views
         // Blanks the balances panel back to nothing, for no employee selected or a failed load.
         private void ClearBalances()
         {
+            currentBalances = null;
+
             lblPTOBalance.Text = string.Empty;
             lblPTOBalance.ForeColor = SystemColors.ControlText;
             lblSickBalance.Text = string.Empty;
@@ -198,6 +206,7 @@ namespace EmployeeTimeManagement.Views
             dtpBookStartDate.Value = DateTime.Today;
             dtpBookEndDate.Value = DateTime.Today;
             txtBookReason.Text = string.Empty;
+            txtBookOverrideReason.Text = string.Empty;
             lblBookingMessage.Text = string.Empty;
             lblBookingMessage.ForeColor = SystemColors.ControlText;
             UpdateDayCountPreview();
@@ -224,16 +233,20 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
+            string leaveType = cboBookLeaveType.SelectedItem as string;
+
             var request = new LeaveBookingRequest
             {
                 EmployeeID = employee.EmployeeID,
-                LeaveType = cboBookLeaveType.SelectedItem as string,
+                LeaveType = leaveType,
                 StartDate = dtpBookStartDate.Value.Date,
                 EndDate = dtpBookEndDate.Value.Date,
                 Reason = txtBookReason.Text,
                 ContractStartDate = employee.ContractStartDate,
                 ContractEndDate = employee.ContractEndDate,
-                ExistingAbsences = selectedEmployeeHistory
+                ExistingAbsences = selectedEmployeeHistory,
+                AvailableBalance = AvailableBalanceFor(leaveType),
+                OverrideReason = txtBookOverrideReason.Text
             };
 
             LeaveBookingResult result = LeaveBooking.Build(request);
@@ -241,6 +254,12 @@ namespace EmployeeTimeManagement.Views
             if (!result.IsValid)
             {
                 ShowBookingMessage(result.Error, isError: true);
+
+                if (result.RequiresOverride)
+                {
+                    txtBookOverrideReason.Focus();
+                }
+
                 return;
             }
 
@@ -267,6 +286,19 @@ namespace EmployeeTimeManagement.Views
 
             ShowHistoryFor(employee);
             ShowBookingMessage("Absence booked.", isError: false);
+        }
+
+        // The Leave Balance the over-balance check should compare this booking's cost against.
+        // Null for a Leave Type with no cap to exceed, or while no balances are loaded yet.
+        private int? AvailableBalanceFor(string leaveType)
+        {
+            LeaveType parsed;
+            if (currentBalances == null || !LeaveTypes.TryParseBookable(leaveType, out parsed))
+            {
+                return null;
+            }
+
+            return currentBalances.AvailableBalance(parsed);
         }
 
         // Shows a booking outcome in red for a refusal or failure, or the default colour otherwise.

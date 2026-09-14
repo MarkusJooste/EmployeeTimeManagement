@@ -25,5 +25,12 @@ namespace EmployeeTimeManagement.Models
         {
             get { return LeaveType.ToDatabaseValue(); }
         }
+
+        // Marks a row as overridden independently of the Override reason text, so a narrow
+        // or scrolled column still shows a balance that looks wrong has an explanation.
+        public string OverriddenDisplay
+        {
+            get { return OverrideReason != null ? "Overridden" : string.Empty; }
+        }
     }
 }

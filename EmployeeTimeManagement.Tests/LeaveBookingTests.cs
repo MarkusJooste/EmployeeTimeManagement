@@ -269,5 +269,111 @@ namespace EmployeeTimeManagement.Tests
             Assert.That(result.IsValid, Is.True);
             Assert.That(result.Warning, Is.Null);
         }
+
+        [Test]
+        public void ABookingCostingMoreThanTheAvailableBalanceIsRefusedByDefault()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.AvailableBalance = 2;
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.False);
+            Assert.That(result.Absence, Is.Null);
+            Assert.That(result.RequiresOverride, Is.True);
+        }
+
+        [Test]
+        public void TheOverBalanceRefusalNamesTheBalanceAvailableAndTheCost()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.AvailableBalance = 2;
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.Error, Does.Contain("3"));
+            Assert.That(result.Error, Does.Contain("2"));
+        }
+
+        [Test]
+        public void ABookingCostingExactlyTheAvailableBalanceIsAcceptedWithoutAnOverride()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.AvailableBalance = 3;
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.True);
+            Assert.That(result.Absence.OverrideReason, Is.Null);
+        }
+
+        [Test]
+        public void AnOverBalanceBookingWithNoOverrideReasonWritesNothing()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.AvailableBalance = 2;
+            request.OverrideReason = "   ";
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.False);
+            Assert.That(result.Absence, Is.Null);
+            Assert.That(result.RequiresOverride, Is.True);
+        }
+
+        [Test]
+        public void AnOverBalanceBookingWithAnOverrideReasonIsAccepted()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.AvailableBalance = 2;
+            request.OverrideReason = "Special arrangement with the owner";
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.True);
+            Assert.That(result.Absence.OverrideReason, Is.EqualTo("Special arrangement with the owner"));
+        }
+
+        [Test]
+        public void TheOverrideReasonIsTrimmedAndKeptSeparateFromTheAbsenceReason()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.Reason = "Annual leave";
+            request.AvailableBalance = 2;
+            request.OverrideReason = "  Advanced leave agreed with owner  ";
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.Absence.Reason, Is.EqualTo("Annual leave"));
+            Assert.That(result.Absence.OverrideReason, Is.EqualTo("Advanced leave agreed with owner"));
+        }
+
+        [Test]
+        public void AnOverrideReasonTypedForABookingThatDidNotNeedOneIsNotStored()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.AvailableBalance = 10;
+            request.OverrideReason = "Not actually needed";
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.True);
+            Assert.That(result.Absence.OverrideReason, Is.Null);
+        }
+
+        [Test]
+        public void ANullAvailableBalanceSkipsTheOverBalanceCheckEntirely()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.LeaveType = "MATERNITY";
+            request.StartDate = new DateTime(2026, 1, 1);
+            request.EndDate = new DateTime(2026, 1, 3);
+            request.AvailableBalance = null;
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.True);
+            Assert.That(result.Absence.OverrideReason, Is.Null);
+        }
     }
 }

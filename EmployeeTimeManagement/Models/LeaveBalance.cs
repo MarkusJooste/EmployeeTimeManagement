@@ -52,6 +52,21 @@ namespace EmployeeTimeManagement.Models
         public SickBalance Sick { get; set; }
         public LeaveTally Maternity { get; set; }
         public LeaveTally AWOL { get; set; }
+
+        // The Leave Balance a booking of this Leave Type would draw from, or null when the
+        // Leave Type carries no balance to exceed - Maternity and AWOL are tallies only.
+        public int? AvailableBalance(LeaveType leaveType)
+        {
+            switch (leaveType)
+            {
+                case LeaveType.PTO:
+                    return PTO.Balance;
+                case LeaveType.Sick:
+                    return Sick.DaysRemaining;
+                default:
+                    return null;
+            }
+        }
     }
 
     // Turns Timesheets and Absences into every Leave Balance the Leave Balances panel shows,

@@ -41,6 +41,23 @@ namespace EmployeeTimeManagement.Tests
             Assert.That(absence.DayCount, Is.EqualTo(5));
         }
 
+        [Test]
+        public void AnAbsenceWithNoOverrideReasonIsNotMarkedOverridden()
+        {
+            var absence = Build(new DateTime(2026, 3, 10), new DateTime(2026, 3, 10));
+
+            Assert.That(absence.OverriddenDisplay, Is.Empty);
+        }
+
+        [Test]
+        public void AnAbsenceWithAnOverrideReasonIsMarkedOverridden()
+        {
+            var absence = Build(new DateTime(2026, 3, 10), new DateTime(2026, 3, 10));
+            absence.OverrideReason = "Special arrangement with the owner";
+
+            Assert.That(absence.OverriddenDisplay, Is.EqualTo("Overridden"));
+        }
+
         private static Absence Build(DateTime startDate, DateTime endDate)
         {
             return new Absence

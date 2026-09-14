@@ -14,6 +14,14 @@ namespace EmployeeTimeManagement.Models
         public DateTime? ContractStartDate { get; set; }
         public DateTime? ContractEndDate { get; set; }
 
+        // The Leave Balance available for this Leave Type before this booking. Null for a
+        // Leave Type with no balance to exceed (Maternity, AWOL), so no over-balance check applies.
+        public int? AvailableBalance { get; set; }
+
+        // The manager's justification for booking past the Leave Balance. Only ever stored
+        // on the Absence when the booking actually needed it to be accepted.
+        public string OverrideReason { get; set; }
+
         // Every other Absence already on record for this employee, any Leave Type included,
         // so a day cannot end up double-booked regardless of which balance it would draw from.
         public IEnumerable<Absence> ExistingAbsences { get; set; } = new List<Absence>();
@@ -24,11 +32,12 @@ namespace EmployeeTimeManagement.Models
     // be written from a refused request.
     public class LeaveBookingResult
     {
-        private LeaveBookingResult(Absence absence, string error, string warning)
+        private LeaveBookingResult(Absence absence, string error, string warning, bool requiresOverride)
         {
             Absence = absence;
             Error = error;
             Warning = warning;
+            RequiresOverride = requiresOverride;
         }
 
         public Absence Absence { get; }
@@ -37,6 +46,10 @@ namespace EmployeeTimeManagement.Models
         // Set when the booking is allowed but worth a manager's second look before it is saved.
         public string Warning { get; }
 
+        // Set when this refusal is specifically the over-balance rule, so the caller knows an
+        // Override reason - not just a corrected request - is what turns it into an Accept.
+        public bool RequiresOverride { get; }
+
         public bool IsValid
         {
             get { return Error == null; }
@@ -44,12 +57,17 @@ namespace EmployeeTimeManagement.Models
 
         public static LeaveBookingResult Refuse(string error)
         {
-            return new LeaveBookingResult(null, error, null);
+            return new LeaveBookingResult(null, error, null, false);
+        }
+
+        public static LeaveBookingResult RefuseOverBalance(string error)
+        {
+            return new LeaveBookingResult(null, error, null, true);
         }
 
         public static LeaveBookingResult Accept(Absence absence, string warning)
         {
-            return new LeaveBookingResult(absence, null, warning);
+            return new LeaveBookingResult(absence, null, warning, false);
         }
     }
 
@@ -96,6 +114,25 @@ namespace EmployeeTimeManagement.Models
                     overlap.LeaveTypeDisplay, overlap.StartDate, overlap.EndDate));
             }
 
+            int dayCount = (endDate - startDate).Days + 1;
+            string overrideReason = string.IsNullOrWhiteSpace(request.OverrideReason) ? null : request.OverrideReason.Trim();
+
+            if (request.AvailableBalance.HasValue && dayCount > request.AvailableBalance.Value)
+            {
+                if (overrideReason == null)
+                {
+                    return LeaveBookingResult.RefuseOverBalance(string.Format(
+                        "This booking needs {0} days but only {1} are available. Add an Override reason to book it anyway.",
+                        dayCount, request.AvailableBalance.Value));
+                }
+            }
+            else
+            {
+                // An Override reason typed for a booking that turns out not to need one is not
+                // an override at all, so it is never carried onto the Absence.
+                overrideReason = null;
+            }
+
             string reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason.Trim();
 
             var absence = new Absence
@@ -104,7 +141,8 @@ namespace EmployeeTimeManagement.Models
                 LeaveType = leaveType,
                 StartDate = startDate,
                 EndDate = endDate,
-                Reason = reason
+                Reason = reason,
+                OverrideReason = overrideReason
             };
 
             string warning = null;

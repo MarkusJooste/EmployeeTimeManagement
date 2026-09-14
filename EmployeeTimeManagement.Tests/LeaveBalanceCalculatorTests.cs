@@ -165,6 +165,41 @@ namespace EmployeeTimeManagement.Tests
         }
 
         [Test]
+        public void DaysTakenPastTheOpeningBalanceLeaveItNegativeRatherThanClampedAtZero()
+        {
+            LeaveBalanceRequest request = EmptyRequest();
+            request.OpeningPTODays = 2;
+            request.Absences = new List<Absence> { Pto(new DateTime(2026, 2, 1), new DateTime(2026, 2, 5)) };
+
+            PTOBalance pto = LeaveBalanceCalculator.Calculate(request).PTO;
+
+            Assert.That(pto.DaysTaken, Is.EqualTo(5));
+            Assert.That(pto.Balance, Is.EqualTo(-3));
+        }
+
+        [Test]
+        public void AvailableBalanceReadsPTOAndSickFromTheirOwnBalances()
+        {
+            LeaveBalanceRequest request = EmptyRequest();
+            request.OpeningPTODays = 5;
+            request.Absences = new List<Absence> { Sick(new DateTime(2026, 2, 1), new DateTime(2026, 2, 2)) };
+
+            LeaveBalanceSummary summary = LeaveBalanceCalculator.Calculate(request);
+
+            Assert.That(summary.AvailableBalance(LeaveType.PTO), Is.EqualTo(5));
+            Assert.That(summary.AvailableBalance(LeaveType.Sick), Is.EqualTo(28));
+        }
+
+        [Test]
+        public void AvailableBalanceIsNullForLeaveTypesWithNoBalanceToExceed()
+        {
+            LeaveBalanceSummary summary = LeaveBalanceCalculator.Calculate(EmptyRequest());
+
+            Assert.That(summary.AvailableBalance(LeaveType.Maternity), Is.Null);
+            Assert.That(summary.AvailableBalance(LeaveType.AWOL), Is.Null);
+        }
+
+        [Test]
         public void AccrualIsCappedAtTwentyOneDays()
         {
             LeaveBalanceRequest request = EmptyRequest();

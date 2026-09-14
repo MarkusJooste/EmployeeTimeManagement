@@ -36,6 +36,8 @@ namespace EmployeeTimeManagement.Views
             this.pnlBooking = new System.Windows.Forms.Panel();
             this.lblBookingMessage = new System.Windows.Forms.Label();
             this.btnBookAbsence = new System.Windows.Forms.Button();
+            this.txtBookOverrideReason = new System.Windows.Forms.TextBox();
+            this.lblBookOverrideReason = new System.Windows.Forms.Label();
             this.txtBookReason = new System.Windows.Forms.TextBox();
             this.lblBookReason = new System.Windows.Forms.Label();
             this.lblBookDayCount = new System.Windows.Forms.Label();
@@ -55,7 +57,9 @@ namespace EmployeeTimeManagement.Views
             this.colStartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colEndDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colDayCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colOverridden = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colReason = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colOverrideReason = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pnlHistoryTop = new System.Windows.Forms.Panel();
             this.cboLeaveType = new System.Windows.Forms.ComboBox();
             this.lblLeaveType = new System.Windows.Forms.Label();
@@ -102,13 +106,15 @@ namespace EmployeeTimeManagement.Views
             this.pnlBooking.Controls.Add(this.lblBookDayCount);
             this.pnlBooking.Controls.Add(this.lblBookReason);
             this.pnlBooking.Controls.Add(this.txtBookReason);
+            this.pnlBooking.Controls.Add(this.lblBookOverrideReason);
+            this.pnlBooking.Controls.Add(this.txtBookOverrideReason);
             this.pnlBooking.Controls.Add(this.btnBookAbsence);
             this.pnlBooking.Controls.Add(this.lblBookingMessage);
             this.pnlBooking.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlBooking.Enabled = false;
             this.pnlBooking.Location = new System.Drawing.Point(0, 136);
             this.pnlBooking.Name = "pnlBooking";
-            this.pnlBooking.Size = new System.Drawing.Size(569, 72);
+            this.pnlBooking.Size = new System.Drawing.Size(569, 104);
             this.pnlBooking.TabIndex = 3;
             //
             // pnlBalances
@@ -240,22 +246,39 @@ namespace EmployeeTimeManagement.Views
             this.txtBookReason.Size = new System.Drawing.Size(240, 20);
             this.txtBookReason.TabIndex = 8;
             //
+            // lblBookOverrideReason
+            //
+            this.lblBookOverrideReason.AutoSize = true;
+            this.lblBookOverrideReason.Location = new System.Drawing.Point(8, 64);
+            this.lblBookOverrideReason.Name = "lblBookOverrideReason";
+            this.lblBookOverrideReason.Size = new System.Drawing.Size(85, 13);
+            this.lblBookOverrideReason.TabIndex = 9;
+            this.lblBookOverrideReason.Text = "Override Reason";
+            //
+            // txtBookOverrideReason
+            //
+            this.txtBookOverrideReason.Location = new System.Drawing.Point(141, 61);
+            this.txtBookOverrideReason.MaxLength = 255;
+            this.txtBookOverrideReason.Name = "txtBookOverrideReason";
+            this.txtBookOverrideReason.Size = new System.Drawing.Size(240, 20);
+            this.txtBookOverrideReason.TabIndex = 10;
+            //
             // btnBookAbsence
             //
-            this.btnBookAbsence.Location = new System.Drawing.Point(392, 33);
+            this.btnBookAbsence.Location = new System.Drawing.Point(392, 59);
             this.btnBookAbsence.Name = "btnBookAbsence";
             this.btnBookAbsence.Size = new System.Drawing.Size(100, 23);
-            this.btnBookAbsence.TabIndex = 9;
+            this.btnBookAbsence.TabIndex = 11;
             this.btnBookAbsence.Text = "Book Absence";
             this.btnBookAbsence.UseVisualStyleBackColor = true;
             this.btnBookAbsence.Click += new System.EventHandler(this.btnBookAbsence_Click);
             //
             // lblBookingMessage
             //
-            this.lblBookingMessage.Location = new System.Drawing.Point(8, 58);
+            this.lblBookingMessage.Location = new System.Drawing.Point(8, 86);
             this.lblBookingMessage.Name = "lblBookingMessage";
             this.lblBookingMessage.Size = new System.Drawing.Size(553, 13);
-            this.lblBookingMessage.TabIndex = 10;
+            this.lblBookingMessage.TabIndex = 12;
             //
             // dgvHistory
             //
@@ -269,7 +292,9 @@ namespace EmployeeTimeManagement.Views
             this.colStartDate,
             this.colEndDate,
             this.colDayCount,
-            this.colReason});
+            this.colOverridden,
+            this.colReason,
+            this.colOverrideReason});
             this.dgvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvHistory.Location = new System.Drawing.Point(0, 208);
             this.dgvHistory.MultiSelect = false;
@@ -318,6 +343,14 @@ namespace EmployeeTimeManagement.Views
             this.colDayCount.ReadOnly = true;
             this.colDayCount.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             //
+            // colOverridden
+            //
+            this.colOverridden.DataPropertyName = "OverriddenDisplay";
+            this.colOverridden.HeaderText = "Overridden";
+            this.colOverridden.Name = "colOverridden";
+            this.colOverridden.ReadOnly = true;
+            this.colOverridden.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            //
             // colReason
             //
             this.colReason.DataPropertyName = "Reason";
@@ -325,6 +358,14 @@ namespace EmployeeTimeManagement.Views
             this.colReason.Name = "colReason";
             this.colReason.ReadOnly = true;
             this.colReason.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            //
+            // colOverrideReason
+            //
+            this.colOverrideReason.DataPropertyName = "OverrideReason";
+            this.colOverrideReason.HeaderText = "Override Reason";
+            this.colOverrideReason.Name = "colOverrideReason";
+            this.colOverrideReason.ReadOnly = true;
+            this.colOverrideReason.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             //
             // pnlHistoryTop
             //
@@ -408,7 +449,9 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.DataGridViewTextBoxColumn colStartDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn colEndDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn colDayCount;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colOverridden;
         private System.Windows.Forms.DataGridViewTextBoxColumn colReason;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colOverrideReason;
         private System.Windows.Forms.Panel pnlHistoryTop;
         private System.Windows.Forms.ComboBox cboLeaveType;
         private System.Windows.Forms.Label lblLeaveType;
@@ -429,6 +472,8 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Label lblBookDayCount;
         private System.Windows.Forms.Label lblBookReason;
         private System.Windows.Forms.TextBox txtBookReason;
+        private System.Windows.Forms.Label lblBookOverrideReason;
+        private System.Windows.Forms.TextBox txtBookOverrideReason;
         private System.Windows.Forms.Button btnBookAbsence;
         private System.Windows.Forms.Label lblBookingMessage;
     }
