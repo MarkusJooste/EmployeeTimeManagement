@@ -20,7 +20,9 @@ namespace EmployeeTimeManagement.Controllers
        e.MobileNumber,
        c.JobDescription,
        c.StartDate,
-       c.EndDate
+       c.EndDate,
+       c.OpeningPTODays,
+       c.OpeningBalanceAsAt
 FROM TBL_employees e
 LEFT JOIN TBL_employee_contracts c
        ON c.EmployeeID = e.EmployeeID
@@ -49,6 +51,8 @@ ORDER BY e.Surname, e.Name;";
                         int jobIndex = reader.GetOrdinal("JobDescription");
                         int startDateIndex = reader.GetOrdinal("StartDate");
                         int endDateIndex = reader.GetOrdinal("EndDate");
+                        int openingPTODaysIndex = reader.GetOrdinal("OpeningPTODays");
+                        int openingBalanceAsAtIndex = reader.GetOrdinal("OpeningBalanceAsAt");
 
                         while (reader.Read())
                         {
@@ -75,6 +79,13 @@ ORDER BY e.Surname, e.Name;";
                             {
                                 item.ContractEndDate = reader.GetDateTime(endDateIndex);
                             }
+
+                            // An employee with no contract row has no Opening Balance to read, which reads as zero.
+                            item.OpeningPTODays = reader.IsDBNull(openingPTODaysIndex) ? 0 : reader.GetInt32(openingPTODaysIndex);
+
+                            item.OpeningBalanceAsAt = reader.IsDBNull(openingBalanceAsAtIndex)
+                                ? (DateTime?)null
+                                : reader.GetDateTime(openingBalanceAsAtIndex);
 
                             employees.Add(item);
                         }

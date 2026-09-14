@@ -45,6 +45,11 @@ namespace EmployeeTimeManagement.Views
             this.lblBookStartDate = new System.Windows.Forms.Label();
             this.cboBookLeaveType = new System.Windows.Forms.ComboBox();
             this.lblBookLeaveType = new System.Windows.Forms.Label();
+            this.pnlBalances = new System.Windows.Forms.Panel();
+            this.lblAWOLBalance = new System.Windows.Forms.Label();
+            this.lblMaternityBalance = new System.Windows.Forms.Label();
+            this.lblSickBalance = new System.Windows.Forms.Label();
+            this.lblPTOBalance = new System.Windows.Forms.Label();
             this.dgvHistory = new System.Windows.Forms.DataGridView();
             this.colLeaveType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colStartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,6 +63,7 @@ namespace EmployeeTimeManagement.Views
             this.lblStatus = new System.Windows.Forms.Label();
             this.pnlHistory.SuspendLayout();
             this.pnlBooking.SuspendLayout();
+            this.pnlBalances.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvHistory)).BeginInit();
             this.pnlHistoryTop.SuspendLayout();
             this.SuspendLayout();
@@ -76,6 +82,7 @@ namespace EmployeeTimeManagement.Views
             //
             this.pnlHistory.Controls.Add(this.dgvHistory);
             this.pnlHistory.Controls.Add(this.pnlBooking);
+            this.pnlHistory.Controls.Add(this.pnlBalances);
             this.pnlHistory.Controls.Add(this.pnlHistoryTop);
             this.pnlHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlHistory.Location = new System.Drawing.Point(320, 0);
@@ -99,10 +106,59 @@ namespace EmployeeTimeManagement.Views
             this.pnlBooking.Controls.Add(this.lblBookingMessage);
             this.pnlBooking.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlBooking.Enabled = false;
-            this.pnlBooking.Location = new System.Drawing.Point(0, 40);
+            this.pnlBooking.Location = new System.Drawing.Point(0, 136);
             this.pnlBooking.Name = "pnlBooking";
             this.pnlBooking.Size = new System.Drawing.Size(569, 72);
-            this.pnlBooking.TabIndex = 2;
+            this.pnlBooking.TabIndex = 3;
+            //
+            // pnlBalances
+            //
+            this.pnlBalances.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlBalances.Controls.Add(this.lblAWOLBalance);
+            this.pnlBalances.Controls.Add(this.lblMaternityBalance);
+            this.pnlBalances.Controls.Add(this.lblSickBalance);
+            this.pnlBalances.Controls.Add(this.lblPTOBalance);
+            this.pnlBalances.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlBalances.Location = new System.Drawing.Point(0, 40);
+            this.pnlBalances.Name = "pnlBalances";
+            this.pnlBalances.Size = new System.Drawing.Size(569, 96);
+            this.pnlBalances.TabIndex = 2;
+            //
+            // lblPTOBalance
+            //
+            this.lblPTOBalance.AutoSize = true;
+            this.lblPTOBalance.Location = new System.Drawing.Point(8, 8);
+            this.lblPTOBalance.Name = "lblPTOBalance";
+            this.lblPTOBalance.Size = new System.Drawing.Size(69, 13);
+            this.lblPTOBalance.TabIndex = 0;
+            this.lblPTOBalance.Text = "lblPTOBalance";
+            //
+            // lblSickBalance
+            //
+            this.lblSickBalance.AutoSize = true;
+            this.lblSickBalance.Location = new System.Drawing.Point(8, 30);
+            this.lblSickBalance.Name = "lblSickBalance";
+            this.lblSickBalance.Size = new System.Drawing.Size(73, 13);
+            this.lblSickBalance.TabIndex = 1;
+            this.lblSickBalance.Text = "lblSickBalance";
+            //
+            // lblMaternityBalance
+            //
+            this.lblMaternityBalance.AutoSize = true;
+            this.lblMaternityBalance.Location = new System.Drawing.Point(8, 52);
+            this.lblMaternityBalance.Name = "lblMaternityBalance";
+            this.lblMaternityBalance.Size = new System.Drawing.Size(100, 13);
+            this.lblMaternityBalance.TabIndex = 2;
+            this.lblMaternityBalance.Text = "lblMaternityBalance";
+            //
+            // lblAWOLBalance
+            //
+            this.lblAWOLBalance.AutoSize = true;
+            this.lblAWOLBalance.Location = new System.Drawing.Point(8, 74);
+            this.lblAWOLBalance.Name = "lblAWOLBalance";
+            this.lblAWOLBalance.Size = new System.Drawing.Size(80, 13);
+            this.lblAWOLBalance.TabIndex = 3;
+            this.lblAWOLBalance.Text = "lblAWOLBalance";
             //
             // lblBookLeaveType
             //
@@ -215,13 +271,13 @@ namespace EmployeeTimeManagement.Views
             this.colDayCount,
             this.colReason});
             this.dgvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvHistory.Location = new System.Drawing.Point(0, 112);
+            this.dgvHistory.Location = new System.Drawing.Point(0, 208);
             this.dgvHistory.MultiSelect = false;
             this.dgvHistory.Name = "dgvHistory";
             this.dgvHistory.ReadOnly = true;
             this.dgvHistory.RowHeadersVisible = false;
             this.dgvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvHistory.Size = new System.Drawing.Size(569, 439);
+            this.dgvHistory.Size = new System.Drawing.Size(569, 343);
             this.dgvHistory.TabIndex = 1;
             //
             // colLeaveType
@@ -334,6 +390,8 @@ namespace EmployeeTimeManagement.Views
             this.pnlHistory.ResumeLayout(false);
             this.pnlBooking.ResumeLayout(false);
             this.pnlBooking.PerformLayout();
+            this.pnlBalances.ResumeLayout(false);
+            this.pnlBalances.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvHistory)).EndInit();
             this.pnlHistoryTop.ResumeLayout(false);
             this.pnlHistoryTop.PerformLayout();
@@ -357,6 +415,11 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Label lblSelectedEmployee;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Panel pnlBooking;
+        private System.Windows.Forms.Panel pnlBalances;
+        private System.Windows.Forms.Label lblPTOBalance;
+        private System.Windows.Forms.Label lblSickBalance;
+        private System.Windows.Forms.Label lblMaternityBalance;
+        private System.Windows.Forms.Label lblAWOLBalance;
         private System.Windows.Forms.Label lblBookLeaveType;
         private System.Windows.Forms.ComboBox cboBookLeaveType;
         private System.Windows.Forms.Label lblBookStartDate;

@@ -15,6 +15,11 @@ namespace EmployeeTimeManagement.Models
         public DateTime? ContractStartDate { get; set; }
         public DateTime? ContractEndDate { get; set; }
 
+        // PTO's Opening Balance, from the latest contract. Zero and null respectively when
+        // the employee has no contract row at all.
+        public int OpeningPTODays { get; set; }
+        public DateTime? OpeningBalanceAsAt { get; set; }
+
         // How the employee is shown in status messages and confirmation dialogs.
         public string FullName
         {

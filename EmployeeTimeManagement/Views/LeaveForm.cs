@@ -91,6 +91,8 @@ namespace EmployeeTimeManagement.Views
 
             pnlBooking.Enabled = false;
             ResetBookingForm();
+
+            ClearBalances();
         }
 
         // Re-reads this employee's whole Absence history and shows it, newest first.
@@ -118,6 +120,74 @@ namespace EmployeeTimeManagement.Views
 
             pnlBooking.Enabled = true;
             ResetBookingForm();
+
+            LoadBalances(employee);
+        }
+
+        // Recomputes every Leave Balance for the selected employee from their Timesheets and
+        // the Absence history already loaded, so a fresh booking is reflected immediately.
+        private void LoadBalances(EmployeeListItem employee)
+        {
+            if (CurrentUser.StoreID == null)
+            {
+                return;
+            }
+
+            try
+            {
+                List<DateTime> workedDates = leaveController.GetWorkedDates(employee.EmployeeID, CurrentUser.StoreID.Value);
+
+                var request = new LeaveBalanceRequest
+                {
+                    AsOf = DateTime.Today,
+
+                    // An employee with no contract row at all is still employed (Employee.IsEmployedOn)
+                    // and can still have Timesheets, so falling back to today would wrongly cut every
+                    // worked date out of accrual; MinValue imposes no cutoff at all instead.
+                    ContractStartDate = employee.ContractStartDate ?? DateTime.MinValue,
+                    OpeningBalanceAsAt = employee.OpeningBalanceAsAt,
+                    OpeningPTODays = employee.OpeningPTODays,
+                    WorkedDates = workedDates,
+                    Absences = selectedEmployeeHistory
+                };
+
+                ShowBalances(LeaveBalanceCalculator.Calculate(request));
+            }
+            catch (Exception ex)
+            {
+                ClearBalances();
+                lblStatus.Text = "Could not load this employee's Leave Balances: " + ex.Message;
+            }
+        }
+
+        // Renders one computed LeaveBalanceSummary as the working-out a manager can defend,
+        // not just the final answer.
+        private void ShowBalances(LeaveBalanceSummary summary)
+        {
+            PTOBalance pto = summary.PTO;
+
+            lblPTOBalance.Text = string.Format(
+                "PTO — Days Worked: {0}   Accrued: {1}   Opening Balance: {2}   Taken: {3}   Balance: {4}{5}",
+                pto.DaysWorked, pto.DaysAccrued, pto.OpeningBalance, pto.DaysTaken, pto.Balance,
+                pto.IsAtCap ? "   (At the 21-day cap — accrual paused)" : string.Empty);
+            lblPTOBalance.ForeColor = pto.IsAtCap ? Color.Red : SystemColors.ControlText;
+
+            lblSickBalance.Text = string.Format(
+                "Sick — {0} of 30 days remaining, cycle ends {1:dd MMM yyyy}",
+                summary.Sick.DaysRemaining, summary.Sick.CycleEndDate);
+
+            lblMaternityBalance.Text = string.Format("Maternity — {0} days taken", summary.Maternity.DaysTaken);
+            lblAWOLBalance.Text = string.Format("AWOL — {0} days taken", summary.AWOL.DaysTaken);
+        }
+
+        // Blanks the balances panel back to nothing, for no employee selected or a failed load.
+        private void ClearBalances()
+        {
+            lblPTOBalance.Text = string.Empty;
+            lblPTOBalance.ForeColor = SystemColors.ControlText;
+            lblSickBalance.Text = string.Empty;
+            lblMaternityBalance.Text = string.Empty;
+            lblAWOLBalance.Text = string.Empty;
         }
 
         // Puts the booking editor back to its default state: today's date on both pickers,

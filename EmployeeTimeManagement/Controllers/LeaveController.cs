@@ -59,6 +59,43 @@ ORDER BY l.StartDate DESC, l.LeaveID DESC;";
             return absences;
         }
 
+        // Returns every distinct date this employee has a Timesheet with Status 'Worked',
+        // scoped to the manager's store, for the PTO accrual the Leave Balances panel shows.
+        // Hours and Day Type play no part, so neither is read here.
+        public List<DateTime> GetWorkedDates(int employeeID, int storeID)
+        {
+            const string query = @"SELECT DISTINCT t.WorkDate
+FROM TBL_timesheets t
+JOIN TBL_employees e ON e.EmployeeID = t.EmployeeID
+WHERE t.EmployeeID = @EmployeeID
+  AND e.StoreID = @StoreID
+  AND t.Status = @Status;";
+
+            var workedDates = new List<DateTime>();
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+                    command.Parameters.AddWithValue("@Status", TimesheetStatus.Worked.ToDatabaseValue());
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        int workDateIndex = reader.GetOrdinal("WorkDate");
+
+                        while (reader.Read())
+                        {
+                            workedDates.Add(reader.GetDateTime(workDateIndex));
+                        }
+                    }
+                }
+            }
+
+            return workedDates;
+        }
+
         // Reads a nullable text column as null, so an Absence with no reason round-trips as genuinely empty.
         private static string ReadNullableText(MySqlDataReader reader, int index)
         {

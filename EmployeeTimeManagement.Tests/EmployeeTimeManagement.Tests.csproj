@@ -36,6 +36,7 @@
     <Compile Include="..\EmployeeTimeManagement\Models\LeaveType.cs" Link="Seams\LeaveType.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Absence.cs" Link="Seams\Absence.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\LeaveBooking.cs" Link="Seams\LeaveBooking.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeaveBalance.cs" Link="Seams\LeaveBalance.cs" />
   </ItemGroup>
 
 </Project>
