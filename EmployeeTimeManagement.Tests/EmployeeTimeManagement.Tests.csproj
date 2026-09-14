@@ -33,6 +33,8 @@
     <Compile Include="..\EmployeeTimeManagement\Models\MaritalStatus.cs" Link="Seams\MaritalStatus.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeIDNumberOwner.cs" Link="Seams\EmployeeIDNumberOwner.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeCapture.cs" Link="Seams\EmployeeCapture.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeaveType.cs" Link="Seams\LeaveType.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Absence.cs" Link="Seams\Absence.cs" />
   </ItemGroup>
 
 </Project>

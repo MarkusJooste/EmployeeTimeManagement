@@ -93,7 +93,7 @@ namespace EmployeeTimeManagement.Views
 
         private void btnLeave_Click(object sender, EventArgs e)
         {
-
+            ShowView(new LeaveForm());
         }
 
         private void btnManagers_Click(object sender, EventArgs e)
