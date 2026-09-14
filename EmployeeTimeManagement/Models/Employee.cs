@@ -23,10 +23,31 @@ namespace EmployeeTimeManagement.Models
         public DateTime BusinessDate { get; set; }
         public int CapturedBy { get; set; }
 
+        // The latest contract's dates, null when the employee has no contract row at all.
+        public DateTime? ContractStartDate { get; set; }
+        public DateTime? ContractEndDate { get; set; }
+
         // How the employee is shown in the capture grid's dropdown.
         public string FullName
         {
             get { return (Name + " " + Surname).Trim(); }
+        }
+
+        // Whether the employee was under contract on a given work date, for date-scoping the
+        // capture dropdown. An employee with no contract row at all is always employed.
+        public bool IsEmployedOn(DateTime workDate)
+        {
+            if (ContractStartDate == null)
+            {
+                return true;
+            }
+
+            if (workDate.Date < ContractStartDate.Value.Date)
+            {
+                return false;
+            }
+
+            return ContractEndDate == null || workDate.Date <= ContractEndDate.Value.Date;
         }
     }
 }

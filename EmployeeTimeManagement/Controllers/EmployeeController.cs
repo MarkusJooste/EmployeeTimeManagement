@@ -868,13 +868,27 @@ LIMIT 1;";
             }
         }
 
-        // Returns every employee at one store, ordered the way a manager reads a register.
+        // Returns every employee at one store, ordered the way a manager reads a register,
+        // each carrying their latest contract's dates so the caller can date-scope who was
+        // actually employed on a given work date. The schema permits several contracts per
+        // employee even though this application writes one, so only the latest is joined,
+        // matching GetListByStore.
         public List<Employee> GetByStore(int storeID)
         {
-            const string query = @"SELECT EmployeeID, StoreID, Name, Surname
-FROM TBL_employees
-WHERE StoreID = @StoreID
-ORDER BY Surname, Name;";
+            const string query = @"SELECT e.EmployeeID,
+       e.StoreID,
+       e.Name,
+       e.Surname,
+       c.StartDate,
+       c.EndDate
+FROM TBL_employees e
+LEFT JOIN TBL_employee_contracts c
+       ON c.EmployeeID = e.EmployeeID
+      AND c.ContractID = (SELECT MAX(latest.ContractID)
+                          FROM TBL_employee_contracts latest
+                          WHERE latest.EmployeeID = e.EmployeeID)
+WHERE e.StoreID = @StoreID
+ORDER BY e.Surname, e.Name;";
 
             var employees = new List<Employee>();
 
@@ -890,6 +904,8 @@ ORDER BY Surname, Name;";
                         int storeIndex = reader.GetOrdinal("StoreID");
                         int nameIndex = reader.GetOrdinal("Name");
                         int surnameIndex = reader.GetOrdinal("Surname");
+                        int startDateIndex = reader.GetOrdinal("StartDate");
+                        int endDateIndex = reader.GetOrdinal("EndDate");
 
                         while (reader.Read())
                         {
@@ -897,24 +913,16 @@ ORDER BY Surname, Name;";
 
                             employee.EmployeeID = reader.GetInt32(employeeIndex);
                             employee.StoreID = reader.GetInt32(storeIndex);
+                            employee.Name = ReadText(reader, nameIndex);
+                            employee.Surname = ReadText(reader, surnameIndex);
 
-                            if (reader.IsDBNull(nameIndex))
-                            {
-                                employee.Name = string.Empty;
-                            }
-                            else
-                            {
-                                employee.Name = reader.GetString(nameIndex);
-                            }
+                            employee.ContractStartDate = reader.IsDBNull(startDateIndex)
+                                ? (DateTime?)null
+                                : reader.GetDateTime(startDateIndex);
 
-                            if (reader.IsDBNull(surnameIndex))
-                            {
-                                employee.Surname = string.Empty;
-                            }
-                            else
-                            {
-                                employee.Surname = reader.GetString(surnameIndex);
-                            }
+                            employee.ContractEndDate = reader.IsDBNull(endDateIndex)
+                                ? (DateTime?)null
+                                : reader.GetDateTime(endDateIndex);
 
                             employees.Add(employee);
                         }

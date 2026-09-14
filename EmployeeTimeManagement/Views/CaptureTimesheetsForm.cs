@@ -32,6 +32,10 @@ namespace EmployeeTimeManagement.Views
         private readonly EmployeeController employeeController;
         private readonly TimesheetController timesheetController;
 
+        // Every employee at the store, regardless of when they were employed.
+        private List<Employee> allEmployees = new List<Employee>();
+
+        // The subset of allEmployees offered on the grid: those employed on currentWorkDate.
         private List<Employee> employees = new List<Employee>();
 
         // Guards against grid events re-entering while cells are being written by code.
@@ -208,7 +212,7 @@ namespace EmployeeTimeManagement.Views
 
             try
             {
-                employees = employeeController.GetByStore(CurrentUser.StoreID.Value);
+                allEmployees = employeeController.GetByStore(CurrentUser.StoreID.Value);
             }
             catch (Exception ex)
             {
@@ -216,11 +220,21 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
-            if (employees.Count == 0)
+            if (allEmployees.Count == 0)
             {
                 DisableCapture("No employees at this store");
                 return;
             }
+
+            ApplyEmployeeScope();
+        }
+
+        // Re-scopes the dropdown to whoever was employed on the current work date, because
+        // who was employed depends on the date being captured.
+        private void ApplyEmployeeScope()
+        {
+            DateTime workDate = dtpWorkDate.Value.Date;
+            employees = allEmployees.Where(e => e.IsEmployedOn(workDate)).ToList();
 
             var employeeColumn = (DataGridViewComboBoxColumn)dgvCapture.Columns[ColumnEmployee];
             employeeColumn.DataSource = employees;
@@ -558,6 +572,7 @@ namespace EmployeeTimeManagement.Views
             lblStatus.Text = string.Empty;
             currentWorkDate = dtpWorkDate.Value.Date;
             ShowDayTypeForDate();
+            ApplyEmployeeScope();
         }
 
         // Puts the date picker back to the date the grid was captured against.
