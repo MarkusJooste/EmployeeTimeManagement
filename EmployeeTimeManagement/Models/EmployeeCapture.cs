@@ -155,7 +155,19 @@ namespace EmployeeTimeManagement.Models
         // way to learn another store's staff.
         public static EmployeeFieldError DescribeIDNumberClash(EmployeeIDNumberOwner owner, int storeID)
         {
+            return DescribeIDNumberClash(owner, storeID, null);
+        }
+
+        // Same rule, but an update passes the employee it is editing, so keeping their own
+        // ID number unchanged is never reported as a clash against themselves.
+        public static EmployeeFieldError DescribeIDNumberClash(EmployeeIDNumberOwner owner, int storeID, int? editingEmployeeID)
+        {
             if (owner == null)
+            {
+                return null;
+            }
+
+            if (editingEmployeeID.HasValue && owner.EmployeeID == editingEmployeeID.Value)
             {
                 return null;
             }

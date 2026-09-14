@@ -7,6 +7,9 @@ namespace EmployeeTimeManagement.Models
     // at another store is never identified to a manager who cannot see them.
     public class EmployeeIDNumberOwner
     {
+        // Lets an update tell "somebody else holds this number" from "this is still my own".
+        public int EmployeeID { get; set; }
+
         public int StoreID { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }

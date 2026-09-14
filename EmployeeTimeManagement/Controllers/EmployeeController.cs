@@ -95,7 +95,7 @@ ORDER BY e.Surname, e.Name;";
         // an employee this manager cannot see.
         public EmployeeIDNumberOwner FindByIDNumber(string idNumber)
         {
-            const string query = @"SELECT StoreID, Name, Surname
+            const string query = @"SELECT EmployeeID, StoreID, Name, Surname
 FROM TBL_employees
 WHERE IDNumber = @IDNumber
 LIMIT 1;";
@@ -115,12 +115,509 @@ LIMIT 1;";
 
                         var owner = new EmployeeIDNumberOwner();
 
+                        owner.EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID"));
                         owner.StoreID = reader.GetInt32(reader.GetOrdinal("StoreID"));
                         owner.Name = ReadText(reader, reader.GetOrdinal("Name"));
                         owner.Surname = ReadText(reader, reader.GetOrdinal("Surname"));
 
                         return owner;
                     }
+                }
+            }
+        }
+
+        // Reads everything on record for one employee, across all six tables, so the editor
+        // can be prefilled for an update. A table an old employee predates comes back null
+        // rather than failing, so a record captured before some detail was known can still be opened.
+        public EmployeeRecord GetForEdit(int employeeID)
+        {
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                Employee employee = ReadEmployee(connection, employeeID);
+
+                if (employee == null)
+                {
+                    return null;
+                }
+
+                return new EmployeeRecord
+                {
+                    Employee = employee,
+                    Address = ReadAddress(connection, employeeID),
+                    Bank = ReadBank(connection, employeeID),
+                    Contract = ReadContract(connection, employeeID),
+                    Spouse = ReadSpouse(connection, employeeID),
+                    FamilyMembers = ReadFamilyMembers(connection, employeeID)
+                };
+            }
+        }
+
+        // Reads the TBL_employees row an update starts from, or null if it no longer exists.
+        private static Employee ReadEmployee(MySqlConnection connection, int employeeID)
+        {
+            const string query = @"SELECT EmployeeID, StoreID, Name, Surname, IDNumber, SARSNumber, MobileNumber,
+       MaritialStatus, NumberOfDependents, BusinessDate, CapturedBy
+FROM TBL_employees
+WHERE EmployeeID = @EmployeeID
+LIMIT 1;";
+
+            using (var command = new MySqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        return null;
+                    }
+
+                    return new Employee
+                    {
+                        EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID")),
+                        StoreID = reader.GetInt32(reader.GetOrdinal("StoreID")),
+                        Name = ReadText(reader, reader.GetOrdinal("Name")),
+                        Surname = ReadText(reader, reader.GetOrdinal("Surname")),
+                        IDNumber = ReadText(reader, reader.GetOrdinal("IDNumber")),
+                        SARSNumber = ReadNullableText(reader, reader.GetOrdinal("SARSNumber")),
+                        MobileNumber = ReadText(reader, reader.GetOrdinal("MobileNumber")),
+                        MaritalStatus = ReadText(reader, reader.GetOrdinal("MaritialStatus")),
+                        NumberOfDependents = reader.GetInt32(reader.GetOrdinal("NumberOfDependents")),
+                        BusinessDate = reader.GetDateTime(reader.GetOrdinal("BusinessDate")),
+                        CapturedBy = reader.GetInt32(reader.GetOrdinal("CapturedBy"))
+                    };
+                }
+            }
+        }
+
+        // Reads the employee's address, or null when nothing has been captured yet.
+        private static EmployeeAddress ReadAddress(MySqlConnection connection, int employeeID)
+        {
+            const string query = @"SELECT AddressID, HouseFlatNumber, ComplexFlatNumber, StreetName, Town, PostalCode
+FROM TBL_employee_addresses
+WHERE EmployeeID = @EmployeeID
+LIMIT 1;";
+
+            using (var command = new MySqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        return null;
+                    }
+
+                    return new EmployeeAddress
+                    {
+                        AddressID = reader.GetInt32(reader.GetOrdinal("AddressID")),
+                        EmployeeID = employeeID,
+                        HouseFlatNumber = ReadText(reader, reader.GetOrdinal("HouseFlatNumber")),
+                        ComplexFlatNumber = ReadText(reader, reader.GetOrdinal("ComplexFlatNumber")),
+                        StreetName = ReadText(reader, reader.GetOrdinal("StreetName")),
+                        Town = ReadText(reader, reader.GetOrdinal("Town")),
+                        PostalCode = ReadText(reader, reader.GetOrdinal("PostalCode"))
+                    };
+                }
+            }
+        }
+
+        // Reads the employee's bank details, or null when nothing has been captured yet.
+        private static EmployeeBank ReadBank(MySqlConnection connection, int employeeID)
+        {
+            const string query = @"SELECT BankID, BankName, AccountType, AccountNumber, BranchCode
+FROM TBL_employee_bank
+WHERE EmployeeID = @EmployeeID
+LIMIT 1;";
+
+            using (var command = new MySqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        return null;
+                    }
+
+                    return new EmployeeBank
+                    {
+                        BankID = reader.GetInt32(reader.GetOrdinal("BankID")),
+                        EmployeeID = employeeID,
+                        BankName = ReadText(reader, reader.GetOrdinal("BankName")),
+                        AccountType = ReadText(reader, reader.GetOrdinal("AccountType")),
+                        AccountNumber = ReadText(reader, reader.GetOrdinal("AccountNumber")),
+                        BranchCode = ReadText(reader, reader.GetOrdinal("BranchCode"))
+                    };
+                }
+            }
+        }
+
+        // Reads the employee's live contract, or null when nothing has been captured yet. The
+        // schema permits several contracts per employee even though this application writes
+        // one, so only the latest is read, matching GetListByStore.
+        private static EmployeeContract ReadContract(MySqlConnection connection, int employeeID)
+        {
+            const string query = @"SELECT ContractID, ContractType, StartDate, EndDate, Department, JobDescription, ReasonForEnding, HourlyRate
+FROM TBL_employee_contracts
+WHERE EmployeeID = @EmployeeID
+ORDER BY ContractID DESC
+LIMIT 1;";
+
+            using (var command = new MySqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        return null;
+                    }
+
+                    int endDateIndex = reader.GetOrdinal("EndDate");
+
+                    return new EmployeeContract
+                    {
+                        ContractID = reader.GetInt32(reader.GetOrdinal("ContractID")),
+                        EmployeeID = employeeID,
+                        ContractType = ReadText(reader, reader.GetOrdinal("ContractType")),
+                        StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                        EndDate = reader.IsDBNull(endDateIndex) ? (DateTime?)null : reader.GetDateTime(endDateIndex),
+                        Department = ReadText(reader, reader.GetOrdinal("Department")),
+                        JobDescription = ReadText(reader, reader.GetOrdinal("JobDescription")),
+                        ReasonForEnding = ReadText(reader, reader.GetOrdinal("ReasonForEnding")),
+                        HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate"))
+                    };
+                }
+            }
+        }
+
+        // Reads the employee's spouse, or null when they have none on record. Read regardless
+        // of the employee's current marital status, so a spouse row survives a manager
+        // correcting marital status away from Married and back without losing it.
+        private static EmployeeSpouse ReadSpouse(MySqlConnection connection, int employeeID)
+        {
+            const string query = @"SELECT SpouseID, SpouseName, SpouseMobileNumber
+FROM TBL_employee_spouses
+WHERE EmployeeID = @EmployeeID
+LIMIT 1;";
+
+            using (var command = new MySqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        return null;
+                    }
+
+                    return new EmployeeSpouse
+                    {
+                        SpouseID = reader.GetInt32(reader.GetOrdinal("SpouseID")),
+                        EmployeeID = employeeID,
+                        SpouseName = ReadText(reader, reader.GetOrdinal("SpouseName")),
+                        SpouseMobileNumber = ReadText(reader, reader.GetOrdinal("SpouseMobileNumber"))
+                    };
+                }
+            }
+        }
+
+        // Reads every family contact on record for the employee.
+        private static List<EmployeeFamilyMember> ReadFamilyMembers(MySqlConnection connection, int employeeID)
+        {
+            const string query = @"SELECT FamilyMemberID, FamilyMemberName, MobileNumber, Relationship
+FROM TBL_employee_family
+WHERE EmployeeID = @EmployeeID
+ORDER BY FamilyMemberID;";
+
+            var members = new List<EmployeeFamilyMember>();
+
+            using (var command = new MySqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        members.Add(new EmployeeFamilyMember
+                        {
+                            FamilyMemberID = reader.GetInt32(reader.GetOrdinal("FamilyMemberID")),
+                            EmployeeID = employeeID,
+                            FamilyMemberName = ReadText(reader, reader.GetOrdinal("FamilyMemberName")),
+                            MobileNumber = ReadNullableText(reader, reader.GetOrdinal("MobileNumber")),
+                            Relationship = ReadText(reader, reader.GetOrdinal("Relationship"))
+                        });
+                    }
+                }
+            }
+
+            return members;
+        }
+
+        // Reads a nullable text column as null, unlike ReadText, for fields whose absence
+        // must round-trip back into the editor as genuinely empty rather than blank text.
+        private static string ReadNullableText(MySqlDataReader reader, int index)
+        {
+            return reader.IsDBNull(index) ? null : reader.GetString(index);
+        }
+
+        // Writes every change to an existing employee as one transaction: the employee row is
+        // always updated, each child table is updated in place where a row exists and inserted
+        // where it does not, and a family contact removed by the manager is deleted - the only
+        // deletion this feature performs. End date and reason for ending are left untouched,
+        // since they are off this form entirely.
+        public void Update(EmployeeRecord record)
+        {
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        UpdateEmployee(connection, transaction, record.Employee);
+
+                        UpsertAddress(connection, transaction, record.Address);
+                        UpsertBank(connection, transaction, record.Bank);
+                        UpsertContract(connection, transaction, record.Contract);
+
+                        // A spouse row is only ever written for a currently married employee;
+                        // one belonging to somebody no longer married is left exactly as it was.
+                        if (record.Spouse != null)
+                        {
+                            UpsertSpouse(connection, transaction, record.Spouse);
+                        }
+
+                        UpsertFamilyMembers(connection, transaction, record.Employee.EmployeeID, record.FamilyMembers);
+
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        // Updates the TBL_employees row in place. StoreID and BusinessDate are left alone:
+        // this screen has no way to move an employee between stores, and BusinessDate records
+        // when the employee was originally captured, not when they were last edited. Only
+        // CapturedBy is overwritten, so the row records the manager who made this change.
+        private static void UpdateEmployee(MySqlConnection connection, MySqlTransaction transaction, Employee employee)
+        {
+            const string query = @"UPDATE TBL_employees SET
+    Name = @Name, Surname = @Surname, IDNumber = @IDNumber, SARSNumber = @SARSNumber,
+    MobileNumber = @MobileNumber, MaritialStatus = @MaritalStatus,
+    NumberOfDependents = @NumberOfDependents, CapturedBy = @CapturedBy
+WHERE EmployeeID = @EmployeeID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employee.EmployeeID);
+                command.Parameters.AddWithValue("@Name", employee.Name);
+                command.Parameters.AddWithValue("@Surname", employee.Surname);
+                command.Parameters.AddWithValue("@IDNumber", employee.IDNumber);
+                command.Parameters.AddWithValue("@SARSNumber", ToParameter(employee.SARSNumber));
+                command.Parameters.AddWithValue("@MobileNumber", employee.MobileNumber);
+                command.Parameters.AddWithValue("@MaritalStatus", employee.MaritalStatus);
+                command.Parameters.AddWithValue("@NumberOfDependents", employee.NumberOfDependents);
+                command.Parameters.AddWithValue("@CapturedBy", employee.CapturedBy);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Updates the address in place if one is on record, or inserts one if this is the
+        // first time it has been captured.
+        private static void UpsertAddress(MySqlConnection connection, MySqlTransaction transaction, EmployeeAddress address)
+        {
+            if (!address.AddressID.HasValue)
+            {
+                InsertAddress(connection, transaction, address);
+                return;
+            }
+
+            const string query = @"UPDATE TBL_employee_addresses SET
+    HouseFlatNumber = @HouseFlatNumber, ComplexFlatNumber = @ComplexFlatNumber,
+    StreetName = @StreetName, Town = @Town, PostalCode = @PostalCode
+WHERE AddressID = @AddressID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@AddressID", address.AddressID.Value);
+                command.Parameters.AddWithValue("@HouseFlatNumber", address.HouseFlatNumber);
+                command.Parameters.AddWithValue("@ComplexFlatNumber", address.ComplexFlatNumber);
+                command.Parameters.AddWithValue("@StreetName", address.StreetName);
+                command.Parameters.AddWithValue("@Town", address.Town);
+                command.Parameters.AddWithValue("@PostalCode", address.PostalCode);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Updates the bank details in place if any are on record, or inserts them if this is
+        // the first time they have been captured.
+        private static void UpsertBank(MySqlConnection connection, MySqlTransaction transaction, EmployeeBank bank)
+        {
+            if (!bank.BankID.HasValue)
+            {
+                InsertBank(connection, transaction, bank);
+                return;
+            }
+
+            const string query = @"UPDATE TBL_employee_bank SET
+    BankName = @BankName, AccountType = @AccountType, AccountNumber = @AccountNumber, BranchCode = @BranchCode
+WHERE BankID = @BankID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@BankID", bank.BankID.Value);
+                command.Parameters.AddWithValue("@BankName", bank.BankName);
+                command.Parameters.AddWithValue("@AccountType", bank.AccountType);
+                command.Parameters.AddWithValue("@AccountNumber", bank.AccountNumber);
+                command.Parameters.AddWithValue("@BranchCode", bank.BranchCode);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Updates the contract in place if one is on record, or inserts one if this is the
+        // first time it has been captured. EndDate and ReasonForEnding are deliberately left
+        // out of the SET list: they are off this form, and Terminate is what owns them.
+        private static void UpsertContract(MySqlConnection connection, MySqlTransaction transaction, EmployeeContract contract)
+        {
+            if (!contract.ContractID.HasValue)
+            {
+                InsertContract(connection, transaction, contract);
+                return;
+            }
+
+            const string query = @"UPDATE TBL_employee_contracts SET
+    ContractType = @ContractType, StartDate = @StartDate, Department = @Department,
+    JobDescription = @JobDescription, HourlyRate = @HourlyRate
+WHERE ContractID = @ContractID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@ContractID", contract.ContractID.Value);
+                command.Parameters.AddWithValue("@ContractType", contract.ContractType);
+                command.Parameters.AddWithValue("@StartDate", contract.StartDate.Date);
+                command.Parameters.AddWithValue("@Department", contract.Department);
+                command.Parameters.AddWithValue("@JobDescription", contract.JobDescription);
+                command.Parameters.AddWithValue("@HourlyRate", contract.HourlyRate);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Updates the spouse in place if one is on record, or inserts one if this is the
+        // first time a spouse has been captured for this employee.
+        private static void UpsertSpouse(MySqlConnection connection, MySqlTransaction transaction, EmployeeSpouse spouse)
+        {
+            if (!spouse.SpouseID.HasValue)
+            {
+                InsertSpouse(connection, transaction, spouse);
+                return;
+            }
+
+            const string query = @"UPDATE TBL_employee_spouses SET
+    SpouseName = @SpouseName, SpouseMobileNumber = @SpouseMobileNumber
+WHERE SpouseID = @SpouseID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@SpouseID", spouse.SpouseID.Value);
+                command.Parameters.AddWithValue("@SpouseName", spouse.SpouseName);
+                command.Parameters.AddWithValue("@SpouseMobileNumber", spouse.SpouseMobileNumber);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Updates or inserts every family contact the manager kept, then deletes whichever
+        // stored contacts are no longer among them - the only deletion this feature performs.
+        private static void UpsertFamilyMembers(MySqlConnection connection, MySqlTransaction transaction, int employeeID, List<EmployeeFamilyMember> members)
+        {
+            var keptIDs = new List<int>();
+
+            foreach (EmployeeFamilyMember member in members)
+            {
+                member.EmployeeID = employeeID;
+
+                if (member.FamilyMemberID.HasValue)
+                {
+                    UpdateFamilyMember(connection, transaction, member);
+                }
+                else
+                {
+                    InsertFamilyMember(connection, transaction, member);
+                }
+
+                keptIDs.Add(member.FamilyMemberID.Value);
+            }
+
+            DeleteRemovedFamilyMembers(connection, transaction, employeeID, keptIDs);
+        }
+
+        // Updates one family contact already on record.
+        private static void UpdateFamilyMember(MySqlConnection connection, MySqlTransaction transaction, EmployeeFamilyMember member)
+        {
+            const string query = @"UPDATE TBL_employee_family SET
+    FamilyMemberName = @FamilyMemberName, MobileNumber = @MobileNumber, Relationship = @Relationship
+WHERE FamilyMemberID = @FamilyMemberID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@FamilyMemberID", member.FamilyMemberID.Value);
+                command.Parameters.AddWithValue("@FamilyMemberName", member.FamilyMemberName);
+                command.Parameters.AddWithValue("@MobileNumber", ToParameter(member.MobileNumber));
+                command.Parameters.AddWithValue("@Relationship", member.Relationship);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Deletes whichever stored family contacts the manager did not keep - a manager
+        // genuinely removing somebody who has moved away, the one deletion this feature performs.
+        private static void DeleteRemovedFamilyMembers(MySqlConnection connection, MySqlTransaction transaction, int employeeID, List<int> keptIDs)
+        {
+            const string selectQuery = "SELECT FamilyMemberID FROM TBL_employee_family WHERE EmployeeID = @EmployeeID;";
+
+            var storedIDs = new List<int>();
+
+            using (var command = new MySqlCommand(selectQuery, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        storedIDs.Add(reader.GetInt32(0));
+                    }
+                }
+            }
+
+            const string deleteQuery = "DELETE FROM TBL_employee_family WHERE FamilyMemberID = @FamilyMemberID;";
+
+            foreach (int storedID in storedIDs)
+            {
+                if (keptIDs.Contains(storedID))
+                {
+                    continue;
+                }
+
+                using (var command = new MySqlCommand(deleteQuery, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@FamilyMemberID", storedID);
+                    command.ExecuteNonQuery();
                 }
             }
         }

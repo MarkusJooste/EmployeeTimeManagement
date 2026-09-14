@@ -11,8 +11,14 @@ namespace EmployeeTimeManagement.Tests
 
         private static EmployeeIDNumberOwner OwnerAt(int storeID)
         {
+            return OwnerAt(storeID, 42);
+        }
+
+        private static EmployeeIDNumberOwner OwnerAt(int storeID, int employeeID)
+        {
             return new EmployeeIDNumberOwner
             {
+                EmployeeID = employeeID,
                 StoreID = storeID,
                 Name = "Thandi",
                 Surname = "Mokoena"
@@ -68,6 +74,22 @@ namespace EmployeeTimeManagement.Tests
             EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(AnotherStore), ThisStore);
 
             Assert.That(error.Message, Does.Contain("another store"));
+        }
+
+        [Test]
+        public void An_employee_keeping_their_own_id_number_does_not_clash_against_themselves()
+        {
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(ThisStore, 42), ThisStore, 42);
+
+            Assert.That(error, Is.Null);
+        }
+
+        [Test]
+        public void An_id_number_held_by_somebody_else_at_this_store_still_clashes_during_an_update()
+        {
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(ThisStore, 42), ThisStore, 99);
+
+            Assert.That(error, Is.Not.Null);
         }
     }
 }

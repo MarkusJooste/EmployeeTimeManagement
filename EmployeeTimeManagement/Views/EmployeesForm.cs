@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -22,6 +23,13 @@ namespace EmployeeTimeManagement.Views
 
         // Every value the editor held when it opened, so Cancel can tell typing from an untouched form.
         private List<string> editorStateOnOpen = new List<string>();
+
+        // The employee being updated, as loaded from the database, or null while adding a new
+        // employee. Save reads its identifiers to decide whether to insert or update, and to
+        // upsert each child row against the one already on record. Its spouse is kept even
+        // after marital status moves away from Married so the details can be restored if it
+        // moves back.
+        private EmployeeRecord editingRecord;
 
         public EmployeesForm()
         {
@@ -156,6 +164,103 @@ namespace EmployeeTimeManagement.Views
             txtName.Focus();
         }
 
+        // Swaps the list away and opens the editor prefilled from all six tables for the
+        // selected employee. Refused silently when nothing is selected, matching the button
+        // being disabled at that point.
+        private void ShowEditorForUpdate()
+        {
+            EmployeeListItem selected = SelectedEmployee;
+
+            if (selected == null)
+            {
+                return;
+            }
+
+            EmployeeRecord record;
+
+            try
+            {
+                record = employeeController.GetForEdit(selected.EmployeeID);
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = "Could not load this employee: " + ex.Message;
+                return;
+            }
+
+            if (record == null)
+            {
+                lblStatus.Text = "That employee could not be found.";
+                LoadData();
+                return;
+            }
+
+            lblEditorTitle.Text = "Update Employee";
+            ClearEditor();
+            FillEditor(record);
+            editorStateOnOpen = DescribeEditorState();
+
+            pnlList.Visible = false;
+            pnlEditor.Visible = true;
+            txtName.Focus();
+        }
+
+        // Copies a loaded employee's six tables into the editor's controls, and remembers
+        // each child row's identifier so Save updates it in place rather than inserting anew.
+        private void FillEditor(EmployeeRecord record)
+        {
+            // Set before the marital status combo below, so selecting Married restores the
+            // loaded spouse through UpdateSpouseFields rather than needing it typed out again.
+            editingRecord = record;
+
+            txtName.Text = record.Employee.Name;
+            txtSurname.Text = record.Employee.Surname;
+            txtIDNumber.Text = record.Employee.IDNumber;
+            txtSARSNumber.Text = record.Employee.SARSNumber;
+            txtMobileNumber.Text = record.Employee.MobileNumber;
+            txtDependents.Text = record.Employee.NumberOfDependents.ToString(CultureInfo.InvariantCulture);
+            cboMaritalStatus.SelectedItem = record.Employee.MaritalStatus;
+
+            if (record.Address != null)
+            {
+                txtHouseFlatNumber.Text = record.Address.HouseFlatNumber;
+                txtComplexFlatNumber.Text = record.Address.ComplexFlatNumber;
+                txtStreetName.Text = record.Address.StreetName;
+                txtTown.Text = record.Address.Town;
+                txtPostalCode.Text = record.Address.PostalCode;
+            }
+
+            if (record.Bank != null)
+            {
+                txtBankName.Text = record.Bank.BankName;
+                txtAccountType.Text = record.Bank.AccountType;
+                txtAccountNumber.Text = record.Bank.AccountNumber;
+                txtBranchCode.Text = record.Bank.BranchCode;
+            }
+
+            if (record.Contract != null)
+            {
+                txtContractType.Text = record.Contract.ContractType;
+                dtpStartDate.Value = record.Contract.StartDate;
+                txtDepartment.Text = record.Contract.Department;
+                txtJobDescription.Text = record.Contract.JobDescription;
+                txtHourlyRate.Text = record.Contract.HourlyRate.ToString(CultureInfo.InvariantCulture);
+            }
+
+            dgvFamily.Rows.Clear();
+
+            foreach (EmployeeFamilyMember member in record.FamilyMembers)
+            {
+                int rowIndex = dgvFamily.Rows.Add(member.FamilyMemberName, member.MobileNumber, member.Relationship);
+                dgvFamily.Rows[rowIndex].Tag = member.FamilyMemberID;
+            }
+
+            if (dgvFamily.Rows.Count == 0)
+            {
+                dgvFamily.Rows.Add();
+            }
+        }
+
         // Swaps the editor away and returns to the list, which is left exactly as the manager had it
         private void ShowList()
         {
@@ -163,7 +268,9 @@ namespace EmployeeTimeManagement.Views
             pnlList.Visible = true;
         }
 
-        // Empties every field of the editor, leaving marital status unset and one blank family row to type into
+        // Empties every field of the editor, leaving marital status unset and one blank family
+        // row to type into, and forgets whichever employee was being updated so Add Employee
+        // never carries their identifiers over.
         private void ClearEditor()
         {
             WalkInputs(
@@ -174,6 +281,8 @@ namespace EmployeeTimeManagement.Views
 
             dgvFamily.Rows.Clear();
             dgvFamily.Rows.Add();
+
+            editingRecord = null;
 
             UpdateSpouseFields();
             ClearFieldErrors();
@@ -254,12 +363,25 @@ namespace EmployeeTimeManagement.Views
             return result == DialogResult.Yes;
         }
 
-        // Only a married employee has a spouse, so the two fields are open to typing then and cleared whenever they are not
+        // Only a married employee has a spouse, so the two fields are open to typing then and
+        // cleared whenever they are not. Selecting Married with the fields still empty restores
+        // whatever spouse was loaded for this employee, so a status corrected away and back
+        // does not lose their details.
         private void UpdateSpouseFields()
         {
             bool isMarried = MaritalStatuses.Married.Equals(cboMaritalStatus.SelectedItem as string);
 
-            if (!isMarried)
+            EmployeeSpouse loadedSpouse = editingRecord == null ? null : editingRecord.Spouse;
+
+            if (isMarried)
+            {
+                if (loadedSpouse != null && txtSpouseName.Text.Length == 0 && txtSpouseMobileNumber.Text.Length == 0)
+                {
+                    txtSpouseName.Text = loadedSpouse.SpouseName;
+                    txtSpouseMobileNumber.Text = loadedSpouse.SpouseMobileNumber;
+                }
+            }
+            else
             {
                 txtSpouseName.Text = string.Empty;
                 txtSpouseMobileNumber.Text = string.Empty;
@@ -283,6 +405,9 @@ namespace EmployeeTimeManagement.Views
             dgvFamily.EndEdit();
             ClearFieldErrors();
 
+            bool isUpdate = editingRecord != null;
+            int? editingEmployeeID = editingRecord == null ? (int?)null : editingRecord.Employee.EmployeeID;
+
             EmployeeCaptureResult result = EmployeeCapture.Build(
                 CurrentUser.StoreID.Value, CurrentUser.ManagerID.Value, ReadEditor());
 
@@ -304,7 +429,7 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
-            EmployeeFieldError clash = EmployeeCapture.DescribeIDNumberClash(owner, CurrentUser.StoreID.Value);
+            EmployeeFieldError clash = EmployeeCapture.DescribeIDNumberClash(owner, CurrentUser.StoreID.Value, editingEmployeeID);
 
             if (clash != null)
             {
@@ -314,7 +439,14 @@ namespace EmployeeTimeManagement.Views
 
             try
             {
-                employeeController.Insert(result.Record);
+                if (isUpdate)
+                {
+                    employeeController.Update(result.Record);
+                }
+                else
+                {
+                    employeeController.Insert(result.Record);
+                }
             }
             catch (Exception ex)
             {
@@ -330,7 +462,7 @@ namespace EmployeeTimeManagement.Views
 
             // Re-read rather than added to the list in memory, so the manager sees what was stored.
             LoadData();
-            lblStatus.Text = "Saved " + result.Record.Employee.FullName;
+            lblStatus.Text = (isUpdate ? "Updated " : "Saved ") + result.Record.Employee.FullName;
         }
 
         // Reads every control of the editor into the raw shape the capture seam validates.
@@ -338,6 +470,12 @@ namespace EmployeeTimeManagement.Views
         {
             var input = new EmployeeCaptureInput
             {
+                EmployeeID = editingRecord == null ? (int?)null : editingRecord.Employee.EmployeeID,
+                AddressID = editingRecord == null || editingRecord.Address == null ? (int?)null : editingRecord.Address.AddressID,
+                BankID = editingRecord == null || editingRecord.Bank == null ? (int?)null : editingRecord.Bank.BankID,
+                ContractID = editingRecord == null || editingRecord.Contract == null ? (int?)null : editingRecord.Contract.ContractID,
+                SpouseID = editingRecord == null || editingRecord.Spouse == null ? (int?)null : editingRecord.Spouse.SpouseID,
+
                 Name = txtName.Text,
                 Surname = txtSurname.Text,
                 IDNumber = txtIDNumber.Text,
@@ -374,6 +512,7 @@ namespace EmployeeTimeManagement.Views
                 input.FamilyMembers.Add(new FamilyMemberInput
                 {
                     RowIndex = index,
+                    FamilyMemberID = row.Tag as int?,
                     Name = CellText(row, colFamilyName.Index),
                     MobileNumber = CellText(row, colFamilyMobileNumber.Index),
                     Relationship = CellText(row, colFamilyRelationship.Index)
@@ -555,6 +694,11 @@ namespace EmployeeTimeManagement.Views
         private void btnAdd_Click(object sender, EventArgs e)
         {
             ShowEditorForNewEmployee();
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            ShowEditorForUpdate();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
