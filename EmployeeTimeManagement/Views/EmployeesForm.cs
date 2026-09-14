@@ -131,14 +131,17 @@ namespace EmployeeTimeManagement.Views
             }
         }
 
-        // Update, Terminate and Reactivate act on one person, so they stay disabled while no row is selected
+        // Update, Terminate and Reactivate act on one person, so they stay disabled while no
+        // row is selected. Terminate and Reactivate are further split by status, so the two
+        // are never both available and neither can be clicked on the wrong person.
         private void UpdateButtonState()
         {
-            bool hasSelection = SelectedEmployee != null;
+            EmployeeListItem selected = SelectedEmployee;
+            bool hasSelection = selected != null;
 
             btnUpdate.Enabled = hasSelection;
-            btnTerminate.Enabled = hasSelection;
-            btnReactivate.Enabled = hasSelection;
+            btnTerminate.Enabled = hasSelection && selected.IsActive;
+            btnReactivate.Enabled = hasSelection && !selected.IsActive;
         }
 
         // Nothing on this screen is safe to press when there is no store to act on
@@ -354,12 +357,16 @@ namespace EmployeeTimeManagement.Views
                 return true;
             }
 
-            DialogResult result = MessageBox.Show(
+            return Confirm(
                 "The details captured on this screen have not been saved. Leaving the editor will discard them.",
-                "Discard unsaved details?",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+                "Discard unsaved details?");
+        }
 
+        // A Yes/No confirmation in the style every destructive or hard-to-reverse action on
+        // this screen asks before going ahead.
+        private static bool Confirm(string message, string title)
+        {
+            DialogResult result = MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             return result == DialogResult.Yes;
         }
 
@@ -749,6 +756,89 @@ namespace EmployeeTimeManagement.Views
         private void dgvEmployees_SelectionChanged(object sender, EventArgs e)
         {
             UpdateButtonState();
+        }
+
+        // Asks for an end date and reason, confirms, then closes the employee's contract.
+        // Writing nothing at all is the way a contract-less employee is handled without error.
+        private void btnTerminate_Click(object sender, EventArgs e)
+        {
+            EmployeeListItem selected = SelectedEmployee;
+
+            if (selected == null)
+            {
+                return;
+            }
+
+            string employeeName = selected.FullName;
+
+            using (var dialog = new TerminateEmployeeForm(employeeName))
+            {
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                if (!Confirm(
+                    "End " + employeeName + "'s employment on " + dialog.EndDate.ToString("yyyy-MM-dd") + "?",
+                    "Terminate employee?"))
+                {
+                    return;
+                }
+
+                bool closed;
+
+                try
+                {
+                    closed = employeeController.Terminate(selected.EmployeeID, dialog.EndDate, dialog.Reason);
+                }
+                catch (Exception ex)
+                {
+                    lblStatus.Text = "Could not terminate this employee: " + ex.Message;
+                    return;
+                }
+
+                // Re-read rather than patched in memory, so the list reflects the closed contract.
+                LoadData();
+
+                // Nobody's contract closes when there was none on file to close, so the
+                // status line does not claim an ending that never happened.
+                lblStatus.Text = closed
+                    ? "Ended " + employeeName + "'s employment."
+                    : employeeName + " has no contract on record, so there was nothing to close.";
+            }
+        }
+
+        // Confirms, then clears the end date and reason back to how a live contract reads.
+        private void btnReactivate_Click(object sender, EventArgs e)
+        {
+            EmployeeListItem selected = SelectedEmployee;
+
+            if (selected == null)
+            {
+                return;
+            }
+
+            string employeeName = selected.FullName;
+
+            if (!Confirm(
+                "Reactivate " + employeeName + "? This clears their end date and reason for leaving.",
+                "Reactivate employee?"))
+            {
+                return;
+            }
+
+            try
+            {
+                employeeController.Reactivate(selected.EmployeeID);
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = "Could not reactivate this employee: " + ex.Message;
+                return;
+            }
+
+            LoadData();
+            lblStatus.Text = "Reactivated " + employeeName + ".";
         }
     }
 }

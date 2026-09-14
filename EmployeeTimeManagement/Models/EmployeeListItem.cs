@@ -14,10 +14,19 @@ namespace EmployeeTimeManagement.Models
         public string JobDescription { get; set; }
         public DateTime? ContractEndDate { get; set; }
 
-        // An employee is still employed while their contract is open or ends today or later; someone with no contract at all counts as employed.
+        // How the employee is shown in status messages and confirmation dialogs.
+        public string FullName
+        {
+            get { return (Name + " " + Surname).Trim(); }
+        }
+
+        // An employee is still employed while their contract is open or ends after today;
+        // someone with no contract at all counts as employed. An end date of today or
+        // earlier reads as Former immediately, so Terminate's default of today takes effect
+        // without a day's delay.
         public bool IsActive
         {
-            get { return ContractEndDate == null || ContractEndDate.Value.Date >= DateTime.Today; }
+            get { return ContractEndDate == null || ContractEndDate.Value.Date > DateTime.Today; }
         }
 
         // How the employee's standing is shown in the Status column.

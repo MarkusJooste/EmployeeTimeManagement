@@ -822,6 +822,52 @@ VALUES
             return value;
         }
 
+        // Ends one employee's contract: writes the end date and reason for leaving, and
+        // touches no other table. Updates only the latest contract, matching ReadContract.
+        // Returns whether a contract row existed to close: a no-op, not an error, when it
+        // did not, so the caller can tell the manager nothing was actually there to end.
+        public bool Terminate(int employeeID, DateTime endDate, string reason)
+        {
+            const string query = @"UPDATE TBL_employee_contracts
+SET EndDate = @EndDate, ReasonForEnding = @ReasonForEnding
+WHERE EmployeeID = @EmployeeID
+ORDER BY ContractID DESC
+LIMIT 1;";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                    command.Parameters.AddWithValue("@EndDate", endDate.Date);
+                    command.Parameters.AddWithValue("@ReasonForEnding", reason ?? string.Empty);
+
+                    return command.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+
+        // Reverses Terminate: clears the end date and reason for leaving back to how a live
+        // contract reads. Covers both a mistaken termination and a genuine rehire.
+        public void Reactivate(int employeeID)
+        {
+            const string query = @"UPDATE TBL_employee_contracts
+SET EndDate = NULL, ReasonForEnding = ''
+WHERE EmployeeID = @EmployeeID
+ORDER BY ContractID DESC
+LIMIT 1;";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
         // Returns every employee at one store, ordered the way a manager reads a register.
         public List<Employee> GetByStore(int storeID)
         {

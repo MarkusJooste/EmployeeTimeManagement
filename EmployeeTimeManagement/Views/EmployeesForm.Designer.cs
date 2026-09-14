@@ -270,6 +270,7 @@ namespace EmployeeTimeManagement.Views
             this.btnTerminate.TabIndex = 2;
             this.btnTerminate.Text = "Terminate";
             this.btnTerminate.UseVisualStyleBackColor = true;
+            this.btnTerminate.Click += new System.EventHandler(this.btnTerminate_Click);
             //
             // btnReactivate
             //
@@ -279,6 +280,7 @@ namespace EmployeeTimeManagement.Views
             this.btnReactivate.TabIndex = 3;
             this.btnReactivate.Text = "Reactivate";
             this.btnReactivate.UseVisualStyleBackColor = true;
+            this.btnReactivate.Click += new System.EventHandler(this.btnReactivate_Click);
             //
             // lblSearch
             //
