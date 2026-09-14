@@ -375,5 +375,74 @@ namespace EmployeeTimeManagement.Tests
             Assert.That(result.IsValid, Is.True);
             Assert.That(result.Absence.OverrideReason, Is.Null);
         }
+
+        [Test]
+        public void ANewBookingHasNoLeaveIDSet()
+        {
+            LeaveBookingResult result = LeaveBooking.Build(ValidRequest());
+
+            Assert.That(result.Absence.LeaveID, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void AnEditedAbsenceCarriesItsLeaveIDOntoTheResult()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.EditingLeaveID = 42;
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.Absence.LeaveID, Is.EqualTo(42));
+        }
+
+        [Test]
+        public void AnEditedAbsenceDoesNotOverlapItsOwnUneditedDates()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.EditingLeaveID = 42;
+            request.ExistingAbsences = new List<Absence>
+            {
+                new Absence { LeaveID = 42, LeaveType = LeaveType.PTO, StartDate = new DateTime(2026, 3, 10), EndDate = new DateTime(2026, 3, 12) }
+            };
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.True);
+        }
+
+        [Test]
+        public void AnEditedAbsenceExtendingIntoNewDatesStillDoesNotOverlapItself()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.EditingLeaveID = 42;
+            request.StartDate = new DateTime(2026, 3, 10);
+            request.EndDate = new DateTime(2026, 3, 13);
+            request.ExistingAbsences = new List<Absence>
+            {
+                new Absence { LeaveID = 42, LeaveType = LeaveType.PTO, StartDate = new DateTime(2026, 3, 10), EndDate = new DateTime(2026, 3, 12) }
+            };
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.True);
+        }
+
+        [Test]
+        public void AnEditedAbsenceStillRefusesOverlapWithADifferentAbsence()
+        {
+            LeaveBookingRequest request = ValidRequest();
+            request.EditingLeaveID = 42;
+            request.ExistingAbsences = new List<Absence>
+            {
+                new Absence { LeaveID = 42, LeaveType = LeaveType.PTO, StartDate = new DateTime(2026, 3, 10), EndDate = new DateTime(2026, 3, 12) },
+                new Absence { LeaveID = 7, LeaveType = LeaveType.Sick, StartDate = new DateTime(2026, 3, 11), EndDate = new DateTime(2026, 3, 11) }
+            };
+
+            LeaveBookingResult result = LeaveBooking.Build(request);
+
+            Assert.That(result.IsValid, Is.False);
+            Assert.That(result.Absence, Is.Null);
+            Assert.That(result.Error, Does.Contain("overlap"));
+        }
     }
 }

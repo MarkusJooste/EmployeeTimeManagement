@@ -24,6 +24,14 @@ namespace EmployeeTimeManagement.Views
         // them without recomputing from Timesheets and Absences a second time.
         private LeaveBalanceSummary currentBalances;
 
+        // The Absence currently loaded into the booking editor for editing, or null while the
+        // editor is booking a new one.
+        private Absence editingAbsence;
+
+        // Set while the grid's DataSource or selection is being changed programmatically, so
+        // dgvHistory_SelectionChanged does not treat it as the manager picking a row to edit.
+        private bool suppressSelectionEvent;
+
         public LeaveForm()
         {
             InitializeComponent();
@@ -199,17 +207,63 @@ namespace EmployeeTimeManagement.Views
         }
 
         // Puts the booking editor back to its default state: today's date on both pickers,
-        // no reason, the first bookable Leave Type, and no message left over from before.
+        // no reason, the first bookable Leave Type, and no message left over from before. Also
+        // drops the grid's selection, so no Absence stays half-loaded for editing.
         private void ResetBookingForm()
         {
+            ResetBookingFields();
+
+            lblBookingMessage.Text = string.Empty;
+            lblBookingMessage.ForeColor = SystemColors.ControlText;
+
+            suppressSelectionEvent = true;
+            dgvHistory.ClearSelection();
+            suppressSelectionEvent = false;
+        }
+
+        // Puts the booking editor's fields back to "book a new Absence" defaults, without
+        // touching the grid selection or any message already shown - used when the AWOL lock
+        // message needs the just-clicked row to stay visibly selected.
+        private void ResetBookingFields()
+        {
+            editingAbsence = null;
             cboBookLeaveType.SelectedIndex = 0;
             dtpBookStartDate.Value = DateTime.Today;
             dtpBookEndDate.Value = DateTime.Today;
             txtBookReason.Text = string.Empty;
             txtBookOverrideReason.Text = string.Empty;
+            btnBookAbsence.Text = "Book Absence";
+            btnDeleteAbsence.Visible = false;
+            btnNewAbsence.Visible = false;
+            UpdateDayCountPreview();
+        }
+
+        // Loads one existing Absence into the booking editor, switching it into edit mode.
+        private void EditAbsence(Absence absence)
+        {
+            editingAbsence = absence;
+
+            cboBookLeaveType.SelectedItem = absence.LeaveType.ToDatabaseValue();
+            dtpBookStartDate.Value = absence.StartDate.Date;
+            dtpBookEndDate.Value = absence.EndDate.Date;
+            txtBookReason.Text = absence.Reason ?? string.Empty;
+            txtBookOverrideReason.Text = absence.OverrideReason ?? string.Empty;
             lblBookingMessage.Text = string.Empty;
             lblBookingMessage.ForeColor = SystemColors.ControlText;
+
+            btnBookAbsence.Text = "Save Changes";
+            btnDeleteAbsence.Visible = true;
+            btnNewAbsence.Visible = true;
+
             UpdateDayCountPreview();
+        }
+
+        // AWOL rows are written from Capture Timesheets and would just be silently reversed by
+        // its next save, so this screen explains that rather than loading one into the editor.
+        private void ShowAwolLockedMessage()
+        {
+            ResetBookingFields();
+            ShowBookingMessage("AWOL rows are captured from Capture Timesheets and cannot be edited or deleted here.", isError: false);
         }
 
         // Shows how many calendar days the currently chosen range costs, before anything
@@ -223,17 +277,19 @@ namespace EmployeeTimeManagement.Views
                 : "End date is before the start date";
         }
 
-        // Validates and books the Absence, writing nothing at all when it is refused.
-        private void BookAbsence()
+        // Validates and saves the Absence - inserting a new one, or updating editingAbsence in
+        // place - writing nothing at all when it is refused.
+        private void SaveAbsence()
         {
             EmployeeListItem employee = employeePicker.SelectedEmployee;
 
-            if (employee == null || CurrentUser.ManagerID == null)
+            if (employee == null || CurrentUser.ManagerID == null || CurrentUser.StoreID == null)
             {
                 return;
             }
 
             string leaveType = cboBookLeaveType.SelectedItem as string;
+            bool isEdit = editingAbsence != null;
 
             var request = new LeaveBookingRequest
             {
@@ -245,8 +301,9 @@ namespace EmployeeTimeManagement.Views
                 ContractStartDate = employee.ContractStartDate,
                 ContractEndDate = employee.ContractEndDate,
                 ExistingAbsences = selectedEmployeeHistory,
-                AvailableBalance = AvailableBalanceFor(leaveType),
-                OverrideReason = txtBookOverrideReason.Text
+                AvailableBalance = AvailableBalanceFor(leaveType, editingAbsence),
+                OverrideReason = txtBookOverrideReason.Text,
+                EditingLeaveID = isEdit ? editingAbsence.LeaveID : (int?)null
             };
 
             LeaveBookingResult result = LeaveBooking.Build(request);
@@ -276,21 +333,71 @@ namespace EmployeeTimeManagement.Views
 
             try
             {
-                leaveController.Insert(result.Absence, CurrentUser.ManagerID.Value);
+                if (isEdit)
+                {
+                    leaveController.Update(result.Absence, CurrentUser.StoreID.Value);
+                }
+                else
+                {
+                    leaveController.Insert(result.Absence, CurrentUser.ManagerID.Value);
+                }
             }
             catch (Exception ex)
             {
-                ShowBookingMessage("Could not book Absence: " + ex.Message, isError: true);
+                ShowBookingMessage("Could not save Absence: " + ex.Message, isError: true);
                 return;
             }
 
             ShowHistoryFor(employee);
-            ShowBookingMessage("Absence booked.", isError: false);
+            ShowBookingMessage(isEdit ? "Absence updated." : "Absence booked.", isError: false);
+        }
+
+        // Deletes editingAbsence after the manager confirms, refusing an AWOL row as a second
+        // line of defence even though the editor never loads one for editing in the first place.
+        private void DeleteAbsence()
+        {
+            EmployeeListItem employee = employeePicker.SelectedEmployee;
+
+            if (employee == null || editingAbsence == null || CurrentUser.StoreID == null)
+            {
+                return;
+            }
+
+            if (editingAbsence.LeaveType == LeaveType.AWOL)
+            {
+                return;
+            }
+
+            DialogResult confirmed = MessageBox.Show(
+                string.Format(
+                    "Delete this {0} Absence ({1:dd MMM yyyy} to {2:dd MMM yyyy})?",
+                    editingAbsence.LeaveTypeDisplay, editingAbsence.StartDate, editingAbsence.EndDate),
+                "Delete Absence", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if (confirmed != DialogResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                leaveController.Delete(editingAbsence.LeaveID, CurrentUser.StoreID.Value);
+            }
+            catch (Exception ex)
+            {
+                ShowBookingMessage("Could not delete Absence: " + ex.Message, isError: true);
+                return;
+            }
+
+            ShowHistoryFor(employee);
+            ShowBookingMessage("Absence deleted.", isError: false);
         }
 
         // The Leave Balance the over-balance check should compare this booking's cost against.
-        // Null for a Leave Type with no cap to exceed, or while no balances are loaded yet.
-        private int? AvailableBalanceFor(string leaveType)
+        // Null for a Leave Type with no cap to exceed, or while no balances are loaded yet. While
+        // editing an Absence of the same Leave Type, its own current days are added back first,
+        // since the loaded balance already has them deducted.
+        private int? AvailableBalanceFor(string leaveType, Absence editing)
         {
             LeaveType parsed;
             if (currentBalances == null || !LeaveTypes.TryParseBookable(leaveType, out parsed))
@@ -298,7 +405,14 @@ namespace EmployeeTimeManagement.Views
                 return null;
             }
 
-            return currentBalances.AvailableBalance(parsed);
+            int? available = currentBalances.AvailableBalance(parsed);
+
+            if (available.HasValue && editing != null && editing.LeaveType == parsed)
+            {
+                available += editing.DayCount;
+            }
+
+            return available;
         }
 
         // Shows a booking outcome in red for a refusal or failure, or the default colour otherwise.
@@ -321,7 +435,9 @@ namespace EmployeeTimeManagement.Views
                 matches = matches.Where(absence => absence.LeaveType == type);
             }
 
+            suppressSelectionEvent = true;
             dgvHistory.DataSource = new BindingList<Absence>(matches.ToList());
+            suppressSelectionEvent = false;
         }
 
         private void employeePicker_SelectionChanged(object sender, EventArgs e)
@@ -345,6 +461,36 @@ namespace EmployeeTimeManagement.Views
         private void cboLeaveType_SelectedIndexChanged(object sender, EventArgs e)
         {
             ApplyLeaveTypeFilter();
+
+            // The row being edited may no longer be in view under the new filter, so the editor
+            // drops back to booking a new Absence rather than saving into a row nobody can see.
+            if (editingAbsence != null)
+            {
+                ResetBookingForm();
+            }
+        }
+
+        private void dgvHistory_SelectionChanged(object sender, EventArgs e)
+        {
+            if (suppressSelectionEvent)
+            {
+                return;
+            }
+
+            var selected = dgvHistory.CurrentRow?.DataBoundItem as Absence;
+
+            if (selected == null)
+            {
+                return;
+            }
+
+            if (selected.LeaveType == LeaveType.AWOL)
+            {
+                ShowAwolLockedMessage();
+                return;
+            }
+
+            EditAbsence(selected);
         }
 
         private void dtpBookDate_ValueChanged(object sender, EventArgs e)
@@ -354,7 +500,17 @@ namespace EmployeeTimeManagement.Views
 
         private void btnBookAbsence_Click(object sender, EventArgs e)
         {
-            BookAbsence();
+            SaveAbsence();
+        }
+
+        private void btnDeleteAbsence_Click(object sender, EventArgs e)
+        {
+            DeleteAbsence();
+        }
+
+        private void btnNewAbsence_Click(object sender, EventArgs e)
+        {
+            ResetBookingForm();
         }
     }
 }

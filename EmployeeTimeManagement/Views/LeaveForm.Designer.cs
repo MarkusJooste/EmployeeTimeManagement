@@ -35,6 +35,8 @@ namespace EmployeeTimeManagement.Views
             this.pnlHistory = new System.Windows.Forms.Panel();
             this.pnlBooking = new System.Windows.Forms.Panel();
             this.lblBookingMessage = new System.Windows.Forms.Label();
+            this.btnNewAbsence = new System.Windows.Forms.Button();
+            this.btnDeleteAbsence = new System.Windows.Forms.Button();
             this.btnBookAbsence = new System.Windows.Forms.Button();
             this.txtBookOverrideReason = new System.Windows.Forms.TextBox();
             this.lblBookOverrideReason = new System.Windows.Forms.Label();
@@ -109,12 +111,14 @@ namespace EmployeeTimeManagement.Views
             this.pnlBooking.Controls.Add(this.lblBookOverrideReason);
             this.pnlBooking.Controls.Add(this.txtBookOverrideReason);
             this.pnlBooking.Controls.Add(this.btnBookAbsence);
+            this.pnlBooking.Controls.Add(this.btnDeleteAbsence);
+            this.pnlBooking.Controls.Add(this.btnNewAbsence);
             this.pnlBooking.Controls.Add(this.lblBookingMessage);
             this.pnlBooking.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlBooking.Enabled = false;
             this.pnlBooking.Location = new System.Drawing.Point(0, 136);
             this.pnlBooking.Name = "pnlBooking";
-            this.pnlBooking.Size = new System.Drawing.Size(569, 104);
+            this.pnlBooking.Size = new System.Drawing.Size(569, 146);
             this.pnlBooking.TabIndex = 3;
             //
             // pnlBalances
@@ -265,20 +269,42 @@ namespace EmployeeTimeManagement.Views
             //
             // btnBookAbsence
             //
-            this.btnBookAbsence.Location = new System.Drawing.Point(392, 59);
+            this.btnBookAbsence.Location = new System.Drawing.Point(8, 90);
             this.btnBookAbsence.Name = "btnBookAbsence";
-            this.btnBookAbsence.Size = new System.Drawing.Size(100, 23);
+            this.btnBookAbsence.Size = new System.Drawing.Size(110, 23);
             this.btnBookAbsence.TabIndex = 11;
             this.btnBookAbsence.Text = "Book Absence";
             this.btnBookAbsence.UseVisualStyleBackColor = true;
             this.btnBookAbsence.Click += new System.EventHandler(this.btnBookAbsence_Click);
             //
+            // btnDeleteAbsence
+            //
+            this.btnDeleteAbsence.Location = new System.Drawing.Point(126, 90);
+            this.btnDeleteAbsence.Name = "btnDeleteAbsence";
+            this.btnDeleteAbsence.Size = new System.Drawing.Size(90, 23);
+            this.btnDeleteAbsence.TabIndex = 12;
+            this.btnDeleteAbsence.Text = "Delete";
+            this.btnDeleteAbsence.UseVisualStyleBackColor = true;
+            this.btnDeleteAbsence.Visible = false;
+            this.btnDeleteAbsence.Click += new System.EventHandler(this.btnDeleteAbsence_Click);
+            //
+            // btnNewAbsence
+            //
+            this.btnNewAbsence.Location = new System.Drawing.Point(224, 90);
+            this.btnNewAbsence.Name = "btnNewAbsence";
+            this.btnNewAbsence.Size = new System.Drawing.Size(90, 23);
+            this.btnNewAbsence.TabIndex = 13;
+            this.btnNewAbsence.Text = "New Absence";
+            this.btnNewAbsence.UseVisualStyleBackColor = true;
+            this.btnNewAbsence.Visible = false;
+            this.btnNewAbsence.Click += new System.EventHandler(this.btnNewAbsence_Click);
+            //
             // lblBookingMessage
             //
-            this.lblBookingMessage.Location = new System.Drawing.Point(8, 86);
+            this.lblBookingMessage.Location = new System.Drawing.Point(8, 118);
             this.lblBookingMessage.Name = "lblBookingMessage";
             this.lblBookingMessage.Size = new System.Drawing.Size(553, 13);
-            this.lblBookingMessage.TabIndex = 12;
+            this.lblBookingMessage.TabIndex = 14;
             //
             // dgvHistory
             //
@@ -304,6 +330,7 @@ namespace EmployeeTimeManagement.Views
             this.dgvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvHistory.Size = new System.Drawing.Size(569, 343);
             this.dgvHistory.TabIndex = 1;
+            this.dgvHistory.SelectionChanged += new System.EventHandler(this.dgvHistory_SelectionChanged);
             //
             // colLeaveType
             //
@@ -475,6 +502,8 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Label lblBookOverrideReason;
         private System.Windows.Forms.TextBox txtBookOverrideReason;
         private System.Windows.Forms.Button btnBookAbsence;
+        private System.Windows.Forms.Button btnDeleteAbsence;
+        private System.Windows.Forms.Button btnNewAbsence;
         private System.Windows.Forms.Label lblBookingMessage;
     }
 }

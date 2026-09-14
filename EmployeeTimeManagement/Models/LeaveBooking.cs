@@ -25,6 +25,11 @@ namespace EmployeeTimeManagement.Models
         // Every other Absence already on record for this employee, any Leave Type included,
         // so a day cannot end up double-booked regardless of which balance it would draw from.
         public IEnumerable<Absence> ExistingAbsences { get; set; } = new List<Absence>();
+
+        // The LeaveID of the Absence being edited, so the overlap check ignores that Absence's
+        // own current dates and the result carries this ID for LeaveController.Update to find it
+        // by. Null for a new booking.
+        public int? EditingLeaveID { get; set; }
     }
 
     // The outcome of validating a booking: the Absence it describes, or the rule that
@@ -106,7 +111,7 @@ namespace EmployeeTimeManagement.Models
                 return LeaveBookingResult.Refuse("These dates fall outside the employee's employment.");
             }
 
-            Absence overlap = FindOverlap(request.ExistingAbsences, startDate, endDate);
+            Absence overlap = FindOverlap(request.ExistingAbsences, startDate, endDate, request.EditingLeaveID);
             if (overlap != null)
             {
                 return LeaveBookingResult.Refuse(string.Format(
@@ -137,6 +142,7 @@ namespace EmployeeTimeManagement.Models
 
             var absence = new Absence
             {
+                LeaveID = request.EditingLeaveID ?? 0,
                 EmployeeID = request.EmployeeID,
                 LeaveType = leaveType,
                 StartDate = startDate,
@@ -183,7 +189,8 @@ namespace EmployeeTimeManagement.Models
 
         // Returns the first existing Absence the requested range overlaps, or null when it
         // is clear. Leave Type plays no part: a day cannot belong to two Absences at once.
-        private static Absence FindOverlap(IEnumerable<Absence> existingAbsences, DateTime startDate, DateTime endDate)
+        // Skips editingLeaveID's own row, so an edit never overlaps its own prior dates.
+        private static Absence FindOverlap(IEnumerable<Absence> existingAbsences, DateTime startDate, DateTime endDate, int? editingLeaveID)
         {
             if (existingAbsences == null)
             {
@@ -192,6 +199,11 @@ namespace EmployeeTimeManagement.Models
 
             foreach (Absence existing in existingAbsences)
             {
+                if (editingLeaveID.HasValue && existing.LeaveID == editingLeaveID.Value)
+                {
+                    continue;
+                }
+
                 if (startDate <= existing.EndDate.Date && endDate >= existing.StartDate.Date)
                 {
                     return existing;

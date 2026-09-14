@@ -131,6 +131,59 @@ VALUES
             }
         }
 
+        // Updates one booked Absence in place, scoped to the manager's store so a LeaveID from
+        // another store's row can never be touched. Only called with an Absence LeaveBooking has
+        // already validated.
+        public void Update(Absence absence, int storeID)
+        {
+            const string query = @"UPDATE TBL_leave l
+JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
+SET l.LeaveType = @LeaveType,
+    l.StartDate = @StartDate,
+    l.EndDate = @EndDate,
+    l.Reason = @Reason,
+    l.OverrideReason = @OverrideReason
+WHERE l.LeaveID = @LeaveID
+  AND e.StoreID = @StoreID;";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@LeaveType", absence.LeaveType.ToDatabaseValue());
+                    command.Parameters.AddWithValue("@StartDate", absence.StartDate.Date);
+                    command.Parameters.AddWithValue("@EndDate", absence.EndDate.Date);
+                    command.Parameters.AddWithValue("@Reason", ToParameter(absence.Reason));
+                    command.Parameters.AddWithValue("@OverrideReason", ToParameter(absence.OverrideReason));
+                    command.Parameters.AddWithValue("@LeaveID", absence.LeaveID);
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // Deletes one booked Absence, scoped to the manager's store for the same reason Update is.
+        public void Delete(int leaveID, int storeID)
+        {
+            const string query = @"DELETE l
+FROM TBL_leave l
+JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
+WHERE l.LeaveID = @LeaveID
+  AND e.StoreID = @StoreID;";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@LeaveID", leaveID);
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
         // Counts employees at one store with an Absence, of any Leave Type, covering today -
         // the same question the Leave view answers for one employee at a time, so the
         // dashboard's tile and this screen can never disagree.
