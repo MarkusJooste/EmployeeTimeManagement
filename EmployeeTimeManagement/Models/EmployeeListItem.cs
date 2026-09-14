@@ -12,6 +12,7 @@ namespace EmployeeTimeManagement.Models
         public string IDNumber { get; set; }
         public string MobileNumber { get; set; }
         public string JobDescription { get; set; }
+        public DateTime? ContractStartDate { get; set; }
         public DateTime? ContractEndDate { get; set; }
 
         // How the employee is shown in status messages and confirmation dialogs.

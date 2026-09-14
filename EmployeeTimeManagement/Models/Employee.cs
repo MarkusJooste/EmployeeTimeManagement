@@ -37,17 +37,24 @@ namespace EmployeeTimeManagement.Models
         // capture dropdown. An employee with no contract row at all is always employed.
         public bool IsEmployedOn(DateTime workDate)
         {
-            if (ContractStartDate == null)
+            return IsEmployedOn(ContractStartDate, ContractEndDate, workDate);
+        }
+
+        // The same employment rule, usable by any caller that only has the contract dates
+        // rather than a full Employee, so the rule is stated once and reused everywhere it applies.
+        public static bool IsEmployedOn(DateTime? contractStartDate, DateTime? contractEndDate, DateTime workDate)
+        {
+            if (contractStartDate == null)
             {
                 return true;
             }
 
-            if (workDate.Date < ContractStartDate.Value.Date)
+            if (workDate.Date < contractStartDate.Value.Date)
             {
                 return false;
             }
 
-            return ContractEndDate == null || workDate.Date <= ContractEndDate.Value.Date;
+            return contractEndDate == null || workDate.Date <= contractEndDate.Value.Date;
         }
     }
 }

@@ -33,6 +33,18 @@ namespace EmployeeTimeManagement.Views
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyleDayCount = new System.Windows.Forms.DataGridViewCellStyle();
             this.employeePicker = new EmployeeTimeManagement.Views.EmployeePickerControl();
             this.pnlHistory = new System.Windows.Forms.Panel();
+            this.pnlBooking = new System.Windows.Forms.Panel();
+            this.lblBookingMessage = new System.Windows.Forms.Label();
+            this.btnBookAbsence = new System.Windows.Forms.Button();
+            this.txtBookReason = new System.Windows.Forms.TextBox();
+            this.lblBookReason = new System.Windows.Forms.Label();
+            this.lblBookDayCount = new System.Windows.Forms.Label();
+            this.dtpBookEndDate = new System.Windows.Forms.DateTimePicker();
+            this.lblBookEndDate = new System.Windows.Forms.Label();
+            this.dtpBookStartDate = new System.Windows.Forms.DateTimePicker();
+            this.lblBookStartDate = new System.Windows.Forms.Label();
+            this.cboBookLeaveType = new System.Windows.Forms.ComboBox();
+            this.lblBookLeaveType = new System.Windows.Forms.Label();
             this.dgvHistory = new System.Windows.Forms.DataGridView();
             this.colLeaveType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colStartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -45,6 +57,7 @@ namespace EmployeeTimeManagement.Views
             this.lblSelectedEmployee = new System.Windows.Forms.Label();
             this.lblStatus = new System.Windows.Forms.Label();
             this.pnlHistory.SuspendLayout();
+            this.pnlBooking.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvHistory)).BeginInit();
             this.pnlHistoryTop.SuspendLayout();
             this.SuspendLayout();
@@ -62,12 +75,131 @@ namespace EmployeeTimeManagement.Views
             // pnlHistory
             //
             this.pnlHistory.Controls.Add(this.dgvHistory);
+            this.pnlHistory.Controls.Add(this.pnlBooking);
             this.pnlHistory.Controls.Add(this.pnlHistoryTop);
             this.pnlHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlHistory.Location = new System.Drawing.Point(320, 0);
             this.pnlHistory.Name = "pnlHistory";
             this.pnlHistory.Size = new System.Drawing.Size(569, 551);
             this.pnlHistory.TabIndex = 0;
+            //
+            // pnlBooking
+            //
+            this.pnlBooking.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlBooking.Controls.Add(this.lblBookLeaveType);
+            this.pnlBooking.Controls.Add(this.cboBookLeaveType);
+            this.pnlBooking.Controls.Add(this.lblBookStartDate);
+            this.pnlBooking.Controls.Add(this.dtpBookStartDate);
+            this.pnlBooking.Controls.Add(this.lblBookEndDate);
+            this.pnlBooking.Controls.Add(this.dtpBookEndDate);
+            this.pnlBooking.Controls.Add(this.lblBookDayCount);
+            this.pnlBooking.Controls.Add(this.lblBookReason);
+            this.pnlBooking.Controls.Add(this.txtBookReason);
+            this.pnlBooking.Controls.Add(this.btnBookAbsence);
+            this.pnlBooking.Controls.Add(this.lblBookingMessage);
+            this.pnlBooking.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlBooking.Enabled = false;
+            this.pnlBooking.Location = new System.Drawing.Point(0, 40);
+            this.pnlBooking.Name = "pnlBooking";
+            this.pnlBooking.Size = new System.Drawing.Size(569, 72);
+            this.pnlBooking.TabIndex = 2;
+            //
+            // lblBookLeaveType
+            //
+            this.lblBookLeaveType.AutoSize = true;
+            this.lblBookLeaveType.Location = new System.Drawing.Point(8, 11);
+            this.lblBookLeaveType.Name = "lblBookLeaveType";
+            this.lblBookLeaveType.Size = new System.Drawing.Size(63, 13);
+            this.lblBookLeaveType.TabIndex = 0;
+            this.lblBookLeaveType.Text = "Leave Type";
+            //
+            // cboBookLeaveType
+            //
+            this.cboBookLeaveType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboBookLeaveType.FormattingEnabled = true;
+            this.cboBookLeaveType.Location = new System.Drawing.Point(80, 8);
+            this.cboBookLeaveType.Name = "cboBookLeaveType";
+            this.cboBookLeaveType.Size = new System.Drawing.Size(100, 21);
+            this.cboBookLeaveType.TabIndex = 1;
+            //
+            // lblBookStartDate
+            //
+            this.lblBookStartDate.AutoSize = true;
+            this.lblBookStartDate.Location = new System.Drawing.Point(196, 11);
+            this.lblBookStartDate.Name = "lblBookStartDate";
+            this.lblBookStartDate.Size = new System.Drawing.Size(58, 13);
+            this.lblBookStartDate.TabIndex = 2;
+            this.lblBookStartDate.Text = "Start Date";
+            //
+            // dtpBookStartDate
+            //
+            this.dtpBookStartDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpBookStartDate.Location = new System.Drawing.Point(260, 8);
+            this.dtpBookStartDate.Name = "dtpBookStartDate";
+            this.dtpBookStartDate.Size = new System.Drawing.Size(100, 20);
+            this.dtpBookStartDate.TabIndex = 3;
+            this.dtpBookStartDate.ValueChanged += new System.EventHandler(this.dtpBookDate_ValueChanged);
+            //
+            // lblBookEndDate
+            //
+            this.lblBookEndDate.AutoSize = true;
+            this.lblBookEndDate.Location = new System.Drawing.Point(372, 11);
+            this.lblBookEndDate.Name = "lblBookEndDate";
+            this.lblBookEndDate.Size = new System.Drawing.Size(55, 13);
+            this.lblBookEndDate.TabIndex = 4;
+            this.lblBookEndDate.Text = "End Date";
+            //
+            // dtpBookEndDate
+            //
+            this.dtpBookEndDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpBookEndDate.Location = new System.Drawing.Point(432, 8);
+            this.dtpBookEndDate.Name = "dtpBookEndDate";
+            this.dtpBookEndDate.Size = new System.Drawing.Size(100, 20);
+            this.dtpBookEndDate.TabIndex = 5;
+            this.dtpBookEndDate.ValueChanged += new System.EventHandler(this.dtpBookDate_ValueChanged);
+            //
+            // lblBookDayCount
+            //
+            this.lblBookDayCount.AutoSize = true;
+            this.lblBookDayCount.Location = new System.Drawing.Point(8, 38);
+            this.lblBookDayCount.Name = "lblBookDayCount";
+            this.lblBookDayCount.Size = new System.Drawing.Size(43, 13);
+            this.lblBookDayCount.TabIndex = 6;
+            this.lblBookDayCount.Text = "1 day";
+            //
+            // lblBookReason
+            //
+            this.lblBookReason.AutoSize = true;
+            this.lblBookReason.Location = new System.Drawing.Point(90, 38);
+            this.lblBookReason.Name = "lblBookReason";
+            this.lblBookReason.Size = new System.Drawing.Size(45, 13);
+            this.lblBookReason.TabIndex = 7;
+            this.lblBookReason.Text = "Reason";
+            //
+            // txtBookReason
+            //
+            this.txtBookReason.Location = new System.Drawing.Point(141, 35);
+            this.txtBookReason.MaxLength = 255;
+            this.txtBookReason.Name = "txtBookReason";
+            this.txtBookReason.Size = new System.Drawing.Size(240, 20);
+            this.txtBookReason.TabIndex = 8;
+            //
+            // btnBookAbsence
+            //
+            this.btnBookAbsence.Location = new System.Drawing.Point(392, 33);
+            this.btnBookAbsence.Name = "btnBookAbsence";
+            this.btnBookAbsence.Size = new System.Drawing.Size(100, 23);
+            this.btnBookAbsence.TabIndex = 9;
+            this.btnBookAbsence.Text = "Book Absence";
+            this.btnBookAbsence.UseVisualStyleBackColor = true;
+            this.btnBookAbsence.Click += new System.EventHandler(this.btnBookAbsence_Click);
+            //
+            // lblBookingMessage
+            //
+            this.lblBookingMessage.Location = new System.Drawing.Point(8, 58);
+            this.lblBookingMessage.Name = "lblBookingMessage";
+            this.lblBookingMessage.Size = new System.Drawing.Size(553, 13);
+            this.lblBookingMessage.TabIndex = 10;
             //
             // dgvHistory
             //
@@ -83,13 +215,13 @@ namespace EmployeeTimeManagement.Views
             this.colDayCount,
             this.colReason});
             this.dgvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvHistory.Location = new System.Drawing.Point(0, 40);
+            this.dgvHistory.Location = new System.Drawing.Point(0, 112);
             this.dgvHistory.MultiSelect = false;
             this.dgvHistory.Name = "dgvHistory";
             this.dgvHistory.ReadOnly = true;
             this.dgvHistory.RowHeadersVisible = false;
             this.dgvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvHistory.Size = new System.Drawing.Size(569, 511);
+            this.dgvHistory.Size = new System.Drawing.Size(569, 439);
             this.dgvHistory.TabIndex = 1;
             //
             // colLeaveType
@@ -200,6 +332,8 @@ namespace EmployeeTimeManagement.Views
             this.Name = "LeaveForm";
             this.Text = "LeaveForm";
             this.pnlHistory.ResumeLayout(false);
+            this.pnlBooking.ResumeLayout(false);
+            this.pnlBooking.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvHistory)).EndInit();
             this.pnlHistoryTop.ResumeLayout(false);
             this.pnlHistoryTop.PerformLayout();
@@ -222,5 +356,17 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Label lblLeaveType;
         private System.Windows.Forms.Label lblSelectedEmployee;
         private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.Panel pnlBooking;
+        private System.Windows.Forms.Label lblBookLeaveType;
+        private System.Windows.Forms.ComboBox cboBookLeaveType;
+        private System.Windows.Forms.Label lblBookStartDate;
+        private System.Windows.Forms.DateTimePicker dtpBookStartDate;
+        private System.Windows.Forms.Label lblBookEndDate;
+        private System.Windows.Forms.DateTimePicker dtpBookEndDate;
+        private System.Windows.Forms.Label lblBookDayCount;
+        private System.Windows.Forms.Label lblBookReason;
+        private System.Windows.Forms.TextBox txtBookReason;
+        private System.Windows.Forms.Button btnBookAbsence;
+        private System.Windows.Forms.Label lblBookingMessage;
     }
 }

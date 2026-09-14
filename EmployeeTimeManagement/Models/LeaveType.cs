@@ -42,6 +42,42 @@ namespace EmployeeTimeManagement.Models
             return new[] { PTOValue, SickValue, MaternityValue, AWOLValue };
         }
 
+        // Lists the Leave Types a manager can book. AWOL is captured only from Capture
+        // Timesheets, so it is deliberately left out.
+        public static string[] BookableValues()
+        {
+            return new[] { PTOValue, SickValue, MaternityValue };
+        }
+
+        // Parses one of the three bookable Leave Type values, refusing AWOL and anything unrecognised.
+        public static bool TryParseBookable(string value, out LeaveType leaveType)
+        {
+            leaveType = default(LeaveType);
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            LeaveType parsed;
+            try
+            {
+                parsed = FromDatabaseValue(value);
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+
+            if (parsed == LeaveType.AWOL)
+            {
+                return false;
+            }
+
+            leaveType = parsed;
+            return true;
+        }
+
         // Converts a string read from the TBL_leave enum column back to a LeaveType.
         public static LeaveType FromDatabaseValue(string value)
         {

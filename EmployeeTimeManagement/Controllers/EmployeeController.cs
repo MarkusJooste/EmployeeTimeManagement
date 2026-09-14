@@ -19,6 +19,7 @@ namespace EmployeeTimeManagement.Controllers
        e.IDNumber,
        e.MobileNumber,
        c.JobDescription,
+       c.StartDate,
        c.EndDate
 FROM TBL_employees e
 LEFT JOIN TBL_employee_contracts c
@@ -46,6 +47,7 @@ ORDER BY e.Surname, e.Name;";
                         int idNumberIndex = reader.GetOrdinal("IDNumber");
                         int mobileIndex = reader.GetOrdinal("MobileNumber");
                         int jobIndex = reader.GetOrdinal("JobDescription");
+                        int startDateIndex = reader.GetOrdinal("StartDate");
                         int endDateIndex = reader.GetOrdinal("EndDate");
 
                         while (reader.Read())
@@ -59,6 +61,10 @@ ORDER BY e.Surname, e.Name;";
                             item.IDNumber = ReadText(reader, idNumberIndex);
                             item.MobileNumber = ReadText(reader, mobileIndex);
                             item.JobDescription = ReadText(reader, jobIndex);
+
+                            item.ContractStartDate = reader.IsDBNull(startDateIndex)
+                                ? (DateTime?)null
+                                : reader.GetDateTime(startDateIndex);
 
                             // An employee with no contract row has no end date, which reads as still employed.
                             if (reader.IsDBNull(endDateIndex))
