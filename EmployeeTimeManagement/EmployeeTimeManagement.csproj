@@ -308,6 +308,12 @@
     <Compile Include="Views\EmployeesForm.Designer.cs">
       <DependentUpon>EmployeesForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\EmployeePickerControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\EmployeePickerControl.Designer.cs">
+      <DependentUpon>EmployeePickerControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\ViewTimesheetsForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -2,7 +2,6 @@ using EmployeeTimeManagement.Controllers;
 using EmployeeTimeManagement.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -13,7 +12,6 @@ namespace EmployeeTimeManagement.Views
     public partial class EmployeesForm : Form
     {
         private readonly EmployeeController employeeController;
-        private List<EmployeeListItem> allEmployees = new List<EmployeeListItem>();
 
         // Every field the capture seam can refuse, by the name it refuses them under.
         private readonly Dictionary<string, EditorField> editorFields;
@@ -40,69 +38,32 @@ namespace EmployeeTimeManagement.Views
             LoadData();
         }
 
-        // Fetches the logged-in manager's store from the database and binds it to the grid
+        // Fetches the logged-in manager's store from the database and hands it to the employee picker
         private void LoadData()
         {
             if (CurrentUser.StoreID == null)
             {
-                allEmployees = new List<EmployeeListItem>();
-                dgvEmployees.DataSource = null;
+                employeePicker.SetEmployees(new List<EmployeeListItem>());
                 lblStatus.Text = "No store assigned to this user";
                 DisableAllButtons();
                 return;
             }
 
+            List<EmployeeListItem> employees;
+
             try
             {
-                allEmployees = employeeController.GetListByStore(CurrentUser.StoreID.Value);
+                employees = employeeController.GetListByStore(CurrentUser.StoreID.Value);
             }
             catch (Exception ex)
             {
-                allEmployees = new List<EmployeeListItem>();
-                dgvEmployees.DataSource = null;
+                employeePicker.SetEmployees(new List<EmployeeListItem>());
                 lblStatus.Text = "Could not load employees: " + ex.Message;
                 DisableAllButtons();
                 return;
             }
 
-            ApplyFilter();
-        }
-
-        // Narrows the loaded employees by the search text and the former-employee checkbox without re-querying the database
-        private void ApplyFilter()
-        {
-            IEnumerable<EmployeeListItem> matches = allEmployees;
-
-            if (!chkShowFormer.Checked)
-            {
-                matches = matches.Where(employee => employee.IsActive);
-            }
-
-            string search = txtSearch.Text.Trim();
-
-            if (search.Length > 0)
-            {
-                matches = matches.Where(employee => Contains(employee.Name, search)
-                                                 || Contains(employee.Surname, search)
-                                                 || Contains(employee.IDNumber, search));
-            }
-
-            List<EmployeeListItem> filtered = matches.ToList();
-
-            dgvEmployees.DataSource = new BindingList<EmployeeListItem>(filtered);
-            ShowCount(filtered);
-            UpdateButtonState();
-        }
-
-        // Case-insensitive substring match that treats a missing value as no match
-        private static bool Contains(string value, string search)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return false;
-            }
-
-            return value.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0;
+            employeePicker.SetEmployees(employees);
         }
 
         // Summarises the displayed rows in the status label
@@ -117,26 +78,12 @@ namespace EmployeeTimeManagement.Views
             lblStatus.Text = employees.Count == 1 ? "1 employee" : $"{employees.Count} employees";
         }
 
-        // The employee whose row is selected, or null when nothing is selected
-        private EmployeeListItem SelectedEmployee
-        {
-            get
-            {
-                if (dgvEmployees.CurrentRow == null || dgvEmployees.CurrentRow.Index < 0)
-                {
-                    return null;
-                }
-
-                return dgvEmployees.CurrentRow.DataBoundItem as EmployeeListItem;
-            }
-        }
-
         // Update, Terminate and Reactivate act on one person, so they stay disabled while no
         // row is selected. Terminate and Reactivate are further split by status, so the two
         // are never both available and neither can be clicked on the wrong person.
         private void UpdateButtonState()
         {
-            EmployeeListItem selected = SelectedEmployee;
+            EmployeeListItem selected = employeePicker.SelectedEmployee;
             bool hasSelection = selected != null;
 
             btnUpdate.Enabled = hasSelection;
@@ -151,8 +98,7 @@ namespace EmployeeTimeManagement.Views
             btnUpdate.Enabled = false;
             btnTerminate.Enabled = false;
             btnReactivate.Enabled = false;
-            txtSearch.Enabled = false;
-            chkShowFormer.Enabled = false;
+            employeePicker.Enabled = false;
         }
 
         // Swaps the list away and opens the editor on a blank form for a new starter
@@ -172,7 +118,7 @@ namespace EmployeeTimeManagement.Views
         // being disabled at that point.
         private void ShowEditorForUpdate()
         {
-            EmployeeListItem selected = SelectedEmployee;
+            EmployeeListItem selected = employeePicker.SelectedEmployee;
 
             if (selected == null)
             {
@@ -465,7 +411,7 @@ namespace EmployeeTimeManagement.Views
 
             // The search that was narrowing the list before is almost certainly the hunt that
             // ended in Add Employee, and it would hide the person just captured.
-            txtSearch.Text = string.Empty;
+            employeePicker.SearchText = string.Empty;
 
             // Re-read rather than added to the list in memory, so the manager sees what was stored.
             LoadData();
@@ -743,18 +689,14 @@ namespace EmployeeTimeManagement.Views
             dgvFamily.Rows.Remove(dgvFamily.CurrentRow);
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void employeePicker_SelectionChanged(object sender, EventArgs e)
         {
-            ApplyFilter();
+            UpdateButtonState();
         }
 
-        private void chkShowFormer_CheckedChanged(object sender, EventArgs e)
+        private void employeePicker_FilterChanged(object sender, EventArgs e)
         {
-            ApplyFilter();
-        }
-
-        private void dgvEmployees_SelectionChanged(object sender, EventArgs e)
-        {
+            ShowCount(employeePicker.VisibleEmployees);
             UpdateButtonState();
         }
 
@@ -762,7 +704,7 @@ namespace EmployeeTimeManagement.Views
         // Writing nothing at all is the way a contract-less employee is handled without error.
         private void btnTerminate_Click(object sender, EventArgs e)
         {
-            EmployeeListItem selected = SelectedEmployee;
+            EmployeeListItem selected = employeePicker.SelectedEmployee;
 
             if (selected == null)
             {
@@ -811,7 +753,7 @@ namespace EmployeeTimeManagement.Views
         // Confirms, then clears the end date and reason back to how a live contract reads.
         private void btnReactivate_Click(object sender, EventArgs e)
         {
-            EmployeeListItem selected = SelectedEmployee;
+            EmployeeListItem selected = employeePicker.SelectedEmployee;
 
             if (selected == null)
             {

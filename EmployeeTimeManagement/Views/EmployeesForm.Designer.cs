@@ -30,22 +30,13 @@ namespace EmployeeTimeManagement.Views
         {
             this.components = new System.ComponentModel.Container();
             this.pnlList = new System.Windows.Forms.Panel();
-            this.dgvEmployees = new System.Windows.Forms.DataGridView();
-            this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSurname = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colIDNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMobileNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colJobDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.employeePicker = new EmployeeTimeManagement.Views.EmployeePickerControl();
             this.lblStatus = new System.Windows.Forms.Label();
             this.pnlListTop = new System.Windows.Forms.Panel();
             this.btnAdd = new System.Windows.Forms.Button();
             this.btnUpdate = new System.Windows.Forms.Button();
             this.btnTerminate = new System.Windows.Forms.Button();
             this.btnReactivate = new System.Windows.Forms.Button();
-            this.lblSearch = new System.Windows.Forms.Label();
-            this.txtSearch = new System.Windows.Forms.TextBox();
-            this.chkShowFormer = new System.Windows.Forms.CheckBox();
             this.pnlEditor = new System.Windows.Forms.Panel();
             this.tlpEditor = new System.Windows.Forms.TableLayoutPanel();
             this.grpPersonal = new System.Windows.Forms.GroupBox();
@@ -117,7 +108,6 @@ namespace EmployeeTimeManagement.Views
             this.tipEditorErrors = new System.Windows.Forms.ToolTip(this.components);
             this.pnlList.SuspendLayout();
             this.pnlListTop.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvEmployees)).BeginInit();
             this.pnlEditor.SuspendLayout();
             this.tlpEditor.SuspendLayout();
             this.grpPersonal.SuspendLayout();
@@ -135,7 +125,7 @@ namespace EmployeeTimeManagement.Views
             //
             // pnlList
             //
-            this.pnlList.Controls.Add(this.dgvEmployees);
+            this.pnlList.Controls.Add(this.employeePicker);
             this.pnlList.Controls.Add(this.lblStatus);
             this.pnlList.Controls.Add(this.pnlListTop);
             this.pnlList.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -144,78 +134,15 @@ namespace EmployeeTimeManagement.Views
             this.pnlList.Size = new System.Drawing.Size(889, 574);
             this.pnlList.TabIndex = 0;
             //
-            // dgvEmployees
+            // employeePicker
             //
-            this.dgvEmployees.AllowUserToAddRows = false;
-            this.dgvEmployees.AllowUserToDeleteRows = false;
-            this.dgvEmployees.AutoGenerateColumns = false;
-            this.dgvEmployees.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvEmployees.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvEmployees.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colName,
-            this.colSurname,
-            this.colIDNumber,
-            this.colMobileNumber,
-            this.colJobDescription,
-            this.colStatus});
-            this.dgvEmployees.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvEmployees.Location = new System.Drawing.Point(0, 80);
-            this.dgvEmployees.MultiSelect = false;
-            this.dgvEmployees.Name = "dgvEmployees";
-            this.dgvEmployees.ReadOnly = true;
-            this.dgvEmployees.RowHeadersVisible = false;
-            this.dgvEmployees.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvEmployees.Size = new System.Drawing.Size(889, 471);
-            this.dgvEmployees.TabIndex = 1;
-            this.dgvEmployees.SelectionChanged += new System.EventHandler(this.dgvEmployees_SelectionChanged);
-            //
-            // colName
-            //
-            this.colName.DataPropertyName = "Name";
-            this.colName.HeaderText = "Name";
-            this.colName.Name = "colName";
-            this.colName.ReadOnly = true;
-            this.colName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            //
-            // colSurname
-            //
-            this.colSurname.DataPropertyName = "Surname";
-            this.colSurname.HeaderText = "Surname";
-            this.colSurname.Name = "colSurname";
-            this.colSurname.ReadOnly = true;
-            this.colSurname.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            //
-            // colIDNumber
-            //
-            this.colIDNumber.DataPropertyName = "IDNumber";
-            this.colIDNumber.HeaderText = "ID Number";
-            this.colIDNumber.Name = "colIDNumber";
-            this.colIDNumber.ReadOnly = true;
-            this.colIDNumber.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            //
-            // colMobileNumber
-            //
-            this.colMobileNumber.DataPropertyName = "MobileNumber";
-            this.colMobileNumber.HeaderText = "Mobile";
-            this.colMobileNumber.Name = "colMobileNumber";
-            this.colMobileNumber.ReadOnly = true;
-            this.colMobileNumber.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            //
-            // colJobDescription
-            //
-            this.colJobDescription.DataPropertyName = "JobDescription";
-            this.colJobDescription.HeaderText = "Job Description";
-            this.colJobDescription.Name = "colJobDescription";
-            this.colJobDescription.ReadOnly = true;
-            this.colJobDescription.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            //
-            // colStatus
-            //
-            this.colStatus.DataPropertyName = "Status";
-            this.colStatus.HeaderText = "Status";
-            this.colStatus.Name = "colStatus";
-            this.colStatus.ReadOnly = true;
-            this.colStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.employeePicker.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.employeePicker.Location = new System.Drawing.Point(0, 40);
+            this.employeePicker.Name = "employeePicker";
+            this.employeePicker.Size = new System.Drawing.Size(889, 511);
+            this.employeePicker.TabIndex = 1;
+            this.employeePicker.SelectionChanged += new System.EventHandler(this.employeePicker_SelectionChanged);
+            this.employeePicker.FilterChanged += new System.EventHandler(this.employeePicker_FilterChanged);
             //
             // lblStatus
             //
@@ -229,9 +156,6 @@ namespace EmployeeTimeManagement.Views
             //
             // pnlListTop
             //
-            this.pnlListTop.Controls.Add(this.chkShowFormer);
-            this.pnlListTop.Controls.Add(this.txtSearch);
-            this.pnlListTop.Controls.Add(this.lblSearch);
             this.pnlListTop.Controls.Add(this.btnReactivate);
             this.pnlListTop.Controls.Add(this.btnTerminate);
             this.pnlListTop.Controls.Add(this.btnUpdate);
@@ -239,7 +163,7 @@ namespace EmployeeTimeManagement.Views
             this.pnlListTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlListTop.Location = new System.Drawing.Point(0, 0);
             this.pnlListTop.Name = "pnlListTop";
-            this.pnlListTop.Size = new System.Drawing.Size(889, 80);
+            this.pnlListTop.Size = new System.Drawing.Size(889, 40);
             this.pnlListTop.TabIndex = 0;
             //
             // btnAdd
@@ -281,34 +205,6 @@ namespace EmployeeTimeManagement.Views
             this.btnReactivate.Text = "Reactivate";
             this.btnReactivate.UseVisualStyleBackColor = true;
             this.btnReactivate.Click += new System.EventHandler(this.btnReactivate_Click);
-            //
-            // lblSearch
-            //
-            this.lblSearch.AutoSize = true;
-            this.lblSearch.Location = new System.Drawing.Point(12, 51);
-            this.lblSearch.Name = "lblSearch";
-            this.lblSearch.Size = new System.Drawing.Size(87, 13);
-            this.lblSearch.TabIndex = 4;
-            this.lblSearch.Text = "Search employee";
-            //
-            // txtSearch
-            //
-            this.txtSearch.Location = new System.Drawing.Point(105, 47);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(180, 20);
-            this.txtSearch.TabIndex = 5;
-            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
-            //
-            // chkShowFormer
-            //
-            this.chkShowFormer.AutoSize = true;
-            this.chkShowFormer.Location = new System.Drawing.Point(300, 49);
-            this.chkShowFormer.Name = "chkShowFormer";
-            this.chkShowFormer.Size = new System.Drawing.Size(139, 17);
-            this.chkShowFormer.TabIndex = 6;
-            this.chkShowFormer.Text = "Show former employees";
-            this.chkShowFormer.UseVisualStyleBackColor = true;
-            this.chkShowFormer.CheckedChanged += new System.EventHandler(this.chkShowFormer_CheckedChanged);
             //
             // pnlEditor
             //
@@ -1054,8 +950,6 @@ namespace EmployeeTimeManagement.Views
             this.Name = "EmployeesForm";
             this.Text = "EmployeesForm";
             this.pnlListTop.ResumeLayout(false);
-            this.pnlListTop.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvEmployees)).EndInit();
             this.pnlList.ResumeLayout(false);
             this.grpPersonal.ResumeLayout(false);
             this.grpPersonal.PerformLayout();
@@ -1087,17 +981,8 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Button btnUpdate;
         private System.Windows.Forms.Button btnTerminate;
         private System.Windows.Forms.Button btnReactivate;
-        private System.Windows.Forms.Label lblSearch;
-        private System.Windows.Forms.TextBox txtSearch;
-        private System.Windows.Forms.CheckBox chkShowFormer;
         private System.Windows.Forms.Label lblStatus;
-        private System.Windows.Forms.DataGridView dgvEmployees;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colSurname;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colIDNumber;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colMobileNumber;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colJobDescription;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colStatus;
+        private EmployeeTimeManagement.Views.EmployeePickerControl employeePicker;
         private System.Windows.Forms.Panel pnlEditor;
         private System.Windows.Forms.Label lblEditorTitle;
         private System.Windows.Forms.TableLayoutPanel tlpEditor;
