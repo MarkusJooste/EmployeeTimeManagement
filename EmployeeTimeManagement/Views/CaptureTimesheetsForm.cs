@@ -31,6 +31,7 @@ namespace EmployeeTimeManagement.Views
 
         private readonly EmployeeController employeeController;
         private readonly TimesheetController timesheetController;
+        private readonly LeaveController leaveController;
 
         // Every employee at the store, regardless of when they were employed.
         private List<Employee> allEmployees = new List<Employee>();
@@ -53,6 +54,7 @@ namespace EmployeeTimeManagement.Views
 
             employeeController = new EmployeeController();
             timesheetController = new TimesheetController();
+            leaveController = new LeaveController();
 
             BuildColumns();
             WireGridEvents();
@@ -227,6 +229,7 @@ namespace EmployeeTimeManagement.Views
             }
 
             ApplyEmployeeScope();
+            ApplyLeavePrefill();
         }
 
         // Re-scopes the dropdown to whoever was employed on the current work date, because
@@ -238,6 +241,66 @@ namespace EmployeeTimeManagement.Views
 
             var employeeColumn = (DataGridViewComboBoxColumn)dgvCapture.Columns[ColumnEmployee];
             employeeColumn.DataSource = employees;
+        }
+
+        // Adds a Status 'Leave' row for every employee whose Absence covers the work date
+        // and who has no saved Timesheet yet, so a manager sees what they already approved
+        // without having to remember it. Never touches the database itself (issue 09).
+        private void ApplyLeavePrefill()
+        {
+            if (CurrentUser.StoreID == null)
+            {
+                return;
+            }
+
+            DateTime workDate = dtpWorkDate.Value.Date;
+
+            List<Absence> absences;
+            List<int> savedEmployeeIDs;
+            try
+            {
+                absences = leaveController.GetActiveLeave(workDate, CurrentUser.StoreID.Value);
+                savedEmployeeIDs = timesheetController.GetEmployeeIDsWithTimesheet(workDate, CurrentUser.StoreID.Value);
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = "Could not load leave for this date: " + ex.Message;
+                return;
+            }
+
+            List<int> employeeIDsToPrefill = LeavePrefill.EmployeeIDsToPrefill(workDate, absences, savedEmployeeIDs);
+
+            foreach (int employeeID in employeeIDsToPrefill)
+            {
+                if (employees.Any(e => e.EmployeeID == employeeID))
+                {
+                    AddPrefilledLeaveRow(employeeID);
+                }
+            }
+        }
+
+        // Adds one row pre-filled with Status 'Leave' for an employee, as if the manager
+        // had chosen them and set the status themselves. Left unsaved, so the manager still
+        // reviews and saves the day before anything reaches the database.
+        private void AddPrefilledLeaveRow(int employeeID)
+        {
+            int rowIndex = dgvCapture.Rows.Add();
+            DataGridViewRow row = dgvCapture.Rows[rowIndex];
+
+            isSettingCells = true;
+            try
+            {
+                row.Cells[ColumnEmployee].Value = employeeID;
+                row.Cells[ColumnStatus].Value = TimesheetStatus.Leave.ToDatabaseValue();
+                row.Cells[ColumnDayType].Value = SouthAfricanHolidays.GetDayType(dtpWorkDate.Value.Date).ToDatabaseValue();
+                row.Tag = new CaptureRowState();
+            }
+            finally
+            {
+                isSettingCells = false;
+            }
+
+            ApplyStatusToRow(row);
         }
 
         // Puts the view into a read-only state with an explanation.
@@ -573,6 +636,7 @@ namespace EmployeeTimeManagement.Views
             currentWorkDate = dtpWorkDate.Value.Date;
             ShowDayTypeForDate();
             ApplyEmployeeScope();
+            ApplyLeavePrefill();
         }
 
         // Puts the date picker back to the date the grid was captured against.

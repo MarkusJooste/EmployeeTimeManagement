@@ -31,32 +31,65 @@ ORDER BY l.StartDate DESC, l.LeaveID DESC;";
 
                     using (var reader = command.ExecuteReader())
                     {
-                        int leaveIDIndex = reader.GetOrdinal("LeaveID");
-                        int employeeIDIndex = reader.GetOrdinal("EmployeeID");
-                        int leaveTypeIndex = reader.GetOrdinal("LeaveType");
-                        int startDateIndex = reader.GetOrdinal("StartDate");
-                        int endDateIndex = reader.GetOrdinal("EndDate");
-                        int reasonIndex = reader.GetOrdinal("Reason");
-                        int overrideReasonIndex = reader.GetOrdinal("OverrideReason");
-
                         while (reader.Read())
                         {
-                            absences.Add(new Absence
-                            {
-                                LeaveID = reader.GetInt32(leaveIDIndex),
-                                EmployeeID = reader.GetInt32(employeeIDIndex),
-                                LeaveType = LeaveTypes.FromDatabaseValue(reader.GetString(leaveTypeIndex)),
-                                StartDate = reader.GetDateTime(startDateIndex),
-                                EndDate = reader.GetDateTime(endDateIndex),
-                                Reason = ReadNullableText(reader, reasonIndex),
-                                OverrideReason = ReadNullableText(reader, overrideReasonIndex)
-                            });
+                            absences.Add(ReadAbsence(reader));
                         }
                     }
                 }
             }
 
             return absences;
+        }
+
+        // Returns every non-AWOL Absence covering one date, scoped to the manager's store,
+        // for the Capture Timesheets prefill (issue 09). AWOL is excluded at the query so a
+        // day derived from Timesheets never flows back in as a prefill (ADR-0002).
+        public List<Absence> GetActiveLeave(DateTime date, int storeID)
+        {
+            const string query = @"SELECT l.LeaveID, l.EmployeeID, l.LeaveType, l.StartDate, l.EndDate, l.Reason, l.OverrideReason
+FROM TBL_leave l
+JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
+WHERE e.StoreID = @StoreID
+  AND l.LeaveType != @AWOL
+  AND @Date BETWEEN l.StartDate AND l.EndDate;";
+
+            var absences = new List<Absence>();
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+                    command.Parameters.AddWithValue("@AWOL", LeaveType.AWOL.ToDatabaseValue());
+                    command.Parameters.AddWithValue("@Date", date.Date);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            absences.Add(ReadAbsence(reader));
+                        }
+                    }
+                }
+            }
+
+            return absences;
+        }
+
+        // Reads one TBL_leave row into an Absence.
+        private static Absence ReadAbsence(MySqlDataReader reader)
+        {
+            return new Absence
+            {
+                LeaveID = reader.GetInt32(reader.GetOrdinal("LeaveID")),
+                EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID")),
+                LeaveType = LeaveTypes.FromDatabaseValue(reader.GetString(reader.GetOrdinal("LeaveType"))),
+                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                Reason = ReadNullableText(reader, reader.GetOrdinal("Reason")),
+                OverrideReason = ReadNullableText(reader, reader.GetOrdinal("OverrideReason"))
+            };
         }
 
         // Returns every distinct date this employee has a Timesheet with Status 'Worked',

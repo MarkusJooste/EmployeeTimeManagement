@@ -177,6 +177,41 @@ ORDER BY TimesheetID;";
             }
         }
 
+        // Returns every EmployeeID already holding a Timesheet for one WorkDate, scoped to
+        // the manager's store, so the Capture Timesheets prefill (issue 09) never overwrites
+        // a saved judgement with a Leave booking.
+        public List<int> GetEmployeeIDsWithTimesheet(DateTime workDate, int storeID)
+        {
+            const string query = @"SELECT DISTINCT t.EmployeeID
+FROM TBL_timesheets t
+JOIN TBL_employees e ON e.EmployeeID = t.EmployeeID
+WHERE t.WorkDate = @WorkDate
+  AND e.StoreID = @StoreID;";
+
+            var employeeIDs = new List<int>();
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@WorkDate", workDate.Date);
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        int employeeIDIndex = reader.GetOrdinal("EmployeeID");
+
+                        while (reader.Read())
+                        {
+                            employeeIDs.Add(reader.GetInt32(employeeIDIndex));
+                        }
+                    }
+                }
+            }
+
+            return employeeIDs;
+        }
+
         // Writes a whole day of Timesheets in one transaction, so a failure part way
         // through leaves nothing behind. Each Timesheet's mirrored AWOL Absence is
         // reconciled in the same transaction, per ADR-0002.

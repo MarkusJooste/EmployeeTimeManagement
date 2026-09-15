@@ -264,6 +264,7 @@
     <Compile Include="Models\LeaveBooking.cs" />
     <Compile Include="Models\LeaveBalance.cs" />
     <Compile Include="Models\AWOLMirror.cs" />
+    <Compile Include="Models\LeavePrefill.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\CaptureTimesheetsForm.cs">
