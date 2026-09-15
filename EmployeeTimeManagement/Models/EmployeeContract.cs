@@ -20,5 +20,13 @@ namespace EmployeeTimeManagement.Models
         public string ReasonForEnding { get; set; }
 
         public decimal HourlyRate { get; set; }
+
+        // How many PTO days the employee already held before this app started tracking them.
+        // Zero for a genuinely new starter.
+        public int OpeningPTODays { get; set; }
+
+        // The date OpeningPTODays was true. Null reads as this contract's StartDate, so the
+        // one contract row that predates this feature needs no backfill.
+        public DateTime? OpeningBalanceAsAt { get; set; }
     }
 }

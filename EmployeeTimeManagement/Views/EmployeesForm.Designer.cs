@@ -87,6 +87,10 @@ namespace EmployeeTimeManagement.Views
             this.txtJobDescription = new System.Windows.Forms.TextBox();
             this.lblHourlyRate = new System.Windows.Forms.Label();
             this.txtHourlyRate = new System.Windows.Forms.TextBox();
+            this.lblOpeningPTODays = new System.Windows.Forms.Label();
+            this.txtOpeningPTODays = new System.Windows.Forms.TextBox();
+            this.lblOpeningBalanceAsAt = new System.Windows.Forms.Label();
+            this.dtpOpeningBalanceAsAt = new System.Windows.Forms.DateTimePicker();
             this.grpSpouse = new System.Windows.Forms.GroupBox();
             this.lblSpouseName = new System.Windows.Forms.Label();
             this.txtSpouseName = new System.Windows.Forms.TextBox();
@@ -642,7 +646,7 @@ namespace EmployeeTimeManagement.Views
             this.tlpContractSpouse.Location = new System.Drawing.Point(593, 3);
             this.tlpContractSpouse.Name = "tlpContractSpouse";
             this.tlpContractSpouse.RowCount = 2;
-            this.tlpContractSpouse.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 176F));
+            this.tlpContractSpouse.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 234F));
             this.tlpContractSpouse.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpContractSpouse.Size = new System.Drawing.Size(287, 324);
             this.tlpContractSpouse.TabIndex = 2;
@@ -659,10 +663,14 @@ namespace EmployeeTimeManagement.Views
             this.grpContract.Controls.Add(this.txtJobDescription);
             this.grpContract.Controls.Add(this.lblHourlyRate);
             this.grpContract.Controls.Add(this.txtHourlyRate);
+            this.grpContract.Controls.Add(this.lblOpeningPTODays);
+            this.grpContract.Controls.Add(this.txtOpeningPTODays);
+            this.grpContract.Controls.Add(this.lblOpeningBalanceAsAt);
+            this.grpContract.Controls.Add(this.dtpOpeningBalanceAsAt);
             this.grpContract.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpContract.Location = new System.Drawing.Point(3, 3);
             this.grpContract.Name = "grpContract";
-            this.grpContract.Size = new System.Drawing.Size(281, 170);
+            this.grpContract.Size = new System.Drawing.Size(281, 228);
             this.grpContract.TabIndex = 0;
             this.grpContract.TabStop = false;
             this.grpContract.Text = "Contract";
@@ -760,6 +768,44 @@ namespace EmployeeTimeManagement.Views
             this.txtHourlyRate.Name = "txtHourlyRate";
             this.txtHourlyRate.Size = new System.Drawing.Size(155, 20);
             this.txtHourlyRate.TabIndex = 9;
+            //
+            // lblOpeningPTODays
+            //
+            this.lblOpeningPTODays.AutoSize = true;
+            this.lblOpeningPTODays.Location = new System.Drawing.Point(10, 173);
+            this.lblOpeningPTODays.Name = "lblOpeningPTODays";
+            this.lblOpeningPTODays.Size = new System.Drawing.Size(102, 13);
+            this.lblOpeningPTODays.TabIndex = 10;
+            this.lblOpeningPTODays.Text = "Opening Balance (days)";
+            //
+            // txtOpeningPTODays
+            //
+            this.txtOpeningPTODays.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtOpeningPTODays.Location = new System.Drawing.Point(115, 170);
+            this.txtOpeningPTODays.Name = "txtOpeningPTODays";
+            this.txtOpeningPTODays.Size = new System.Drawing.Size(155, 20);
+            this.txtOpeningPTODays.TabIndex = 11;
+            //
+            // lblOpeningBalanceAsAt
+            //
+            this.lblOpeningBalanceAsAt.AutoSize = true;
+            this.lblOpeningBalanceAsAt.Location = new System.Drawing.Point(10, 202);
+            this.lblOpeningBalanceAsAt.Name = "lblOpeningBalanceAsAt";
+            this.lblOpeningBalanceAsAt.Size = new System.Drawing.Size(102, 13);
+            this.lblOpeningBalanceAsAt.TabIndex = 12;
+            this.lblOpeningBalanceAsAt.Text = "Opening Balance As At";
+            //
+            // dtpOpeningBalanceAsAt
+            //
+            this.dtpOpeningBalanceAsAt.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dtpOpeningBalanceAsAt.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpOpeningBalanceAsAt.Location = new System.Drawing.Point(115, 199);
+            this.dtpOpeningBalanceAsAt.Name = "dtpOpeningBalanceAsAt";
+            this.dtpOpeningBalanceAsAt.ShowCheckBox = true;
+            this.dtpOpeningBalanceAsAt.Size = new System.Drawing.Size(155, 20);
+            this.dtpOpeningBalanceAsAt.TabIndex = 13;
             //
             // grpSpouse
             //
@@ -1034,6 +1080,10 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.TextBox txtJobDescription;
         private System.Windows.Forms.Label lblHourlyRate;
         private System.Windows.Forms.TextBox txtHourlyRate;
+        private System.Windows.Forms.Label lblOpeningPTODays;
+        private System.Windows.Forms.TextBox txtOpeningPTODays;
+        private System.Windows.Forms.Label lblOpeningBalanceAsAt;
+        private System.Windows.Forms.DateTimePicker dtpOpeningBalanceAsAt;
         private System.Windows.Forms.GroupBox grpSpouse;
         private System.Windows.Forms.Label lblSpouseName;
         private System.Windows.Forms.TextBox txtSpouseName;

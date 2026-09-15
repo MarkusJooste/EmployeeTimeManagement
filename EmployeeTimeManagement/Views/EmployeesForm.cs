@@ -194,6 +194,11 @@ namespace EmployeeTimeManagement.Views
                 txtDepartment.Text = record.Contract.Department;
                 txtJobDescription.Text = record.Contract.JobDescription;
                 txtHourlyRate.Text = record.Contract.HourlyRate.ToString(CultureInfo.InvariantCulture);
+                txtOpeningPTODays.Text = record.Contract.OpeningPTODays.ToString(CultureInfo.InvariantCulture);
+
+                // Unchecked reads as "use the contract start date", matching a stored null.
+                dtpOpeningBalanceAsAt.Checked = record.Contract.OpeningBalanceAsAt.HasValue;
+                dtpOpeningBalanceAsAt.Value = record.Contract.OpeningBalanceAsAt ?? record.Contract.StartDate;
             }
 
             dgvFamily.Rows.Clear();
@@ -226,7 +231,16 @@ namespace EmployeeTimeManagement.Views
                 pnlEditor,
                 textBox => textBox.Text = string.Empty,
                 comboBox => comboBox.SelectedIndex = -1,
-                picker => picker.Value = DateTime.Today);
+                picker =>
+                {
+                    picker.Value = DateTime.Today;
+
+                    // Unchecked reads as "use the contract start date", the default for a new starter.
+                    if (picker.ShowCheckBox)
+                    {
+                        picker.Checked = false;
+                    }
+                });
 
             dgvFamily.Rows.Clear();
             dgvFamily.Rows.Add();
@@ -250,7 +264,7 @@ namespace EmployeeTimeManagement.Views
                 pnlEditor,
                 textBox => state.Add(textBox.Text),
                 comboBox => state.Add(comboBox.SelectedIndex.ToString()),
-                picker => state.Add(picker.Value.Date.ToString("yyyy-MM-dd")));
+                picker => state.Add(picker.Value.Date.ToString("yyyy-MM-dd") + ":" + (picker.ShowCheckBox && picker.Checked)));
 
             foreach (DataGridViewRow row in dgvFamily.Rows)
             {
@@ -453,6 +467,8 @@ namespace EmployeeTimeManagement.Views
                 Department = txtDepartment.Text,
                 JobDescription = txtJobDescription.Text,
                 HourlyRate = txtHourlyRate.Text,
+                OpeningPTODays = txtOpeningPTODays.Text,
+                OpeningBalanceAsAt = dtpOpeningBalanceAsAt.Checked ? dtpOpeningBalanceAsAt.Value.Date : (DateTime?)null,
 
                 SpouseName = txtSpouseName.Text,
                 SpouseMobileNumber = txtSpouseMobileNumber.Text
@@ -512,6 +528,7 @@ namespace EmployeeTimeManagement.Views
                 { "Department", new EditorField(txtDepartment, "Department") },
                 { "JobDescription", new EditorField(txtJobDescription, "Job description") },
                 { "HourlyRate", new EditorField(txtHourlyRate, "Hourly rate") },
+                { "OpeningPTODays", new EditorField(txtOpeningPTODays, "Opening Balance") },
 
                 { "SpouseName", new EditorField(txtSpouseName, "Spouse name") },
                 { "SpouseMobileNumber", new EditorField(txtSpouseMobileNumber, "Spouse mobile number") },

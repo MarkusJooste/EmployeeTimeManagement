@@ -74,7 +74,10 @@ namespace EmployeeTimeManagement.Models
     public static class LeaveBalanceCalculator
     {
         private const int DaysWorkedPerAccrual = 17;
-        private const int PTOCap = 21;
+
+        // Public so the Opening Balance captured on the employee editor is refused above the
+        // same cap the running PTO balance itself can never exceed.
+        public const int PTOCap = 21;
         private const int SickDaysPerCycle = 30;
         private const int SickCycleMonths = 36;
 

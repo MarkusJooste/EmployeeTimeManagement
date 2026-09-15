@@ -277,7 +277,7 @@ LIMIT 1;";
         // one, so only the latest is read, matching GetListByStore.
         private static EmployeeContract ReadContract(MySqlConnection connection, int employeeID)
         {
-            const string query = @"SELECT ContractID, ContractType, StartDate, EndDate, Department, JobDescription, ReasonForEnding, HourlyRate
+            const string query = @"SELECT ContractID, ContractType, StartDate, EndDate, Department, JobDescription, ReasonForEnding, HourlyRate, OpeningPTODays, OpeningBalanceAsAt
 FROM TBL_employee_contracts
 WHERE EmployeeID = @EmployeeID
 ORDER BY ContractID DESC
@@ -295,6 +295,7 @@ LIMIT 1;";
                     }
 
                     int endDateIndex = reader.GetOrdinal("EndDate");
+                    int openingBalanceAsAtIndex = reader.GetOrdinal("OpeningBalanceAsAt");
 
                     return new EmployeeContract
                     {
@@ -306,7 +307,9 @@ LIMIT 1;";
                         Department = ReadText(reader, reader.GetOrdinal("Department")),
                         JobDescription = ReadText(reader, reader.GetOrdinal("JobDescription")),
                         ReasonForEnding = ReadText(reader, reader.GetOrdinal("ReasonForEnding")),
-                        HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate"))
+                        HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate")),
+                        OpeningPTODays = reader.GetInt32(reader.GetOrdinal("OpeningPTODays")),
+                        OpeningBalanceAsAt = reader.IsDBNull(openingBalanceAsAtIndex) ? (DateTime?)null : reader.GetDateTime(openingBalanceAsAtIndex)
                     };
                 }
             }
@@ -518,7 +521,8 @@ WHERE BankID = @BankID;";
 
             const string query = @"UPDATE TBL_employee_contracts SET
     ContractType = @ContractType, StartDate = @StartDate, Department = @Department,
-    JobDescription = @JobDescription, HourlyRate = @HourlyRate
+    JobDescription = @JobDescription, HourlyRate = @HourlyRate,
+    OpeningPTODays = @OpeningPTODays, OpeningBalanceAsAt = @OpeningBalanceAsAt
 WHERE ContractID = @ContractID;";
 
             using (var command = new MySqlCommand(query, connection, transaction))
@@ -529,6 +533,8 @@ WHERE ContractID = @ContractID;";
                 command.Parameters.AddWithValue("@Department", contract.Department);
                 command.Parameters.AddWithValue("@JobDescription", contract.JobDescription);
                 command.Parameters.AddWithValue("@HourlyRate", contract.HourlyRate);
+                command.Parameters.AddWithValue("@OpeningPTODays", contract.OpeningPTODays);
+                command.Parameters.AddWithValue("@OpeningBalanceAsAt", ToParameter(contract.OpeningBalanceAsAt));
 
                 command.ExecuteNonQuery();
             }
@@ -766,9 +772,9 @@ VALUES
         private static void InsertContract(MySqlConnection connection, MySqlTransaction transaction, EmployeeContract contract)
         {
             const string query = @"INSERT INTO TBL_employee_contracts
-    (EmployeeID, ContractType, StartDate, EndDate, Department, JobDescription, ReasonForEnding, HourlyRate)
+    (EmployeeID, ContractType, StartDate, EndDate, Department, JobDescription, ReasonForEnding, HourlyRate, OpeningPTODays, OpeningBalanceAsAt)
 VALUES
-    (@EmployeeID, @ContractType, @StartDate, @EndDate, @Department, @JobDescription, @ReasonForEnding, @HourlyRate);";
+    (@EmployeeID, @ContractType, @StartDate, @EndDate, @Department, @JobDescription, @ReasonForEnding, @HourlyRate, @OpeningPTODays, @OpeningBalanceAsAt);";
 
             using (var command = new MySqlCommand(query, connection, transaction))
             {
@@ -780,6 +786,8 @@ VALUES
                 command.Parameters.AddWithValue("@JobDescription", contract.JobDescription);
                 command.Parameters.AddWithValue("@ReasonForEnding", contract.ReasonForEnding);
                 command.Parameters.AddWithValue("@HourlyRate", contract.HourlyRate);
+                command.Parameters.AddWithValue("@OpeningPTODays", contract.OpeningPTODays);
+                command.Parameters.AddWithValue("@OpeningBalanceAsAt", ToParameter(contract.OpeningBalanceAsAt));
 
                 command.ExecuteNonQuery();
 

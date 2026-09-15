@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using EmployeeTimeManagement.Models;
 using NUnit.Framework;
@@ -569,6 +570,94 @@ namespace EmployeeTimeManagement.Tests
 
             Assert.That(result.IsValid, Is.False);
             Assert.That(HasErrorFor(result, "Town"), Is.True, FailingFields(result));
+        }
+
+        // --- Opening Balance ---
+
+        [Test]
+        public void OpeningPTODaysDefaultsToZeroWhenLeftBlank()
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.OpeningPTODays = "";
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.True, FailingFields(result));
+            Assert.That(result.Record.Contract.OpeningPTODays, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void OpeningPTODaysIsCapturedWhenSupplied()
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.OpeningPTODays = "12";
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.True, FailingFields(result));
+            Assert.That(result.Record.Contract.OpeningPTODays, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void AnOpeningPTODaysAtTheCapIsAccepted()
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.OpeningPTODays = LeaveBalanceCalculator.PTOCap.ToString(CultureInfo.InvariantCulture);
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.True, FailingFields(result));
+            Assert.That(result.Record.Contract.OpeningPTODays, Is.EqualTo(LeaveBalanceCalculator.PTOCap));
+        }
+
+        [Test]
+        public void AnOpeningPTODaysAboveTheCapIsRejected()
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.OpeningPTODays = (LeaveBalanceCalculator.PTOCap + 1).ToString(CultureInfo.InvariantCulture);
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.False);
+            Assert.That(HasErrorFor(result, "OpeningPTODays"), Is.True, FailingFields(result));
+        }
+
+        [TestCase("-1")]
+        [TestCase("two")]
+        [TestCase("1.5")]
+        public void AnUnusableOpeningPTODaysIsRejected(string days)
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.OpeningPTODays = days;
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.False, days + " was accepted.");
+            Assert.That(HasErrorFor(result, "OpeningPTODays"), Is.True, FailingFields(result));
+        }
+
+        [Test]
+        public void OpeningBalanceAsAtIsNullWhenNotSupplied()
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.OpeningBalanceAsAt = null;
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.True, FailingFields(result));
+            Assert.That(result.Record.Contract.OpeningBalanceAsAt, Is.Null);
+        }
+
+        [Test]
+        public void OpeningBalanceAsAtIsCapturedWhenSupplied()
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.OpeningBalanceAsAt = new DateTime(2022, 3, 1);
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.True, FailingFields(result));
+            Assert.That(result.Record.Contract.OpeningBalanceAsAt, Is.EqualTo(new DateTime(2022, 3, 1)));
         }
 
         // --- Update ---

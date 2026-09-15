@@ -55,6 +55,8 @@ namespace EmployeeTimeManagement.Models
         public string Department { get; set; }
         public string JobDescription { get; set; }
         public string HourlyRate { get; set; }
+        public string OpeningPTODays { get; set; }
+        public DateTime? OpeningBalanceAsAt { get; set; }
 
         public string SpouseName { get; set; }
         public string SpouseMobileNumber { get; set; }
@@ -255,7 +257,9 @@ namespace EmployeeTimeManagement.Models
                 JobDescription = Required(input.JobDescription, "JobDescription", "A job description is required.", errors),
                 EndDate = null,
                 ReasonForEnding = string.Empty,
-                HourlyRate = ValidateHourlyRate(input.HourlyRate, errors)
+                HourlyRate = ValidateHourlyRate(input.HourlyRate, errors),
+                OpeningPTODays = ValidateOpeningPTODays(input.OpeningPTODays, errors),
+                OpeningBalanceAsAt = input.OpeningBalanceAsAt.HasValue ? input.OpeningBalanceAsAt.Value.Date : (DateTime?)null
             };
 
             if (!input.StartDate.HasValue)
@@ -500,6 +504,38 @@ namespace EmployeeTimeManagement.Models
             }
 
             return rate;
+        }
+
+        // Reads the Opening Balance day count, which defaults to zero so a genuinely new
+        // starter needs no thought, and is refused above the same cap the running PTO
+        // balance itself can never exceed.
+        private static int ValidateOpeningPTODays(string text, List<EmployeeFieldError> errors)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return 0;
+            }
+
+            int days;
+            if (!int.TryParse(text.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out days))
+            {
+                errors.Add(new EmployeeFieldError("OpeningPTODays", "Opening Balance must be a whole number of days."));
+                return 0;
+            }
+
+            if (days < 0)
+            {
+                errors.Add(new EmployeeFieldError("OpeningPTODays", "Opening Balance cannot be negative."));
+                return 0;
+            }
+
+            if (days > LeaveBalanceCalculator.PTOCap)
+            {
+                errors.Add(new EmployeeFieldError("OpeningPTODays", "Opening Balance cannot exceed the " + LeaveBalanceCalculator.PTOCap + "-day PTO cap."));
+                return 0;
+            }
+
+            return days;
         }
 
         // Reads the employee's identifier, which is zero for somebody being added because
