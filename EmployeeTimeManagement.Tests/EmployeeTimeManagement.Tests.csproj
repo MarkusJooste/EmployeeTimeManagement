@@ -37,6 +37,7 @@
     <Compile Include="..\EmployeeTimeManagement\Models\Absence.cs" Link="Seams\Absence.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\LeaveBooking.cs" Link="Seams\LeaveBooking.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\LeaveBalance.cs" Link="Seams\LeaveBalance.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\AWOLMirror.cs" Link="Seams\AWOLMirror.cs" />
   </ItemGroup>
 
 </Project>

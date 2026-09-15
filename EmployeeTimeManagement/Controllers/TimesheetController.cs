@@ -178,9 +178,12 @@ ORDER BY TimesheetID;";
         }
 
         // Writes a whole day of Timesheets in one transaction, so a failure part way
-        // through leaves nothing behind.
+        // through leaves nothing behind. Each Timesheet's mirrored AWOL Absence is
+        // reconciled in the same transaction, per ADR-0002.
         public void Save(IEnumerable<Timesheet> timesheets)
         {
+            var leaveController = new LeaveController();
+
             using (var connection = DatabaseConnection.GetConnection())
             {
                 using (var transaction = connection.BeginTransaction())
@@ -197,6 +200,8 @@ ORDER BY TimesheetID;";
                             {
                                 Insert(connection, transaction, timesheet);
                             }
+
+                            ReconcileAWOLMirror(connection, transaction, leaveController, timesheet);
                         }
 
                         transaction.Commit();
@@ -207,6 +212,28 @@ ORDER BY TimesheetID;";
                         throw;
                     }
                 }
+            }
+        }
+
+        // Keeps one Timesheet's mirrored AWOL Absence in step with its Status, inside the
+        // transaction already open for the Timesheet itself.
+        private static void ReconcileAWOLMirror(
+            MySqlConnection connection, MySqlTransaction transaction, LeaveController leaveController, Timesheet timesheet)
+        {
+            int? existingMirrorID = leaveController.FindAWOLMirror(connection, transaction, timesheet.EmployeeID, timesheet.WorkDate);
+            AWOLMirrorAction action = AWOLMirror.Decide(timesheet, existingMirrorID);
+
+            switch (action.Type)
+            {
+                case AWOLMirrorActionType.Insert:
+                    leaveController.InsertMirror(connection, transaction, action.Absence, timesheet.CapturedBy);
+                    break;
+                case AWOLMirrorActionType.Update:
+                    leaveController.UpdateMirrorReason(connection, transaction, action.LeaveID.Value, action.Absence.Reason);
+                    break;
+                case AWOLMirrorActionType.Delete:
+                    leaveController.DeleteMirror(connection, transaction, action.LeaveID.Value);
+                    break;
             }
         }
 

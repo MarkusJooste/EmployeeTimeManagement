@@ -212,5 +212,84 @@ WHERE e.StoreID = @StoreID
         {
             return value ?? DBNull.Value;
         }
+
+        // Finds this employee's mirrored AWOL Absence for one day, if one exists, by Leave
+        // Type and both dates matching the day - never by Reason text, so a manager's
+        // wording is never load-bearing for reconciliation (ADR-0002). Runs inside the
+        // caller's transaction so it sees writes not yet committed within the same save.
+        public int? FindAWOLMirror(MySqlConnection connection, MySqlTransaction transaction, int employeeID, DateTime workDate)
+        {
+            const string query = @"SELECT LeaveID
+FROM TBL_leave
+WHERE EmployeeID = @EmployeeID
+  AND LeaveType = @LeaveType
+  AND StartDate = @WorkDate
+  AND EndDate = @WorkDate
+LIMIT 1;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                command.Parameters.AddWithValue("@LeaveType", LeaveType.AWOL.ToDatabaseValue());
+                command.Parameters.AddWithValue("@WorkDate", workDate.Date);
+
+                object result = command.ExecuteScalar();
+                return result == null ? (int?)null : Convert.ToInt32(result);
+            }
+        }
+
+        // Writes a new mirrored AWOL Absence inside the caller's transaction, so it commits
+        // or rolls back together with the Timesheet that produced it.
+        public void InsertMirror(MySqlConnection connection, MySqlTransaction transaction, Absence absence, int capturedBy)
+        {
+            const string query = @"INSERT INTO TBL_leave
+    (EmployeeID, LeaveType, StartDate, EndDate, Reason, OverrideReason, BusinessDate, CapturedBy)
+VALUES
+    (@EmployeeID, @LeaveType, @StartDate, @EndDate, @Reason, @OverrideReason, @BusinessDate, @CapturedBy);";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", absence.EmployeeID);
+                command.Parameters.AddWithValue("@LeaveType", absence.LeaveType.ToDatabaseValue());
+                command.Parameters.AddWithValue("@StartDate", absence.StartDate.Date);
+                command.Parameters.AddWithValue("@EndDate", absence.EndDate.Date);
+                command.Parameters.AddWithValue("@Reason", ToParameter(absence.Reason));
+                command.Parameters.AddWithValue("@OverrideReason", ToParameter(absence.OverrideReason));
+                command.Parameters.AddWithValue("@BusinessDate", DateTime.Today);
+                command.Parameters.AddWithValue("@CapturedBy", capturedBy);
+
+                command.ExecuteNonQuery();
+
+                absence.LeaveID = (int)command.LastInsertedId;
+            }
+        }
+
+        // Updates a mirrored AWOL Absence's Reason in place. Dates and Leave Type never
+        // change on a mirror row, since only the Timesheet's Notes can move it.
+        public void UpdateMirrorReason(MySqlConnection connection, MySqlTransaction transaction, int leaveID, string reason)
+        {
+            const string query = @"UPDATE TBL_leave SET Reason = @Reason WHERE LeaveID = @LeaveID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@Reason", ToParameter(reason));
+                command.Parameters.AddWithValue("@LeaveID", leaveID);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Removes a mirrored AWOL Absence inside the caller's transaction, when its
+        // Timesheet's Status has moved away from AWOL.
+        public void DeleteMirror(MySqlConnection connection, MySqlTransaction transaction, int leaveID)
+        {
+            const string query = @"DELETE FROM TBL_leave WHERE LeaveID = @LeaveID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@LeaveID", leaveID);
+                command.ExecuteNonQuery();
+            }
+        }
     }
 }
