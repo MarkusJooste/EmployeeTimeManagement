@@ -1,0 +1,328 @@
+using System;
+using System.Collections.Generic;
+using EmployeeTimeManagement.Database;
+using EmployeeTimeManagement.Models;
+using MySqlConnector;
+
+namespace EmployeeTimeManagement.Controllers
+{
+    internal class LeaveController
+    {
+        // Returns every Absence booked for one employee, scoped to the manager's store by
+        // joining through the employee, newest first, covering the whole employment rather
+        // than one cycle.
+        public List<Absence> GetHistoryForEmployee(int employeeID, int storeID)
+        {
+            const string query = @"SELECT l.LeaveID, l.EmployeeID, l.LeaveType, l.StartDate, l.EndDate, l.Reason, l.OverrideReason
+FROM TBL_leave l
+JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
+WHERE l.EmployeeID = @EmployeeID
+  AND e.StoreID = @StoreID
+ORDER BY l.StartDate DESC, l.LeaveID DESC;";
+
+            var absences = new List<Absence>();
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            absences.Add(ReadAbsence(reader));
+                        }
+                    }
+                }
+            }
+
+            return absences;
+        }
+
+        // Returns every non-AWOL Absence covering one date, scoped to the manager's store,
+        // for the Capture Timesheets prefill (issue 09). AWOL is excluded at the query so a
+        // day derived from Timesheets never flows back in as a prefill (ADR-0002).
+        public List<Absence> GetActiveLeave(DateTime date, int storeID)
+        {
+            const string query = @"SELECT l.LeaveID, l.EmployeeID, l.LeaveType, l.StartDate, l.EndDate, l.Reason, l.OverrideReason
+FROM TBL_leave l
+JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
+WHERE e.StoreID = @StoreID
+  AND l.LeaveType != @AWOL
+  AND @Date BETWEEN l.StartDate AND l.EndDate;";
+
+            var absences = new List<Absence>();
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+                    command.Parameters.AddWithValue("@AWOL", LeaveType.AWOL.ToDatabaseValue());
+                    command.Parameters.AddWithValue("@Date", date.Date);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            absences.Add(ReadAbsence(reader));
+                        }
+                    }
+                }
+            }
+
+            return absences;
+        }
+
+        // Reads one TBL_leave row into an Absence.
+        private static Absence ReadAbsence(MySqlDataReader reader)
+        {
+            return new Absence
+            {
+                LeaveID = reader.GetInt32(reader.GetOrdinal("LeaveID")),
+                EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID")),
+                LeaveType = LeaveTypes.FromDatabaseValue(reader.GetString(reader.GetOrdinal("LeaveType"))),
+                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                Reason = ReadNullableText(reader, reader.GetOrdinal("Reason")),
+                OverrideReason = ReadNullableText(reader, reader.GetOrdinal("OverrideReason"))
+            };
+        }
+
+        // Returns every distinct date this employee has a Timesheet with Status 'Worked',
+        // scoped to the manager's store, for the PTO accrual the Leave Balances panel shows.
+        // Hours and Day Type play no part, so neither is read here.
+        public List<DateTime> GetWorkedDates(int employeeID, int storeID)
+        {
+            const string query = @"SELECT DISTINCT t.WorkDate
+FROM TBL_timesheets t
+JOIN TBL_employees e ON e.EmployeeID = t.EmployeeID
+WHERE t.EmployeeID = @EmployeeID
+  AND e.StoreID = @StoreID
+  AND t.Status = @Status;";
+
+            var workedDates = new List<DateTime>();
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+                    command.Parameters.AddWithValue("@Status", TimesheetStatus.Worked.ToDatabaseValue());
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        int workDateIndex = reader.GetOrdinal("WorkDate");
+
+                        while (reader.Read())
+                        {
+                            workedDates.Add(reader.GetDateTime(workDateIndex));
+                        }
+                    }
+                }
+            }
+
+            return workedDates;
+        }
+
+        // Reads a nullable text column as null, so an Absence with no reason round-trips as genuinely empty.
+        private static string ReadNullableText(MySqlDataReader reader, int index)
+        {
+            return reader.IsDBNull(index) ? null : reader.GetString(index);
+        }
+
+        // Writes one booked Absence. Only called with an Absence LeaveBooking has already
+        // validated, so a refused booking never reaches this far.
+        public void Insert(Absence absence, int capturedBy)
+        {
+            const string query = @"INSERT INTO TBL_leave
+    (EmployeeID, LeaveType, StartDate, EndDate, Reason, OverrideReason, BusinessDate, CapturedBy)
+VALUES
+    (@EmployeeID, @LeaveType, @StartDate, @EndDate, @Reason, @OverrideReason, @BusinessDate, @CapturedBy);";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeID", absence.EmployeeID);
+                    command.Parameters.AddWithValue("@LeaveType", absence.LeaveType.ToDatabaseValue());
+                    command.Parameters.AddWithValue("@StartDate", absence.StartDate.Date);
+                    command.Parameters.AddWithValue("@EndDate", absence.EndDate.Date);
+                    command.Parameters.AddWithValue("@Reason", ToParameter(absence.Reason));
+                    command.Parameters.AddWithValue("@OverrideReason", ToParameter(absence.OverrideReason));
+                    command.Parameters.AddWithValue("@BusinessDate", DateTime.Today);
+                    command.Parameters.AddWithValue("@CapturedBy", capturedBy);
+
+                    command.ExecuteNonQuery();
+
+                    absence.LeaveID = (int)command.LastInsertedId;
+                }
+            }
+        }
+
+        // Updates one booked Absence in place, scoped to the manager's store so a LeaveID from
+        // another store's row can never be touched. Only called with an Absence LeaveBooking has
+        // already validated.
+        public void Update(Absence absence, int storeID)
+        {
+            const string query = @"UPDATE TBL_leave l
+JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
+SET l.LeaveType = @LeaveType,
+    l.StartDate = @StartDate,
+    l.EndDate = @EndDate,
+    l.Reason = @Reason,
+    l.OverrideReason = @OverrideReason
+WHERE l.LeaveID = @LeaveID
+  AND e.StoreID = @StoreID;";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@LeaveType", absence.LeaveType.ToDatabaseValue());
+                    command.Parameters.AddWithValue("@StartDate", absence.StartDate.Date);
+                    command.Parameters.AddWithValue("@EndDate", absence.EndDate.Date);
+                    command.Parameters.AddWithValue("@Reason", ToParameter(absence.Reason));
+                    command.Parameters.AddWithValue("@OverrideReason", ToParameter(absence.OverrideReason));
+                    command.Parameters.AddWithValue("@LeaveID", absence.LeaveID);
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // Deletes one booked Absence, scoped to the manager's store for the same reason Update is.
+        public void Delete(int leaveID, int storeID)
+        {
+            const string query = @"DELETE l
+FROM TBL_leave l
+JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
+WHERE l.LeaveID = @LeaveID
+  AND e.StoreID = @StoreID;";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@LeaveID", leaveID);
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // Counts employees at one store with an Absence, of any Leave Type, covering today -
+        // the same question the Leave view answers for one employee at a time, so the
+        // dashboard's tile and this screen can never disagree.
+        public int CountOnLeaveToday(int storeID, DateTime today)
+        {
+            const string query = @"SELECT COUNT(DISTINCT l.EmployeeID)
+FROM TBL_leave l
+JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
+WHERE e.StoreID = @StoreID
+  AND @Today BETWEEN l.StartDate AND l.EndDate;";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@StoreID", storeID);
+                    command.Parameters.AddWithValue("@Today", today.Date);
+
+                    return Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+        }
+
+        // Converts an absent value to the DBNull the driver expects.
+        private static object ToParameter(object value)
+        {
+            return value ?? DBNull.Value;
+        }
+
+        // Finds this employee's mirrored AWOL Absence for one day, if one exists, by Leave
+        // Type and both dates matching the day - never by Reason text, so a manager's
+        // wording is never load-bearing for reconciliation (ADR-0002). Runs inside the
+        // caller's transaction so it sees writes not yet committed within the same save.
+        public int? FindAWOLMirror(MySqlConnection connection, MySqlTransaction transaction, int employeeID, DateTime workDate)
+        {
+            const string query = @"SELECT LeaveID
+FROM TBL_leave
+WHERE EmployeeID = @EmployeeID
+  AND LeaveType = @LeaveType
+  AND StartDate = @WorkDate
+  AND EndDate = @WorkDate
+LIMIT 1;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                command.Parameters.AddWithValue("@LeaveType", LeaveType.AWOL.ToDatabaseValue());
+                command.Parameters.AddWithValue("@WorkDate", workDate.Date);
+
+                object result = command.ExecuteScalar();
+                return result == null ? (int?)null : Convert.ToInt32(result);
+            }
+        }
+
+        // Writes a new mirrored AWOL Absence inside the caller's transaction, so it commits
+        // or rolls back together with the Timesheet that produced it.
+        public void InsertMirror(MySqlConnection connection, MySqlTransaction transaction, Absence absence, int capturedBy)
+        {
+            const string query = @"INSERT INTO TBL_leave
+    (EmployeeID, LeaveType, StartDate, EndDate, Reason, OverrideReason, BusinessDate, CapturedBy)
+VALUES
+    (@EmployeeID, @LeaveType, @StartDate, @EndDate, @Reason, @OverrideReason, @BusinessDate, @CapturedBy);";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", absence.EmployeeID);
+                command.Parameters.AddWithValue("@LeaveType", absence.LeaveType.ToDatabaseValue());
+                command.Parameters.AddWithValue("@StartDate", absence.StartDate.Date);
+                command.Parameters.AddWithValue("@EndDate", absence.EndDate.Date);
+                command.Parameters.AddWithValue("@Reason", ToParameter(absence.Reason));
+                command.Parameters.AddWithValue("@OverrideReason", ToParameter(absence.OverrideReason));
+                command.Parameters.AddWithValue("@BusinessDate", DateTime.Today);
+                command.Parameters.AddWithValue("@CapturedBy", capturedBy);
+
+                command.ExecuteNonQuery();
+
+                absence.LeaveID = (int)command.LastInsertedId;
+            }
+        }
+
+        // Updates a mirrored AWOL Absence's Reason in place. Dates and Leave Type never
+        // change on a mirror row, since only the Timesheet's Notes can move it.
+        public void UpdateMirrorReason(MySqlConnection connection, MySqlTransaction transaction, int leaveID, string reason)
+        {
+            const string query = @"UPDATE TBL_leave SET Reason = @Reason WHERE LeaveID = @LeaveID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@Reason", ToParameter(reason));
+                command.Parameters.AddWithValue("@LeaveID", leaveID);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        // Removes a mirrored AWOL Absence inside the caller's transaction, when its
+        // Timesheet's Status has moved away from AWOL.
+        public void DeleteMirror(MySqlConnection connection, MySqlTransaction transaction, int leaveID)
+        {
+            const string query = @"DELETE FROM TBL_leave WHERE LeaveID = @LeaveID;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@LeaveID", leaveID);
+                command.ExecuteNonQuery();
+            }
+        }
+    }
+}

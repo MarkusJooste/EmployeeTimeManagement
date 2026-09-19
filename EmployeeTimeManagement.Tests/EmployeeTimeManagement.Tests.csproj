@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>EmployeeTimeManagement.Tests</RootNamespace>
+    <AssemblyName>EmployeeTimeManagement.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+
+  <!-- The seams are compiled straight into the test assembly rather than referenced.
+       The application is a legacy packages.config WinForms project that `dotnet test`
+       cannot restore, and these modules are pure logic with no WinForms or MySQL
+       dependency, so linking the source keeps the tests fast and isolated. -->
+  <ItemGroup>
+    <Compile Include="..\EmployeeTimeManagement\Models\SouthAfricanHolidays.cs" Link="Seams\SouthAfricanHolidays.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\DayType.cs" Link="Seams\DayType.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Timesheet.cs" Link="Seams\Timesheet.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\TimesheetCapture.cs" Link="Seams\TimesheetCapture.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Employee.cs" Link="Seams\Employee.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeAddress.cs" Link="Seams\EmployeeAddress.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeBank.cs" Link="Seams\EmployeeBank.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeContract.cs" Link="Seams\EmployeeContract.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeFamilyMember.cs" Link="Seams\EmployeeFamilyMember.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeSpouse.cs" Link="Seams\EmployeeSpouse.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeRecord.cs" Link="Seams\EmployeeRecord.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\MaritalStatus.cs" Link="Seams\MaritalStatus.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeIDNumberOwner.cs" Link="Seams\EmployeeIDNumberOwner.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeCapture.cs" Link="Seams\EmployeeCapture.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeaveType.cs" Link="Seams\LeaveType.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Absence.cs" Link="Seams\Absence.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeaveBooking.cs" Link="Seams\LeaveBooking.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeaveBalance.cs" Link="Seams\LeaveBalance.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\AWOLMirror.cs" Link="Seams\AWOLMirror.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeavePrefill.cs" Link="Seams\LeavePrefill.cs" />
+  </ItemGroup>
+
+</Project>
