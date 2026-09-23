@@ -43,6 +43,7 @@
     <Compile Include="..\EmployeeTimeManagement\Models\ManagerAccess.cs" Link="Seams\ManagerAccess.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeListItem.cs" Link="Seams\EmployeeListItem.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeListFilter.cs" Link="Seams\EmployeeListFilter.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeEditorSectionLookup.cs" Link="Seams\EmployeeEditorSectionLookup.cs" />
   </ItemGroup>
 
 </Project>

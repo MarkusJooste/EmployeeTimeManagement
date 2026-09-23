@@ -26,21 +26,12 @@ namespace EmployeeTimeManagement.Views
         // moves back.
         private EmployeeRecord editingRecord;
 
-        // The editor's sections, in the order they sit on the section list.
-        private enum EditorSection
-        {
-            Personal,
-            Address,
-            Bank,
-            Contract,
-            Spouse,
-            Family
-        }
-
         // Each section's panel and the section-list button that shows it, so switching
-        // sections is one lookup rather than a chain of if/else.
-        private Dictionary<EditorSection, Control> sectionPanels;
-        private Dictionary<EditorSection, Button> sectionButtons;
+        // sections is one lookup rather than a chain of if/else. Keyed by the same
+        // EmployeeEditorSection the field-error lookup reports, so a refused Save can go
+        // straight from an error's section to the button and panel that show it.
+        private Dictionary<EmployeeEditorSection, Control> sectionPanels;
+        private Dictionary<EmployeeEditorSection, Button> sectionButtons;
 
         public EmployeesForm()
         {
@@ -56,24 +47,24 @@ namespace EmployeeTimeManagement.Views
         // Ties each section to the panel it shows and the section-list button that opens it.
         private void BuildSectionMaps()
         {
-            sectionPanels = new Dictionary<EditorSection, Control>
+            sectionPanels = new Dictionary<EmployeeEditorSection, Control>
             {
-                { EditorSection.Personal, grpPersonal },
-                { EditorSection.Address, grpAddress },
-                { EditorSection.Bank, grpBank },
-                { EditorSection.Contract, grpContract },
-                { EditorSection.Spouse, grpSpouse },
-                { EditorSection.Family, grpFamily }
+                { EmployeeEditorSection.Personal, grpPersonal },
+                { EmployeeEditorSection.Address, grpAddress },
+                { EmployeeEditorSection.Bank, grpBank },
+                { EmployeeEditorSection.Contract, grpContract },
+                { EmployeeEditorSection.Spouse, grpSpouse },
+                { EmployeeEditorSection.Family, grpFamily }
             };
 
-            sectionButtons = new Dictionary<EditorSection, Button>
+            sectionButtons = new Dictionary<EmployeeEditorSection, Button>
             {
-                { EditorSection.Personal, btnSectionPersonal },
-                { EditorSection.Address, btnSectionAddress },
-                { EditorSection.Bank, btnSectionBank },
-                { EditorSection.Contract, btnSectionContract },
-                { EditorSection.Spouse, btnSectionSpouse },
-                { EditorSection.Family, btnSectionFamily }
+                { EmployeeEditorSection.Personal, btnSectionPersonal },
+                { EmployeeEditorSection.Address, btnSectionAddress },
+                { EmployeeEditorSection.Bank, btnSectionBank },
+                { EmployeeEditorSection.Contract, btnSectionContract },
+                { EmployeeEditorSection.Spouse, btnSectionSpouse },
+                { EmployeeEditorSection.Family, btnSectionFamily }
             };
         }
 
@@ -132,14 +123,14 @@ namespace EmployeeTimeManagement.Views
         // Shows one section's fields and hides the rest, and marks its button as the chosen
         // one on the section list. Switching sections never touches a control's value, so
         // typing in a section survives moving away from it and back.
-        private void ShowSection(EditorSection section)
+        private void ShowSection(EmployeeEditorSection section)
         {
-            foreach (KeyValuePair<EditorSection, Control> entry in sectionPanels)
+            foreach (KeyValuePair<EmployeeEditorSection, Control> entry in sectionPanels)
             {
                 entry.Value.Visible = entry.Key == section;
             }
 
-            foreach (KeyValuePair<EditorSection, Button> entry in sectionButtons)
+            foreach (KeyValuePair<EmployeeEditorSection, Button> entry in sectionButtons)
             {
                 Theme.SelectSectionItem(entry.Value, entry.Key == section);
             }
@@ -220,7 +211,7 @@ namespace EmployeeTimeManagement.Views
 
             pnlList.Visible = false;
             pnlEditor.Visible = true;
-            ShowSection(EditorSection.Personal);
+            ShowSection(EmployeeEditorSection.Personal);
             txtName.Focus();
         }
 
@@ -262,7 +253,7 @@ namespace EmployeeTimeManagement.Views
 
             pnlList.Visible = false;
             pnlEditor.Visible = true;
-            ShowSection(EditorSection.Personal);
+            ShowSection(EmployeeEditorSection.Personal);
             txtName.Focus();
         }
 
@@ -659,6 +650,7 @@ namespace EmployeeTimeManagement.Views
         private void ShowFieldErrors(List<EmployeeFieldError> errors)
         {
             ClearFieldErrors();
+            MarkSections(errors);
 
             var named = new List<string>();
             int marked = 0;
@@ -686,6 +678,26 @@ namespace EmployeeTimeManagement.Views
                 "{0} field(s) need fixing before this employee can be saved: {1}",
                 marked,
                 string.Join(", ", named)));
+        }
+
+        // Puts a red dot on every section the pure lookup ties to one of these errors, and
+        // switches the editor to the first such section in section-list order, so a refused
+        // Save both shows where every problem is and lands on the first one.
+        private void MarkSections(List<EmployeeFieldError> errors)
+        {
+            List<EmployeeEditorSection> sectionsWithErrors = EmployeeEditorSectionLookup.SectionsWithErrors(errors);
+
+            foreach (KeyValuePair<EmployeeEditorSection, Button> entry in sectionButtons)
+            {
+                Theme.SetSectionItemError(entry.Value, sectionsWithErrors.Contains(entry.Key));
+            }
+
+            EmployeeEditorSection? firstSection = EmployeeEditorSectionLookup.FirstSectionWithErrors(errors);
+
+            if (firstSection.HasValue)
+            {
+                ShowSection(firstSection.Value);
+            }
         }
 
         // Marks the one field a problem belongs to and returns what to call it in the summary,
@@ -742,6 +754,11 @@ namespace EmployeeTimeManagement.Views
                 {
                     cell.ErrorText = string.Empty;
                 }
+            }
+
+            foreach (Button button in sectionButtons.Values)
+            {
+                Theme.SetSectionItemError(button, false);
             }
 
             lblEditorStatus.Text = string.Empty;
@@ -816,32 +833,32 @@ namespace EmployeeTimeManagement.Views
 
         private void btnSectionPersonal_Click(object sender, EventArgs e)
         {
-            ShowSection(EditorSection.Personal);
+            ShowSection(EmployeeEditorSection.Personal);
         }
 
         private void btnSectionAddress_Click(object sender, EventArgs e)
         {
-            ShowSection(EditorSection.Address);
+            ShowSection(EmployeeEditorSection.Address);
         }
 
         private void btnSectionBank_Click(object sender, EventArgs e)
         {
-            ShowSection(EditorSection.Bank);
+            ShowSection(EmployeeEditorSection.Bank);
         }
 
         private void btnSectionContract_Click(object sender, EventArgs e)
         {
-            ShowSection(EditorSection.Contract);
+            ShowSection(EmployeeEditorSection.Contract);
         }
 
         private void btnSectionSpouse_Click(object sender, EventArgs e)
         {
-            ShowSection(EditorSection.Spouse);
+            ShowSection(EmployeeEditorSection.Spouse);
         }
 
         private void btnSectionFamily_Click(object sender, EventArgs e)
         {
-            ShowSection(EditorSection.Family);
+            ShowSection(EmployeeEditorSection.Family);
         }
 
         private void cboMaritalStatus_SelectedIndexChanged(object sender, EventArgs e)

@@ -159,6 +159,16 @@ namespace EmployeeTimeManagement.Views
         private static readonly Color SectionSelectedBack = Color.FromArgb(58, 50, 46);
         private static readonly Color SectionHoverBack = Color.FromArgb(46, 40, 37);
         private const int SectionAccentWidth = 4;
+        private const int SectionErrorDotDiameter = 8;
+
+        // Whether an item is the chosen one and whether it holds an error, kept together on
+        // the button's Tag so one Paint handler can draw both the mustard bar and the red dot
+        // without either state overwriting the other.
+        private sealed class SectionItemState
+        {
+            public bool Selected;
+            public bool HasError;
+        }
 
         // Wires up one item of a dark section list (the editor's Personal/Address/... rail):
         // flat, left-aligned, no border, with a mustard bar marking the chosen item. Call it
@@ -177,11 +187,22 @@ namespace EmployeeTimeManagement.Views
 
             button.Paint += (sender, e) =>
             {
-                if (Equals(button.Tag, true))
+                SectionItemState state = StateOf(button);
+
+                if (state.Selected)
                 {
                     using (var bar = new SolidBrush(Mustard))
                     {
                         e.Graphics.FillRectangle(bar, 0, 0, SectionAccentWidth, button.Height);
+                    }
+                }
+
+                if (state.HasError)
+                {
+                    using (var dot = new SolidBrush(Red))
+                    {
+                        int y = (button.Height - SectionErrorDotDiameter) / 2;
+                        e.Graphics.FillEllipse(dot, button.Width - SectionErrorDotDiameter - 10, y, SectionErrorDotDiameter, SectionErrorDotDiameter);
                     }
                 }
 
@@ -199,12 +220,40 @@ namespace EmployeeTimeManagement.Views
         // lighter than the rail and carries the mustard bar; the rest sit flush with it.
         public static void SelectSectionItem(Button button, bool selected)
         {
-            button.Tag = selected;
+            SectionItemState state = StateOf(button);
+            state.Selected = selected;
+            button.Tag = state;
+
             button.BackColor = selected ? SectionSelectedBack : Charcoal;
             button.ForeColor = selected ? OnDark : OnDarkMuted;
             button.FlatAppearance.MouseOverBackColor = SectionHoverBack;
             button.FlatAppearance.MouseDownBackColor = SectionHoverBack;
             button.Invalidate();
+        }
+
+        // Marks one section item as holding a validation error, or clears that mark. Leaves
+        // whether the item is the chosen one untouched, since a refused Save can switch to a
+        // section without wiping the dots a still-visited section already carries.
+        public static void SetSectionItemError(Button button, bool hasError)
+        {
+            SectionItemState state = StateOf(button);
+            state.HasError = hasError;
+            button.Tag = state;
+            button.Invalidate();
+        }
+
+        // The item's paint state, created fresh the first time a section item is asked for it.
+        private static SectionItemState StateOf(Button button)
+        {
+            var state = button.Tag as SectionItemState;
+
+            if (state == null)
+            {
+                state = new SectionItemState();
+                button.Tag = state;
+            }
+
+            return state;
         }
 
         // Draws the two-pixel ring that shows which control the keyboard is on
