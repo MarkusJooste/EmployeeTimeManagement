@@ -294,6 +294,12 @@
 
     </Compile>
 
+    <Compile Include="Views\PromoteManagerForm.cs">
+
+      <SubType>Form</SubType>
+
+    </Compile>
+
     <Compile Include="Views\DashboardForm.cs">
       <SubType>Form</SubType>
     </Compile>

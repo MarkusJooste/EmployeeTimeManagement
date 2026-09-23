@@ -8,8 +8,8 @@ using System.Windows.Forms;
 namespace EmployeeTimeManagement.Views
 {
     // Lists who could have a login and who does, for an Owner to Promote or Demote. Holds no
-    // membership rules of its own: both lists come from ManagerAccess, matching EmployeesForm's
-    // list-and-buttons shape. Read-only for now; Promote and Demote gain behaviour in later tickets.
+    // rules of its own: both lists and every refusal come from ManagerAccess, matching
+    // EmployeesForm's list-and-buttons shape. Demote gains behaviour in a later ticket.
     public partial class ManagersForm : Form
     {
         private const string MaskedPin = "****";
@@ -186,9 +186,74 @@ namespace EmployeeTimeManagement.Views
             dgvManagers.Refresh();
         }
 
-        // Ticket 05 gives this a rule.
+        // Asks for a PIN, typed twice, then hands the decision to the seam. Nothing is written
+        // until the seam accepts it, and every refusal is shown exactly as the seam gives it.
         private void btnPromote_Click(object sender, EventArgs e)
         {
+            var selected = dgvEmployees.CurrentRow?.DataBoundItem as Employee;
+
+            if (selected == null || CurrentUser.StoreID == null || CurrentUser.ManagerID == null)
+            {
+                return;
+            }
+
+            using (var dialog = new PromoteManagerForm(selected.FullName))
+            {
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                List<Manager> allManagers;
+
+                try
+                {
+                    allManagers = managerController.GetAll();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not check existing PINs: " + ex.Message, "Promote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                Manager demotedRow = allManagers.FirstOrDefault(manager => manager.EmployeeID == selected.EmployeeID);
+
+                var request = new PromotionRequest
+                {
+                    EmployeeID = selected.EmployeeID,
+                    EmployeeStoreID = selected.StoreID,
+                    OwnerStoreID = CurrentUser.StoreID.Value,
+                    ContractEndDate = selected.ContractEndDate,
+                    Pin = dialog.Pin,
+                    PinConfirmation = dialog.PinConfirmation,
+                    ExistingManagers = allManagers,
+                    ExistingManagerRow = demotedRow,
+                    CapturedBy = CurrentUser.ManagerID.Value,
+                    BusinessDate = DateTime.Today
+                };
+
+                PromotionResult result = ManagerAccess.Promote(request);
+
+                if (!result.IsValid)
+                {
+                    MessageBox.Show(result.Error, "Promote", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                try
+                {
+                    managerController.Promote(result.Manager);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not promote " + selected.FullName + ": " + ex.Message, "Promote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                LoadData();
+
+                MessageBox.Show("Promoted " + selected.FullName + " to manager.", "Promote", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         // Ticket 06 gives this a rule.
