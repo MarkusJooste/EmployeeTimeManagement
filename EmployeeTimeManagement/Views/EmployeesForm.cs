@@ -415,6 +415,11 @@ namespace EmployeeTimeManagement.Views
                     employeeController.Insert(result.Record);
                 }
             }
+            catch (AccessRevokedException ex)
+            {
+                AccessRevokedPrompt.Show(ex);
+                return;
+            }
             catch (Exception ex)
             {
                 ShowRefusal("Could not save this employee: " + ex.Message);
@@ -749,6 +754,11 @@ namespace EmployeeTimeManagement.Views
                 try
                 {
                     closed = employeeController.Terminate(selected.EmployeeID, dialog.EndDate, dialog.Reason);
+                }
+                catch (AccessRevokedException ex)
+                {
+                    AccessRevokedPrompt.Show(ex);
+                    return;
                 }
                 catch (Exception ex)
                 {

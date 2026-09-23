@@ -394,6 +394,8 @@ ORDER BY FamilyMemberID;";
         // since they are off this form entirely.
         public void Update(EmployeeRecord record)
         {
+            WriteAccessGuard.EnsureActive();
+
             using (var connection = DatabaseConnection.GetConnection())
             {
                 using (var transaction = connection.BeginTransaction())
@@ -649,6 +651,8 @@ WHERE FamilyMemberID = @FamilyMemberID;";
         // failure part-way leaves nothing behind rather than an employee payroll cannot pay.
         public void Insert(EmployeeRecord record)
         {
+            WriteAccessGuard.EnsureActive();
+
             using (var connection = DatabaseConnection.GetConnection())
             {
                 using (var transaction = connection.BeginTransaction())
@@ -853,6 +857,8 @@ VALUES
         // did not, so the caller can tell the manager nothing was actually there to end.
         public bool Terminate(int employeeID, DateTime endDate, string reason)
         {
+            WriteAccessGuard.EnsureActive();
+
             const string query = @"UPDATE TBL_employee_contracts
 SET EndDate = @EndDate, ReasonForEnding = @ReasonForEnding
 WHERE EmployeeID = @EmployeeID

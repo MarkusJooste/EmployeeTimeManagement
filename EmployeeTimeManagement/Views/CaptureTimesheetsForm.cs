@@ -713,6 +713,11 @@ namespace EmployeeTimeManagement.Views
             {
                 timesheetController.Save(result.Valid);
             }
+            catch (AccessRevokedException ex)
+            {
+                AccessRevokedPrompt.Show(ex);
+                return;
+            }
             catch (Exception ex)
             {
                 lblStatus.Text = "Could not save timesheets: " + ex.Message;

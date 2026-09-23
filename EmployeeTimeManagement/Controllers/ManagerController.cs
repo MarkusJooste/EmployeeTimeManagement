@@ -176,6 +176,23 @@ WHERE ManagerID = @ManagerID;";
             Update(manager);
         }
 
+        // Re-reads whether one login is still active, straight from the database rather than the in-memory session.
+        public bool IsActive(int managerID)
+        {
+            const string query = @"SELECT IsActiveManager FROM TBL_managers WHERE ManagerID = @ManagerID LIMIT 1;";
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ManagerID", managerID);
+
+                    object result = command.ExecuteScalar();
+                    return result != null && Convert.ToBoolean(result);
+                }
+            }
+        }
+
         private static string ReadText(MySqlDataReader reader, int index)
         {
             if (reader.IsDBNull(index))

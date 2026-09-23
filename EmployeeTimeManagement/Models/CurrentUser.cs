@@ -62,5 +62,14 @@ namespace EmployeeTimeManagement.Models
         {
             Manager = null;
         }
+
+        // Fired when a write discovers the session's own login was deactivated elsewhere.
+        public static event Action AccessRevoked;
+
+        public static void RevokeAccess()
+        {
+            Manager = null;
+            AccessRevoked?.Invoke();
+        }
     }
 }
