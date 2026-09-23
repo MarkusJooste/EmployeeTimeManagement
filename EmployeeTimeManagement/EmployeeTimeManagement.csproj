@@ -238,6 +238,7 @@
     <Compile Include="Models\Employee.cs" />
 
     <Compile Include="Models\EmployeeListItem.cs" />
+    <Compile Include="Models\EmployeeListFilter.cs" />
     <Compile Include="Models\ManagerListItem.cs" />
 
     <Compile Include="Models\EmployeeAddress.cs" />

@@ -152,6 +152,7 @@ namespace EmployeeTimeManagement.Views
             this.employeePicker.TabIndex = 2;
             this.employeePicker.SelectionChanged += new System.EventHandler(this.employeePicker_SelectionChanged);
             this.employeePicker.FilterChanged += new System.EventHandler(this.employeePicker_FilterChanged);
+            this.employeePicker.EmployeeActivated += new System.EventHandler(this.employeePicker_EmployeeActivated);
             //
             // lblStatus
             //

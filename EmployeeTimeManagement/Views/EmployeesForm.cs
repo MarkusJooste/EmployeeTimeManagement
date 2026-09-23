@@ -769,6 +769,17 @@ namespace EmployeeTimeManagement.Views
             UpdateButtonState();
         }
 
+        // Double-clicking a row, or pressing Enter on it, means the same as pressing Update.
+        private void employeePicker_EmployeeActivated(object sender, EventArgs e)
+        {
+            if (!btnUpdate.Enabled)
+            {
+                return;
+            }
+
+            ShowEditorForUpdate();
+        }
+
         // Asks for an end date and reason, confirms, then closes the employee's contract.
         // Writing nothing at all is the way a contract-less employee is handled without error.
         private void btnTerminate_Click(object sender, EventArgs e)

@@ -99,6 +99,44 @@ namespace EmployeeTimeManagement.Views
             button.LostFocus += (sender, e) => button.Invalidate();
         }
 
+        // Wires up a filter tab: flat, bold, and a focus ring, with no handler that has to be
+        // renewed when the chosen tab changes. Call it once per tab; call SelectTab after it
+        // and on every later change to say which tab is the chosen one.
+        public static void StyleTab(Button button)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.Font = ButtonFont;
+            button.UseVisualStyleBackColor = false;
+            button.FlatAppearance.BorderSize = 1;
+
+            SelectTab(button, false);
+
+            button.Paint += (sender, e) =>
+            {
+                if (button.Focused && button.Enabled)
+                {
+                    // A chosen tab is charcoal, so its ring has to be the colour that reads
+                    // against charcoal rather than the one used on the pale tabs beside it.
+                    Color ring = button.BackColor == Charcoal ? Mustard : Charcoal;
+                    DrawFocusRing(e.Graphics, button.ClientSize, ring);
+                }
+            };
+
+            button.GotFocus += (sender, e) => button.Invalidate();
+            button.LostFocus += (sender, e) => button.Invalidate();
+        }
+
+        // Colours a filter tab for whether it is the chosen one: the chosen tab is filled
+        // charcoal, the rest stay pale and outlined so only one group reads as selected.
+        public static void SelectTab(Button button, bool selected)
+        {
+            button.BackColor = selected ? Charcoal : Surface;
+            button.ForeColor = selected ? OnDark : InkMuted;
+            button.FlatAppearance.BorderColor = selected ? Charcoal : Border;
+            button.FlatAppearance.MouseOverBackColor = selected ? Charcoal : Cream;
+            button.FlatAppearance.MouseDownBackColor = selected ? Charcoal : Cream;
+        }
+
         // Colours a button for the state it is in, since a disabled flat button otherwise
         // keeps whatever colours it was last given and goes on reading as available
         private static void ApplyLook(Button button, ButtonPalette palette)

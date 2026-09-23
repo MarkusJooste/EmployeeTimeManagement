@@ -40,5 +40,28 @@ namespace EmployeeTimeManagement.Models
         {
             get { return IsActive ? "Active" : "Former"; }
         }
+
+        // The one or two letters the list draws in place of a photograph, with a placeholder
+        // for an employee whose name and surname are both missing.
+        public string Initials
+        {
+            get
+            {
+                string initials = FirstLetter(Name) + FirstLetter(Surname);
+
+                return initials.Length == 0 ? "?" : initials;
+            }
+        }
+
+        // The capital a name contributes to the initials, or nothing when it is missing.
+        private static string FirstLetter(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            return value.Trim().Substring(0, 1).ToUpperInvariant();
+        }
     }
 }

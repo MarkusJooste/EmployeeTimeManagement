@@ -46,9 +46,9 @@ namespace EmployeeTimeManagement.Views
             cboBookLeaveType.Items.AddRange(LeaveTypes.BookableValues());
             cboBookLeaveType.SelectedIndex = 0;
 
-            // Set before LoadEmployees, which selects its first row as a side effect of
-            // binding the grid and so immediately overwrites this with a real employee's
-            // history where the store has any employees to show.
+            // Set before LoadEmployees, which settles on its first row once the picker is
+            // shown and so overwrites this with a real employee's history where the store
+            // has any employees to show.
             ShowNoSelection();
             LoadEmployees();
         }

@@ -41,6 +41,8 @@
     <Compile Include="..\EmployeeTimeManagement\Models\LeavePrefill.cs" Link="Seams\LeavePrefill.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Manager.cs" Link="Seams\Manager.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\ManagerAccess.cs" Link="Seams\ManagerAccess.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeListItem.cs" Link="Seams\EmployeeListItem.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeListFilter.cs" Link="Seams\EmployeeListFilter.cs" />
   </ItemGroup>
 
 </Project>
