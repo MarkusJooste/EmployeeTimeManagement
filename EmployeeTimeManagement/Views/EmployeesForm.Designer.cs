@@ -39,7 +39,8 @@ namespace EmployeeTimeManagement.Views
             this.lblStore = new System.Windows.Forms.Label();
             this.btnAdd = new System.Windows.Forms.Button();
             this.pnlEditor = new System.Windows.Forms.Panel();
-            this.tlpEditor = new System.Windows.Forms.TableLayoutPanel();
+            this.pnlSectionBody = new System.Windows.Forms.Panel();
+            this.pnlSectionContent = new System.Windows.Forms.Panel();
             this.grpPersonal = new System.Windows.Forms.GroupBox();
             this.lblName = new System.Windows.Forms.Label();
             this.txtName = new System.Windows.Forms.TextBox();
@@ -55,7 +56,6 @@ namespace EmployeeTimeManagement.Views
             this.cboMaritalStatus = new System.Windows.Forms.ComboBox();
             this.lblDependents = new System.Windows.Forms.Label();
             this.txtDependents = new System.Windows.Forms.TextBox();
-            this.tlpAddressBank = new System.Windows.Forms.TableLayoutPanel();
             this.grpAddress = new System.Windows.Forms.GroupBox();
             this.lblHouseFlatNumber = new System.Windows.Forms.Label();
             this.txtHouseFlatNumber = new System.Windows.Forms.TextBox();
@@ -76,7 +76,6 @@ namespace EmployeeTimeManagement.Views
             this.txtAccountNumber = new System.Windows.Forms.TextBox();
             this.lblBranchCode = new System.Windows.Forms.Label();
             this.txtBranchCode = new System.Windows.Forms.TextBox();
-            this.tlpContractSpouse = new System.Windows.Forms.TableLayoutPanel();
             this.grpContract = new System.Windows.Forms.GroupBox();
             this.lblContractType = new System.Windows.Forms.Label();
             this.txtContractType = new System.Windows.Forms.TextBox();
@@ -105,6 +104,14 @@ namespace EmployeeTimeManagement.Views
             this.pnlFamilyButtons = new System.Windows.Forms.Panel();
             this.btnAddFamilyRow = new System.Windows.Forms.Button();
             this.btnRemoveFamilyRow = new System.Windows.Forms.Button();
+            this.pnlSectionList = new System.Windows.Forms.Panel();
+            this.btnSectionFamily = new System.Windows.Forms.Button();
+            this.btnSectionSpouse = new System.Windows.Forms.Button();
+            this.btnSectionContract = new System.Windows.Forms.Button();
+            this.btnSectionBank = new System.Windows.Forms.Button();
+            this.btnSectionAddress = new System.Windows.Forms.Button();
+            this.btnSectionPersonal = new System.Windows.Forms.Button();
+            this.btnBackToList = new System.Windows.Forms.Button();
             this.pnlEditorButtons = new System.Windows.Forms.Panel();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -115,17 +122,17 @@ namespace EmployeeTimeManagement.Views
             this.pnlSplit.SuspendLayout();
             this.pnlHeader.SuspendLayout();
             this.pnlEditor.SuspendLayout();
-            this.tlpEditor.SuspendLayout();
+            this.pnlSectionBody.SuspendLayout();
+            this.pnlSectionContent.SuspendLayout();
             this.grpPersonal.SuspendLayout();
-            this.tlpAddressBank.SuspendLayout();
             this.grpAddress.SuspendLayout();
             this.grpBank.SuspendLayout();
-            this.tlpContractSpouse.SuspendLayout();
             this.grpContract.SuspendLayout();
             this.grpSpouse.SuspendLayout();
             this.grpFamily.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFamily)).BeginInit();
             this.pnlFamilyButtons.SuspendLayout();
+            this.pnlSectionList.SuspendLayout();
             this.pnlEditorButtons.SuspendLayout();
             this.SuspendLayout();
             //
@@ -224,7 +231,7 @@ namespace EmployeeTimeManagement.Views
             //
             // pnlEditor
             //
-            this.pnlEditor.Controls.Add(this.tlpEditor);
+            this.pnlEditor.Controls.Add(this.pnlSectionBody);
             this.pnlEditor.Controls.Add(this.pnlEditorButtons);
             this.pnlEditor.Controls.Add(this.lblEditorTitle);
             this.pnlEditor.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -237,35 +244,38 @@ namespace EmployeeTimeManagement.Views
             // lblEditorTitle
             //
             this.lblEditorTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblEditorTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Bold);
             this.lblEditorTitle.Location = new System.Drawing.Point(0, 0);
             this.lblEditorTitle.Name = "lblEditorTitle";
-            this.lblEditorTitle.Padding = new System.Windows.Forms.Padding(9, 0, 0, 0);
+            this.lblEditorTitle.Padding = new System.Windows.Forms.Padding(16, 0, 0, 0);
             this.lblEditorTitle.Size = new System.Drawing.Size(889, 30);
             this.lblEditorTitle.TabIndex = 0;
             this.lblEditorTitle.Text = "Add Employee";
             this.lblEditorTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
-            // tlpEditor
+            // pnlSectionBody
             //
-            this.tlpEditor.ColumnCount = 3;
-            this.tlpEditor.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpEditor.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpEditor.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpEditor.Controls.Add(this.grpPersonal, 0, 0);
-            this.tlpEditor.Controls.Add(this.tlpAddressBank, 1, 0);
-            this.tlpEditor.Controls.Add(this.tlpContractSpouse, 2, 0);
-            this.tlpEditor.Controls.Add(this.grpFamily, 0, 1);
-            this.tlpEditor.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlpEditor.Location = new System.Drawing.Point(0, 30);
-            this.tlpEditor.Name = "tlpEditor";
-            this.tlpEditor.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.tlpEditor.RowCount = 2;
-            this.tlpEditor.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpEditor.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 170F));
-            this.tlpEditor.SetColumnSpan(this.grpFamily, 3);
-            this.tlpEditor.Size = new System.Drawing.Size(889, 500);
-            this.tlpEditor.TabIndex = 1;
+            this.pnlSectionBody.Controls.Add(this.pnlSectionContent);
+            this.pnlSectionBody.Controls.Add(this.pnlSectionList);
+            this.pnlSectionBody.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlSectionBody.Location = new System.Drawing.Point(0, 30);
+            this.pnlSectionBody.Name = "pnlSectionBody";
+            this.pnlSectionBody.Size = new System.Drawing.Size(889, 500);
+            this.pnlSectionBody.TabIndex = 1;
+            //
+            // pnlSectionContent
+            //
+            this.pnlSectionContent.Controls.Add(this.grpPersonal);
+            this.pnlSectionContent.Controls.Add(this.grpAddress);
+            this.pnlSectionContent.Controls.Add(this.grpBank);
+            this.pnlSectionContent.Controls.Add(this.grpContract);
+            this.pnlSectionContent.Controls.Add(this.grpSpouse);
+            this.pnlSectionContent.Controls.Add(this.grpFamily);
+            this.pnlSectionContent.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlSectionContent.Location = new System.Drawing.Point(200, 0);
+            this.pnlSectionContent.Name = "pnlSectionContent";
+            this.pnlSectionContent.Padding = new System.Windows.Forms.Padding(12);
+            this.pnlSectionContent.Size = new System.Drawing.Size(689, 500);
+            this.pnlSectionContent.TabIndex = 1;
             //
             // grpPersonal
             //
@@ -284,9 +294,9 @@ namespace EmployeeTimeManagement.Views
             this.grpPersonal.Controls.Add(this.lblDependents);
             this.grpPersonal.Controls.Add(this.txtDependents);
             this.grpPersonal.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpPersonal.Location = new System.Drawing.Point(9, 3);
+            this.grpPersonal.Location = new System.Drawing.Point(12, 12);
             this.grpPersonal.Name = "grpPersonal";
-            this.grpPersonal.Size = new System.Drawing.Size(286, 324);
+            this.grpPersonal.Size = new System.Drawing.Size(665, 476);
             this.grpPersonal.TabIndex = 0;
             this.grpPersonal.TabStop = false;
             this.grpPersonal.Text = "Personal";
@@ -294,62 +304,58 @@ namespace EmployeeTimeManagement.Views
             // lblName
             //
             this.lblName.AutoSize = true;
-            this.lblName.Location = new System.Drawing.Point(10, 28);
+            this.lblName.Location = new System.Drawing.Point(16, 32);
             this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(35, 13);
+            this.lblName.Size = new System.Drawing.Size(41, 13);
             this.lblName.TabIndex = 0;
-            this.lblName.Text = "Name";
+            this.lblName.Text = "Name *";
             //
             // txtName
             //
-            this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtName.Location = new System.Drawing.Point(115, 25);
+            this.txtName.Location = new System.Drawing.Point(142, 29);
             this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(160, 20);
+            this.txtName.Size = new System.Drawing.Size(200, 20);
             this.txtName.TabIndex = 1;
             //
             // lblSurname
             //
             this.lblSurname.AutoSize = true;
-            this.lblSurname.Location = new System.Drawing.Point(10, 57);
+            this.lblSurname.Location = new System.Drawing.Point(366, 32);
             this.lblSurname.Name = "lblSurname";
-            this.lblSurname.Size = new System.Drawing.Size(49, 13);
+            this.lblSurname.Size = new System.Drawing.Size(55, 13);
             this.lblSurname.TabIndex = 2;
-            this.lblSurname.Text = "Surname";
+            this.lblSurname.Text = "Surname *";
             //
             // txtSurname
             //
             this.txtSurname.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSurname.Location = new System.Drawing.Point(115, 54);
+            this.txtSurname.Location = new System.Drawing.Point(492, 29);
             this.txtSurname.Name = "txtSurname";
-            this.txtSurname.Size = new System.Drawing.Size(160, 20);
+            this.txtSurname.Size = new System.Drawing.Size(157, 20);
             this.txtSurname.TabIndex = 3;
             //
             // lblIDNumber
             //
             this.lblIDNumber.AutoSize = true;
-            this.lblIDNumber.Location = new System.Drawing.Point(10, 86);
+            this.lblIDNumber.Location = new System.Drawing.Point(16, 66);
             this.lblIDNumber.Name = "lblIDNumber";
-            this.lblIDNumber.Size = new System.Drawing.Size(57, 13);
+            this.lblIDNumber.Size = new System.Drawing.Size(63, 13);
             this.lblIDNumber.TabIndex = 4;
-            this.lblIDNumber.Text = "ID Number";
+            this.lblIDNumber.Text = "ID Number *";
             //
             // txtIDNumber
             //
-            this.txtIDNumber.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtIDNumber.Location = new System.Drawing.Point(115, 83);
+            this.txtIDNumber.Location = new System.Drawing.Point(142, 63);
             this.txtIDNumber.MaxLength = 13;
             this.txtIDNumber.Name = "txtIDNumber";
-            this.txtIDNumber.Size = new System.Drawing.Size(160, 20);
+            this.txtIDNumber.Size = new System.Drawing.Size(200, 20);
             this.txtIDNumber.TabIndex = 5;
             //
             // lblSARSNumber
             //
             this.lblSARSNumber.AutoSize = true;
-            this.lblSARSNumber.Location = new System.Drawing.Point(10, 115);
+            this.lblSARSNumber.Location = new System.Drawing.Point(366, 66);
             this.lblSARSNumber.Name = "lblSARSNumber";
             this.lblSARSNumber.Size = new System.Drawing.Size(101, 13);
             this.lblSARSNumber.TabIndex = 6;
@@ -359,39 +365,37 @@ namespace EmployeeTimeManagement.Views
             //
             this.txtSARSNumber.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSARSNumber.Location = new System.Drawing.Point(115, 112);
+            this.txtSARSNumber.Location = new System.Drawing.Point(492, 63);
             this.txtSARSNumber.MaxLength = 20;
             this.txtSARSNumber.Name = "txtSARSNumber";
-            this.txtSARSNumber.Size = new System.Drawing.Size(160, 20);
+            this.txtSARSNumber.Size = new System.Drawing.Size(157, 20);
             this.txtSARSNumber.TabIndex = 7;
             //
             // lblMobileNumber
             //
             this.lblMobileNumber.AutoSize = true;
-            this.lblMobileNumber.Location = new System.Drawing.Point(10, 144);
+            this.lblMobileNumber.Location = new System.Drawing.Point(16, 100);
             this.lblMobileNumber.Name = "lblMobileNumber";
-            this.lblMobileNumber.Size = new System.Drawing.Size(76, 13);
+            this.lblMobileNumber.Size = new System.Drawing.Size(84, 13);
             this.lblMobileNumber.TabIndex = 8;
-            this.lblMobileNumber.Text = "Mobile Number";
+            this.lblMobileNumber.Text = "Mobile Number *";
             //
             // txtMobileNumber
             //
-            this.txtMobileNumber.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtMobileNumber.Location = new System.Drawing.Point(115, 141);
+            this.txtMobileNumber.Location = new System.Drawing.Point(142, 97);
             this.txtMobileNumber.MaxLength = 20;
             this.txtMobileNumber.Name = "txtMobileNumber";
-            this.txtMobileNumber.Size = new System.Drawing.Size(160, 20);
+            this.txtMobileNumber.Size = new System.Drawing.Size(200, 20);
             this.txtMobileNumber.TabIndex = 9;
             //
             // lblMaritalStatus
             //
             this.lblMaritalStatus.AutoSize = true;
-            this.lblMaritalStatus.Location = new System.Drawing.Point(10, 173);
+            this.lblMaritalStatus.Location = new System.Drawing.Point(366, 100);
             this.lblMaritalStatus.Name = "lblMaritalStatus";
-            this.lblMaritalStatus.Size = new System.Drawing.Size(71, 13);
+            this.lblMaritalStatus.Size = new System.Drawing.Size(79, 13);
             this.lblMaritalStatus.TabIndex = 10;
-            this.lblMaritalStatus.Text = "Marital Status";
+            this.lblMaritalStatus.Text = "Marital Status *";
             //
             // cboMaritalStatus
             //
@@ -399,45 +403,27 @@ namespace EmployeeTimeManagement.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cboMaritalStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboMaritalStatus.FormattingEnabled = true;
-            this.cboMaritalStatus.Location = new System.Drawing.Point(115, 170);
+            this.cboMaritalStatus.Location = new System.Drawing.Point(492, 97);
             this.cboMaritalStatus.Name = "cboMaritalStatus";
-            this.cboMaritalStatus.Size = new System.Drawing.Size(160, 21);
+            this.cboMaritalStatus.Size = new System.Drawing.Size(157, 21);
             this.cboMaritalStatus.TabIndex = 11;
             this.cboMaritalStatus.SelectedIndexChanged += new System.EventHandler(this.cboMaritalStatus_SelectedIndexChanged);
             //
             // lblDependents
             //
             this.lblDependents.AutoSize = true;
-            this.lblDependents.Location = new System.Drawing.Point(10, 202);
+            this.lblDependents.Location = new System.Drawing.Point(16, 134);
             this.lblDependents.Name = "lblDependents";
-            this.lblDependents.Size = new System.Drawing.Size(103, 13);
+            this.lblDependents.Size = new System.Drawing.Size(78, 13);
             this.lblDependents.TabIndex = 12;
-            this.lblDependents.Text = "Dependents";
+            this.lblDependents.Text = "Dependents *";
             //
             // txtDependents
             //
-            this.txtDependents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDependents.Location = new System.Drawing.Point(115, 199);
+            this.txtDependents.Location = new System.Drawing.Point(142, 131);
             this.txtDependents.Name = "txtDependents";
-            this.txtDependents.Size = new System.Drawing.Size(160, 20);
+            this.txtDependents.Size = new System.Drawing.Size(200, 20);
             this.txtDependents.TabIndex = 13;
-            //
-            // tlpAddressBank
-            //
-            this.tlpAddressBank.ColumnCount = 1;
-            this.tlpAddressBank.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpAddressBank.Controls.Add(this.grpAddress, 0, 0);
-            this.tlpAddressBank.Controls.Add(this.grpBank, 0, 1);
-            this.tlpAddressBank.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlpAddressBank.Location = new System.Drawing.Point(301, 3);
-            this.tlpAddressBank.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tlpAddressBank.Name = "tlpAddressBank";
-            this.tlpAddressBank.RowCount = 2;
-            this.tlpAddressBank.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 176F));
-            this.tlpAddressBank.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpAddressBank.Size = new System.Drawing.Size(286, 324);
-            this.tlpAddressBank.TabIndex = 1;
             //
             // grpAddress
             //
@@ -452,36 +438,35 @@ namespace EmployeeTimeManagement.Views
             this.grpAddress.Controls.Add(this.lblPostalCode);
             this.grpAddress.Controls.Add(this.txtPostalCode);
             this.grpAddress.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpAddress.Location = new System.Drawing.Point(3, 3);
+            this.grpAddress.Location = new System.Drawing.Point(12, 12);
             this.grpAddress.Name = "grpAddress";
-            this.grpAddress.Size = new System.Drawing.Size(280, 170);
+            this.grpAddress.Size = new System.Drawing.Size(665, 476);
             this.grpAddress.TabIndex = 0;
             this.grpAddress.TabStop = false;
             this.grpAddress.Text = "Address";
+            this.grpAddress.Visible = false;
             //
             // lblHouseFlatNumber
             //
             this.lblHouseFlatNumber.AutoSize = true;
-            this.lblHouseFlatNumber.Location = new System.Drawing.Point(10, 28);
+            this.lblHouseFlatNumber.Location = new System.Drawing.Point(16, 32);
             this.lblHouseFlatNumber.Name = "lblHouseFlatNumber";
-            this.lblHouseFlatNumber.Size = new System.Drawing.Size(95, 13);
+            this.lblHouseFlatNumber.Size = new System.Drawing.Size(114, 13);
             this.lblHouseFlatNumber.TabIndex = 0;
-            this.lblHouseFlatNumber.Text = "House/Flat Number";
+            this.lblHouseFlatNumber.Text = "House/Flat Number *";
             //
             // txtHouseFlatNumber
             //
-            this.txtHouseFlatNumber.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtHouseFlatNumber.Location = new System.Drawing.Point(115, 25);
+            this.txtHouseFlatNumber.Location = new System.Drawing.Point(142, 29);
             this.txtHouseFlatNumber.MaxLength = 20;
             this.txtHouseFlatNumber.Name = "txtHouseFlatNumber";
-            this.txtHouseFlatNumber.Size = new System.Drawing.Size(154, 20);
+            this.txtHouseFlatNumber.Size = new System.Drawing.Size(200, 20);
             this.txtHouseFlatNumber.TabIndex = 1;
             //
             // lblComplexFlatNumber
             //
             this.lblComplexFlatNumber.AutoSize = true;
-            this.lblComplexFlatNumber.Location = new System.Drawing.Point(10, 57);
+            this.lblComplexFlatNumber.Location = new System.Drawing.Point(366, 32);
             this.lblComplexFlatNumber.Name = "lblComplexFlatNumber";
             this.lblComplexFlatNumber.Size = new System.Drawing.Size(104, 13);
             this.lblComplexFlatNumber.TabIndex = 2;
@@ -491,67 +476,63 @@ namespace EmployeeTimeManagement.Views
             //
             this.txtComplexFlatNumber.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtComplexFlatNumber.Location = new System.Drawing.Point(115, 54);
+            this.txtComplexFlatNumber.Location = new System.Drawing.Point(492, 29);
             this.txtComplexFlatNumber.MaxLength = 15;
             this.txtComplexFlatNumber.Name = "txtComplexFlatNumber";
-            this.txtComplexFlatNumber.Size = new System.Drawing.Size(154, 20);
+            this.txtComplexFlatNumber.Size = new System.Drawing.Size(157, 20);
             this.txtComplexFlatNumber.TabIndex = 3;
             //
             // lblStreetName
             //
             this.lblStreetName.AutoSize = true;
-            this.lblStreetName.Location = new System.Drawing.Point(10, 86);
+            this.lblStreetName.Location = new System.Drawing.Point(16, 66);
             this.lblStreetName.Name = "lblStreetName";
-            this.lblStreetName.Size = new System.Drawing.Size(66, 13);
+            this.lblStreetName.Size = new System.Drawing.Size(74, 13);
             this.lblStreetName.TabIndex = 4;
-            this.lblStreetName.Text = "Street Name";
+            this.lblStreetName.Text = "Street Name *";
             //
             // txtStreetName
             //
-            this.txtStreetName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtStreetName.Location = new System.Drawing.Point(115, 83);
+            this.txtStreetName.Location = new System.Drawing.Point(142, 63);
             this.txtStreetName.MaxLength = 150;
             this.txtStreetName.Name = "txtStreetName";
-            this.txtStreetName.Size = new System.Drawing.Size(154, 20);
+            this.txtStreetName.Size = new System.Drawing.Size(200, 20);
             this.txtStreetName.TabIndex = 5;
             //
             // lblTown
             //
             this.lblTown.AutoSize = true;
-            this.lblTown.Location = new System.Drawing.Point(10, 115);
+            this.lblTown.Location = new System.Drawing.Point(366, 66);
             this.lblTown.Name = "lblTown";
-            this.lblTown.Size = new System.Drawing.Size(33, 13);
+            this.lblTown.Size = new System.Drawing.Size(41, 13);
             this.lblTown.TabIndex = 6;
-            this.lblTown.Text = "Town";
+            this.lblTown.Text = "Town *";
             //
             // txtTown
             //
             this.txtTown.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtTown.Location = new System.Drawing.Point(115, 112);
+            this.txtTown.Location = new System.Drawing.Point(492, 63);
             this.txtTown.MaxLength = 100;
             this.txtTown.Name = "txtTown";
-            this.txtTown.Size = new System.Drawing.Size(154, 20);
+            this.txtTown.Size = new System.Drawing.Size(157, 20);
             this.txtTown.TabIndex = 7;
             //
             // lblPostalCode
             //
             this.lblPostalCode.AutoSize = true;
-            this.lblPostalCode.Location = new System.Drawing.Point(10, 144);
+            this.lblPostalCode.Location = new System.Drawing.Point(16, 100);
             this.lblPostalCode.Name = "lblPostalCode";
-            this.lblPostalCode.Size = new System.Drawing.Size(63, 13);
+            this.lblPostalCode.Size = new System.Drawing.Size(71, 13);
             this.lblPostalCode.TabIndex = 8;
-            this.lblPostalCode.Text = "Postal Code";
+            this.lblPostalCode.Text = "Postal Code *";
             //
             // txtPostalCode
             //
-            this.txtPostalCode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtPostalCode.Location = new System.Drawing.Point(115, 141);
+            this.txtPostalCode.Location = new System.Drawing.Point(142, 97);
             this.txtPostalCode.MaxLength = 10;
             this.txtPostalCode.Name = "txtPostalCode";
-            this.txtPostalCode.Size = new System.Drawing.Size(154, 20);
+            this.txtPostalCode.Size = new System.Drawing.Size(200, 20);
             this.txtPostalCode.TabIndex = 9;
             //
             // grpBank
@@ -565,103 +546,85 @@ namespace EmployeeTimeManagement.Views
             this.grpBank.Controls.Add(this.lblBranchCode);
             this.grpBank.Controls.Add(this.txtBranchCode);
             this.grpBank.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpBank.Location = new System.Drawing.Point(3, 179);
+            this.grpBank.Location = new System.Drawing.Point(12, 12);
             this.grpBank.Name = "grpBank";
-            this.grpBank.Size = new System.Drawing.Size(280, 142);
-            this.grpBank.TabIndex = 1;
+            this.grpBank.Size = new System.Drawing.Size(665, 476);
+            this.grpBank.TabIndex = 0;
             this.grpBank.TabStop = false;
             this.grpBank.Text = "Bank";
+            this.grpBank.Visible = false;
             //
             // lblBankName
             //
             this.lblBankName.AutoSize = true;
-            this.lblBankName.Location = new System.Drawing.Point(10, 28);
+            this.lblBankName.Location = new System.Drawing.Point(16, 32);
             this.lblBankName.Name = "lblBankName";
-            this.lblBankName.Size = new System.Drawing.Size(62, 13);
+            this.lblBankName.Size = new System.Drawing.Size(70, 13);
             this.lblBankName.TabIndex = 0;
-            this.lblBankName.Text = "Bank Name";
+            this.lblBankName.Text = "Bank Name *";
             //
             // txtBankName
             //
-            this.txtBankName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtBankName.Location = new System.Drawing.Point(115, 25);
+            this.txtBankName.Location = new System.Drawing.Point(142, 29);
             this.txtBankName.MaxLength = 100;
             this.txtBankName.Name = "txtBankName";
-            this.txtBankName.Size = new System.Drawing.Size(154, 20);
+            this.txtBankName.Size = new System.Drawing.Size(200, 20);
             this.txtBankName.TabIndex = 1;
             //
             // lblAccountType
             //
             this.lblAccountType.AutoSize = true;
-            this.lblAccountType.Location = new System.Drawing.Point(10, 57);
+            this.lblAccountType.Location = new System.Drawing.Point(366, 32);
             this.lblAccountType.Name = "lblAccountType";
-            this.lblAccountType.Size = new System.Drawing.Size(72, 13);
+            this.lblAccountType.Size = new System.Drawing.Size(80, 13);
             this.lblAccountType.TabIndex = 2;
-            this.lblAccountType.Text = "Account Type";
+            this.lblAccountType.Text = "Account Type *";
             //
             // txtAccountType
             //
             this.txtAccountType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtAccountType.Location = new System.Drawing.Point(115, 54);
+            this.txtAccountType.Location = new System.Drawing.Point(492, 29);
             this.txtAccountType.MaxLength = 30;
             this.txtAccountType.Name = "txtAccountType";
-            this.txtAccountType.Size = new System.Drawing.Size(154, 20);
+            this.txtAccountType.Size = new System.Drawing.Size(157, 20);
             this.txtAccountType.TabIndex = 3;
             //
             // lblAccountNumber
             //
             this.lblAccountNumber.AutoSize = true;
-            this.lblAccountNumber.Location = new System.Drawing.Point(10, 86);
+            this.lblAccountNumber.Location = new System.Drawing.Point(16, 66);
             this.lblAccountNumber.Name = "lblAccountNumber";
-            this.lblAccountNumber.Size = new System.Drawing.Size(86, 13);
+            this.lblAccountNumber.Size = new System.Drawing.Size(94, 13);
             this.lblAccountNumber.TabIndex = 4;
-            this.lblAccountNumber.Text = "Account Number";
+            this.lblAccountNumber.Text = "Account Number *";
             //
             // txtAccountNumber
             //
-            this.txtAccountNumber.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtAccountNumber.Location = new System.Drawing.Point(115, 83);
+            this.txtAccountNumber.Location = new System.Drawing.Point(142, 63);
             this.txtAccountNumber.MaxLength = 30;
             this.txtAccountNumber.Name = "txtAccountNumber";
-            this.txtAccountNumber.Size = new System.Drawing.Size(154, 20);
+            this.txtAccountNumber.Size = new System.Drawing.Size(200, 20);
             this.txtAccountNumber.TabIndex = 5;
             //
             // lblBranchCode
             //
             this.lblBranchCode.AutoSize = true;
-            this.lblBranchCode.Location = new System.Drawing.Point(10, 115);
+            this.lblBranchCode.Location = new System.Drawing.Point(366, 66);
             this.lblBranchCode.Name = "lblBranchCode";
-            this.lblBranchCode.Size = new System.Drawing.Size(68, 13);
+            this.lblBranchCode.Size = new System.Drawing.Size(76, 13);
             this.lblBranchCode.TabIndex = 6;
-            this.lblBranchCode.Text = "Branch Code";
+            this.lblBranchCode.Text = "Branch Code *";
             //
             // txtBranchCode
             //
             this.txtBranchCode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtBranchCode.Location = new System.Drawing.Point(115, 112);
+            this.txtBranchCode.Location = new System.Drawing.Point(492, 63);
             this.txtBranchCode.MaxLength = 10;
             this.txtBranchCode.Name = "txtBranchCode";
-            this.txtBranchCode.Size = new System.Drawing.Size(154, 20);
+            this.txtBranchCode.Size = new System.Drawing.Size(157, 20);
             this.txtBranchCode.TabIndex = 7;
-            //
-            // tlpContractSpouse
-            //
-            this.tlpContractSpouse.ColumnCount = 1;
-            this.tlpContractSpouse.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpContractSpouse.Controls.Add(this.grpContract, 0, 0);
-            this.tlpContractSpouse.Controls.Add(this.grpSpouse, 0, 1);
-            this.tlpContractSpouse.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlpContractSpouse.Location = new System.Drawing.Point(593, 3);
-            this.tlpContractSpouse.Name = "tlpContractSpouse";
-            this.tlpContractSpouse.RowCount = 2;
-            this.tlpContractSpouse.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 234F));
-            this.tlpContractSpouse.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpContractSpouse.Size = new System.Drawing.Size(287, 324);
-            this.tlpContractSpouse.TabIndex = 2;
             //
             // grpContract
             //
@@ -680,113 +643,108 @@ namespace EmployeeTimeManagement.Views
             this.grpContract.Controls.Add(this.lblOpeningBalanceAsAt);
             this.grpContract.Controls.Add(this.dtpOpeningBalanceAsAt);
             this.grpContract.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpContract.Location = new System.Drawing.Point(3, 3);
+            this.grpContract.Location = new System.Drawing.Point(12, 12);
             this.grpContract.Name = "grpContract";
-            this.grpContract.Size = new System.Drawing.Size(281, 228);
+            this.grpContract.Size = new System.Drawing.Size(665, 476);
             this.grpContract.TabIndex = 0;
             this.grpContract.TabStop = false;
             this.grpContract.Text = "Contract";
+            this.grpContract.Visible = false;
             //
             // lblContractType
             //
             this.lblContractType.AutoSize = true;
-            this.lblContractType.Location = new System.Drawing.Point(10, 28);
+            this.lblContractType.Location = new System.Drawing.Point(16, 32);
             this.lblContractType.Name = "lblContractType";
-            this.lblContractType.Size = new System.Drawing.Size(74, 13);
+            this.lblContractType.Size = new System.Drawing.Size(88, 13);
             this.lblContractType.TabIndex = 0;
-            this.lblContractType.Text = "Contract Type";
+            this.lblContractType.Text = "Contract Type *";
             //
             // txtContractType
             //
-            this.txtContractType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtContractType.Location = new System.Drawing.Point(115, 25);
+            this.txtContractType.Location = new System.Drawing.Point(142, 29);
             this.txtContractType.MaxLength = 30;
             this.txtContractType.Name = "txtContractType";
-            this.txtContractType.Size = new System.Drawing.Size(155, 20);
+            this.txtContractType.Size = new System.Drawing.Size(200, 20);
             this.txtContractType.TabIndex = 1;
             //
             // lblStartDate
             //
             this.lblStartDate.AutoSize = true;
-            this.lblStartDate.Location = new System.Drawing.Point(10, 57);
+            this.lblStartDate.Location = new System.Drawing.Point(366, 32);
             this.lblStartDate.Name = "lblStartDate";
-            this.lblStartDate.Size = new System.Drawing.Size(54, 13);
+            this.lblStartDate.Size = new System.Drawing.Size(68, 13);
             this.lblStartDate.TabIndex = 2;
-            this.lblStartDate.Text = "Start Date";
+            this.lblStartDate.Text = "Start Date *";
             //
             // dtpStartDate
             //
             this.dtpStartDate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dtpStartDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpStartDate.Location = new System.Drawing.Point(115, 54);
+            this.dtpStartDate.Location = new System.Drawing.Point(492, 29);
             this.dtpStartDate.Name = "dtpStartDate";
-            this.dtpStartDate.Size = new System.Drawing.Size(155, 20);
+            this.dtpStartDate.Size = new System.Drawing.Size(157, 20);
             this.dtpStartDate.TabIndex = 3;
             //
             // lblDepartment
             //
             this.lblDepartment.AutoSize = true;
-            this.lblDepartment.Location = new System.Drawing.Point(10, 86);
+            this.lblDepartment.Location = new System.Drawing.Point(16, 66);
             this.lblDepartment.Name = "lblDepartment";
-            this.lblDepartment.Size = new System.Drawing.Size(62, 13);
+            this.lblDepartment.Size = new System.Drawing.Size(76, 13);
             this.lblDepartment.TabIndex = 4;
-            this.lblDepartment.Text = "Department";
+            this.lblDepartment.Text = "Department *";
             //
             // txtDepartment
             //
-            this.txtDepartment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDepartment.Location = new System.Drawing.Point(115, 83);
+            this.txtDepartment.Location = new System.Drawing.Point(142, 63);
             this.txtDepartment.MaxLength = 100;
             this.txtDepartment.Name = "txtDepartment";
-            this.txtDepartment.Size = new System.Drawing.Size(155, 20);
+            this.txtDepartment.Size = new System.Drawing.Size(200, 20);
             this.txtDepartment.TabIndex = 5;
             //
             // lblJobDescription
             //
             this.lblJobDescription.AutoSize = true;
-            this.lblJobDescription.Location = new System.Drawing.Point(10, 115);
+            this.lblJobDescription.Location = new System.Drawing.Point(366, 66);
             this.lblJobDescription.Name = "lblJobDescription";
-            this.lblJobDescription.Size = new System.Drawing.Size(80, 13);
+            this.lblJobDescription.Size = new System.Drawing.Size(94, 13);
             this.lblJobDescription.TabIndex = 6;
-            this.lblJobDescription.Text = "Job Description";
+            this.lblJobDescription.Text = "Job Description *";
             //
             // txtJobDescription
             //
             this.txtJobDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtJobDescription.Location = new System.Drawing.Point(115, 112);
+            this.txtJobDescription.Location = new System.Drawing.Point(492, 63);
             this.txtJobDescription.MaxLength = 100;
             this.txtJobDescription.Name = "txtJobDescription";
-            this.txtJobDescription.Size = new System.Drawing.Size(155, 20);
+            this.txtJobDescription.Size = new System.Drawing.Size(157, 20);
             this.txtJobDescription.TabIndex = 7;
             //
             // lblHourlyRate
             //
             this.lblHourlyRate.AutoSize = true;
-            this.lblHourlyRate.Location = new System.Drawing.Point(10, 144);
+            this.lblHourlyRate.Location = new System.Drawing.Point(16, 100);
             this.lblHourlyRate.Name = "lblHourlyRate";
-            this.lblHourlyRate.Size = new System.Drawing.Size(62, 13);
+            this.lblHourlyRate.Size = new System.Drawing.Size(70, 13);
             this.lblHourlyRate.TabIndex = 8;
-            this.lblHourlyRate.Text = "Hourly Rate";
+            this.lblHourlyRate.Text = "Hourly Rate *";
             //
             // txtHourlyRate
             //
-            this.txtHourlyRate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtHourlyRate.Location = new System.Drawing.Point(115, 141);
+            this.txtHourlyRate.Location = new System.Drawing.Point(142, 97);
             this.txtHourlyRate.Name = "txtHourlyRate";
-            this.txtHourlyRate.Size = new System.Drawing.Size(155, 20);
+            this.txtHourlyRate.Size = new System.Drawing.Size(200, 20);
             this.txtHourlyRate.TabIndex = 9;
             //
             // lblOpeningPTODays
             //
             this.lblOpeningPTODays.AutoSize = true;
-            this.lblOpeningPTODays.Location = new System.Drawing.Point(10, 173);
+            this.lblOpeningPTODays.Location = new System.Drawing.Point(366, 100);
             this.lblOpeningPTODays.Name = "lblOpeningPTODays";
-            this.lblOpeningPTODays.Size = new System.Drawing.Size(102, 13);
+            this.lblOpeningPTODays.Size = new System.Drawing.Size(126, 13);
             this.lblOpeningPTODays.TabIndex = 10;
             this.lblOpeningPTODays.Text = "Opening Balance (days)";
             //
@@ -794,29 +752,27 @@ namespace EmployeeTimeManagement.Views
             //
             this.txtOpeningPTODays.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtOpeningPTODays.Location = new System.Drawing.Point(115, 170);
+            this.txtOpeningPTODays.Location = new System.Drawing.Point(492, 97);
             this.txtOpeningPTODays.Name = "txtOpeningPTODays";
-            this.txtOpeningPTODays.Size = new System.Drawing.Size(155, 20);
+            this.txtOpeningPTODays.Size = new System.Drawing.Size(157, 20);
             this.txtOpeningPTODays.TabIndex = 11;
             //
             // lblOpeningBalanceAsAt
             //
             this.lblOpeningBalanceAsAt.AutoSize = true;
-            this.lblOpeningBalanceAsAt.Location = new System.Drawing.Point(10, 202);
+            this.lblOpeningBalanceAsAt.Location = new System.Drawing.Point(16, 134);
             this.lblOpeningBalanceAsAt.Name = "lblOpeningBalanceAsAt";
-            this.lblOpeningBalanceAsAt.Size = new System.Drawing.Size(102, 13);
+            this.lblOpeningBalanceAsAt.Size = new System.Drawing.Size(126, 13);
             this.lblOpeningBalanceAsAt.TabIndex = 12;
             this.lblOpeningBalanceAsAt.Text = "Opening Balance As At";
             //
             // dtpOpeningBalanceAsAt
             //
-            this.dtpOpeningBalanceAsAt.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.dtpOpeningBalanceAsAt.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpOpeningBalanceAsAt.Location = new System.Drawing.Point(115, 199);
+            this.dtpOpeningBalanceAsAt.Location = new System.Drawing.Point(142, 131);
             this.dtpOpeningBalanceAsAt.Name = "dtpOpeningBalanceAsAt";
             this.dtpOpeningBalanceAsAt.ShowCheckBox = true;
-            this.dtpOpeningBalanceAsAt.Size = new System.Drawing.Size(155, 20);
+            this.dtpOpeningBalanceAsAt.Size = new System.Drawing.Size(200, 20);
             this.dtpOpeningBalanceAsAt.TabIndex = 13;
             //
             // grpSpouse
@@ -826,49 +782,48 @@ namespace EmployeeTimeManagement.Views
             this.grpSpouse.Controls.Add(this.lblSpouseMobileNumber);
             this.grpSpouse.Controls.Add(this.txtSpouseMobileNumber);
             this.grpSpouse.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpSpouse.Location = new System.Drawing.Point(3, 179);
+            this.grpSpouse.Location = new System.Drawing.Point(12, 12);
             this.grpSpouse.Name = "grpSpouse";
-            this.grpSpouse.Size = new System.Drawing.Size(281, 142);
-            this.grpSpouse.TabIndex = 1;
+            this.grpSpouse.Size = new System.Drawing.Size(665, 476);
+            this.grpSpouse.TabIndex = 0;
             this.grpSpouse.TabStop = false;
             this.grpSpouse.Text = "Spouse";
+            this.grpSpouse.Visible = false;
             //
             // lblSpouseName
             //
             this.lblSpouseName.AutoSize = true;
-            this.lblSpouseName.Location = new System.Drawing.Point(10, 28);
+            this.lblSpouseName.Location = new System.Drawing.Point(16, 32);
             this.lblSpouseName.Name = "lblSpouseName";
-            this.lblSpouseName.Size = new System.Drawing.Size(74, 13);
+            this.lblSpouseName.Size = new System.Drawing.Size(82, 13);
             this.lblSpouseName.TabIndex = 0;
-            this.lblSpouseName.Text = "Spouse Name";
+            this.lblSpouseName.Text = "Spouse Name *";
             //
             // txtSpouseName
             //
-            this.txtSpouseName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSpouseName.Location = new System.Drawing.Point(115, 25);
+            this.txtSpouseName.Location = new System.Drawing.Point(142, 29);
             this.txtSpouseName.MaxLength = 200;
             this.txtSpouseName.Name = "txtSpouseName";
-            this.txtSpouseName.Size = new System.Drawing.Size(155, 20);
+            this.txtSpouseName.Size = new System.Drawing.Size(200, 20);
             this.txtSpouseName.TabIndex = 1;
             //
             // lblSpouseMobileNumber
             //
             this.lblSpouseMobileNumber.AutoSize = true;
-            this.lblSpouseMobileNumber.Location = new System.Drawing.Point(10, 57);
+            this.lblSpouseMobileNumber.Location = new System.Drawing.Point(366, 32);
             this.lblSpouseMobileNumber.Name = "lblSpouseMobileNumber";
-            this.lblSpouseMobileNumber.Size = new System.Drawing.Size(115, 13);
+            this.lblSpouseMobileNumber.Size = new System.Drawing.Size(123, 13);
             this.lblSpouseMobileNumber.TabIndex = 2;
-            this.lblSpouseMobileNumber.Text = "Spouse Mobile No.";
+            this.lblSpouseMobileNumber.Text = "Spouse Mobile No. *";
             //
             // txtSpouseMobileNumber
             //
             this.txtSpouseMobileNumber.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSpouseMobileNumber.Location = new System.Drawing.Point(115, 54);
+            this.txtSpouseMobileNumber.Location = new System.Drawing.Point(492, 29);
             this.txtSpouseMobileNumber.MaxLength = 20;
             this.txtSpouseMobileNumber.Name = "txtSpouseMobileNumber";
-            this.txtSpouseMobileNumber.Size = new System.Drawing.Size(155, 20);
+            this.txtSpouseMobileNumber.Size = new System.Drawing.Size(157, 20);
             this.txtSpouseMobileNumber.TabIndex = 3;
             //
             // grpFamily
@@ -876,12 +831,13 @@ namespace EmployeeTimeManagement.Views
             this.grpFamily.Controls.Add(this.dgvFamily);
             this.grpFamily.Controls.Add(this.pnlFamilyButtons);
             this.grpFamily.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpFamily.Location = new System.Drawing.Point(9, 333);
+            this.grpFamily.Location = new System.Drawing.Point(12, 12);
             this.grpFamily.Name = "grpFamily";
-            this.grpFamily.Size = new System.Drawing.Size(871, 164);
-            this.grpFamily.TabIndex = 3;
+            this.grpFamily.Size = new System.Drawing.Size(665, 476);
+            this.grpFamily.TabIndex = 0;
             this.grpFamily.TabStop = false;
             this.grpFamily.Text = "Family Contacts";
+            this.grpFamily.Visible = false;
             //
             // dgvFamily
             //
@@ -899,12 +855,12 @@ namespace EmployeeTimeManagement.Views
             this.dgvFamily.MultiSelect = false;
             this.dgvFamily.Name = "dgvFamily";
             this.dgvFamily.RowHeadersVisible = false;
-            this.dgvFamily.Size = new System.Drawing.Size(745, 145);
+            this.dgvFamily.Size = new System.Drawing.Size(539, 457);
             this.dgvFamily.TabIndex = 0;
             //
             // colFamilyName
             //
-            this.colFamilyName.HeaderText = "Name";
+            this.colFamilyName.HeaderText = "Name *";
             this.colFamilyName.MaxInputLength = 200;
             this.colFamilyName.Name = "colFamilyName";
             this.colFamilyName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -918,7 +874,7 @@ namespace EmployeeTimeManagement.Views
             //
             // colFamilyRelationship
             //
-            this.colFamilyRelationship.HeaderText = "Relationship";
+            this.colFamilyRelationship.HeaderText = "Relationship *";
             this.colFamilyRelationship.MaxInputLength = 50;
             this.colFamilyRelationship.Name = "colFamilyRelationship";
             this.colFamilyRelationship.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -928,9 +884,9 @@ namespace EmployeeTimeManagement.Views
             this.pnlFamilyButtons.Controls.Add(this.btnAddFamilyRow);
             this.pnlFamilyButtons.Controls.Add(this.btnRemoveFamilyRow);
             this.pnlFamilyButtons.Dock = System.Windows.Forms.DockStyle.Right;
-            this.pnlFamilyButtons.Location = new System.Drawing.Point(748, 16);
+            this.pnlFamilyButtons.Location = new System.Drawing.Point(542, 16);
             this.pnlFamilyButtons.Name = "pnlFamilyButtons";
-            this.pnlFamilyButtons.Size = new System.Drawing.Size(120, 145);
+            this.pnlFamilyButtons.Size = new System.Drawing.Size(120, 457);
             this.pnlFamilyButtons.TabIndex = 1;
             //
             // btnAddFamilyRow
@@ -952,6 +908,84 @@ namespace EmployeeTimeManagement.Views
             this.btnRemoveFamilyRow.Text = "Remove Row";
             this.btnRemoveFamilyRow.UseVisualStyleBackColor = true;
             this.btnRemoveFamilyRow.Click += new System.EventHandler(this.btnRemoveFamilyRow_Click);
+            //
+            // pnlSectionList
+            //
+            this.pnlSectionList.Controls.Add(this.btnSectionFamily);
+            this.pnlSectionList.Controls.Add(this.btnSectionSpouse);
+            this.pnlSectionList.Controls.Add(this.btnSectionContract);
+            this.pnlSectionList.Controls.Add(this.btnSectionBank);
+            this.pnlSectionList.Controls.Add(this.btnSectionAddress);
+            this.pnlSectionList.Controls.Add(this.btnSectionPersonal);
+            this.pnlSectionList.Controls.Add(this.btnBackToList);
+            this.pnlSectionList.Dock = System.Windows.Forms.DockStyle.Left;
+            this.pnlSectionList.Location = new System.Drawing.Point(0, 0);
+            this.pnlSectionList.Name = "pnlSectionList";
+            this.pnlSectionList.Size = new System.Drawing.Size(200, 500);
+            this.pnlSectionList.TabIndex = 0;
+            //
+            // btnBackToList
+            //
+            this.btnBackToList.Location = new System.Drawing.Point(0, 16);
+            this.btnBackToList.Name = "btnBackToList";
+            this.btnBackToList.Size = new System.Drawing.Size(200, 32);
+            this.btnBackToList.TabIndex = 0;
+            this.btnBackToList.Text = "Back to list";
+            this.btnBackToList.Click += new System.EventHandler(this.btnBackToList_Click);
+            //
+            // btnSectionPersonal
+            //
+            this.btnSectionPersonal.Location = new System.Drawing.Point(0, 64);
+            this.btnSectionPersonal.Name = "btnSectionPersonal";
+            this.btnSectionPersonal.Size = new System.Drawing.Size(200, 40);
+            this.btnSectionPersonal.TabIndex = 1;
+            this.btnSectionPersonal.Text = "Personal";
+            this.btnSectionPersonal.Click += new System.EventHandler(this.btnSectionPersonal_Click);
+            //
+            // btnSectionAddress
+            //
+            this.btnSectionAddress.Location = new System.Drawing.Point(0, 104);
+            this.btnSectionAddress.Name = "btnSectionAddress";
+            this.btnSectionAddress.Size = new System.Drawing.Size(200, 40);
+            this.btnSectionAddress.TabIndex = 2;
+            this.btnSectionAddress.Text = "Address";
+            this.btnSectionAddress.Click += new System.EventHandler(this.btnSectionAddress_Click);
+            //
+            // btnSectionBank
+            //
+            this.btnSectionBank.Location = new System.Drawing.Point(0, 144);
+            this.btnSectionBank.Name = "btnSectionBank";
+            this.btnSectionBank.Size = new System.Drawing.Size(200, 40);
+            this.btnSectionBank.TabIndex = 3;
+            this.btnSectionBank.Text = "Bank";
+            this.btnSectionBank.Click += new System.EventHandler(this.btnSectionBank_Click);
+            //
+            // btnSectionContract
+            //
+            this.btnSectionContract.Location = new System.Drawing.Point(0, 184);
+            this.btnSectionContract.Name = "btnSectionContract";
+            this.btnSectionContract.Size = new System.Drawing.Size(200, 40);
+            this.btnSectionContract.TabIndex = 4;
+            this.btnSectionContract.Text = "Contract";
+            this.btnSectionContract.Click += new System.EventHandler(this.btnSectionContract_Click);
+            //
+            // btnSectionSpouse
+            //
+            this.btnSectionSpouse.Location = new System.Drawing.Point(0, 224);
+            this.btnSectionSpouse.Name = "btnSectionSpouse";
+            this.btnSectionSpouse.Size = new System.Drawing.Size(200, 40);
+            this.btnSectionSpouse.TabIndex = 5;
+            this.btnSectionSpouse.Text = "Spouse";
+            this.btnSectionSpouse.Click += new System.EventHandler(this.btnSectionSpouse_Click);
+            //
+            // btnSectionFamily
+            //
+            this.btnSectionFamily.Location = new System.Drawing.Point(0, 264);
+            this.btnSectionFamily.Name = "btnSectionFamily";
+            this.btnSectionFamily.Size = new System.Drawing.Size(200, 40);
+            this.btnSectionFamily.TabIndex = 6;
+            this.btnSectionFamily.Text = "Family contacts";
+            this.btnSectionFamily.Click += new System.EventHandler(this.btnSectionFamily_Click);
             //
             // pnlEditorButtons
             //
@@ -1016,16 +1050,16 @@ namespace EmployeeTimeManagement.Views
             this.grpAddress.PerformLayout();
             this.grpBank.ResumeLayout(false);
             this.grpBank.PerformLayout();
-            this.tlpAddressBank.ResumeLayout(false);
             this.grpContract.ResumeLayout(false);
             this.grpContract.PerformLayout();
             this.grpSpouse.ResumeLayout(false);
             this.grpSpouse.PerformLayout();
-            this.tlpContractSpouse.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvFamily)).EndInit();
             this.pnlFamilyButtons.ResumeLayout(false);
             this.grpFamily.ResumeLayout(false);
-            this.tlpEditor.ResumeLayout(false);
+            this.pnlSectionContent.ResumeLayout(false);
+            this.pnlSectionList.ResumeLayout(false);
+            this.pnlSectionBody.ResumeLayout(false);
             this.pnlEditorButtons.ResumeLayout(false);
             this.pnlEditor.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -1045,7 +1079,8 @@ namespace EmployeeTimeManagement.Views
         private EmployeeTimeManagement.Views.EmployeeDetailsPanel employeeDetails;
         private System.Windows.Forms.Panel pnlEditor;
         private System.Windows.Forms.Label lblEditorTitle;
-        private System.Windows.Forms.TableLayoutPanel tlpEditor;
+        private System.Windows.Forms.Panel pnlSectionBody;
+        private System.Windows.Forms.Panel pnlSectionContent;
         private System.Windows.Forms.GroupBox grpPersonal;
         private System.Windows.Forms.Label lblName;
         private System.Windows.Forms.TextBox txtName;
@@ -1061,7 +1096,6 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.ComboBox cboMaritalStatus;
         private System.Windows.Forms.Label lblDependents;
         private System.Windows.Forms.TextBox txtDependents;
-        private System.Windows.Forms.TableLayoutPanel tlpAddressBank;
         private System.Windows.Forms.GroupBox grpAddress;
         private System.Windows.Forms.Label lblHouseFlatNumber;
         private System.Windows.Forms.TextBox txtHouseFlatNumber;
@@ -1082,7 +1116,6 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.TextBox txtAccountNumber;
         private System.Windows.Forms.Label lblBranchCode;
         private System.Windows.Forms.TextBox txtBranchCode;
-        private System.Windows.Forms.TableLayoutPanel tlpContractSpouse;
         private System.Windows.Forms.GroupBox grpContract;
         private System.Windows.Forms.Label lblContractType;
         private System.Windows.Forms.TextBox txtContractType;
@@ -1111,6 +1144,14 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Panel pnlFamilyButtons;
         private System.Windows.Forms.Button btnAddFamilyRow;
         private System.Windows.Forms.Button btnRemoveFamilyRow;
+        private System.Windows.Forms.Panel pnlSectionList;
+        private System.Windows.Forms.Button btnBackToList;
+        private System.Windows.Forms.Button btnSectionPersonal;
+        private System.Windows.Forms.Button btnSectionAddress;
+        private System.Windows.Forms.Button btnSectionBank;
+        private System.Windows.Forms.Button btnSectionContract;
+        private System.Windows.Forms.Button btnSectionSpouse;
+        private System.Windows.Forms.Button btnSectionFamily;
         private System.Windows.Forms.Panel pnlEditorButtons;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnCancel;

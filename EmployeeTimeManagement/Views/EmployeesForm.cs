@@ -26,14 +26,55 @@ namespace EmployeeTimeManagement.Views
         // moves back.
         private EmployeeRecord editingRecord;
 
+        // The editor's sections, in the order they sit on the section list.
+        private enum EditorSection
+        {
+            Personal,
+            Address,
+            Bank,
+            Contract,
+            Spouse,
+            Family
+        }
+
+        // Each section's panel and the section-list button that shows it, so switching
+        // sections is one lookup rather than a chain of if/else.
+        private Dictionary<EditorSection, Control> sectionPanels;
+        private Dictionary<EditorSection, Button> sectionButtons;
+
         public EmployeesForm()
         {
             InitializeComponent();
+            BuildSectionMaps();
             ApplyTheme();
             employeeController = new EmployeeController();
             editorFields = BuildEditorFields();
             cboMaritalStatus.Items.AddRange(MaritalStatuses.All());
             LoadData();
+        }
+
+        // Ties each section to the panel it shows and the section-list button that opens it.
+        private void BuildSectionMaps()
+        {
+            sectionPanels = new Dictionary<EditorSection, Control>
+            {
+                { EditorSection.Personal, grpPersonal },
+                { EditorSection.Address, grpAddress },
+                { EditorSection.Bank, grpBank },
+                { EditorSection.Contract, grpContract },
+                { EditorSection.Spouse, grpSpouse },
+                { EditorSection.Family, grpFamily }
+            };
+
+            sectionButtons = new Dictionary<EditorSection, Button>
+            {
+                { EditorSection.Personal, btnSectionPersonal },
+                { EditorSection.Address, btnSectionAddress },
+                { EditorSection.Bank, btnSectionBank },
+                { EditorSection.Contract, btnSectionContract },
+                { EditorSection.Spouse, btnSectionSpouse },
+                { EditorSection.Family, btnSectionFamily }
+            };
         }
 
         // Dresses the view in the theme: a dark header bar over a cream page, and one themed
@@ -58,6 +99,50 @@ namespace EmployeeTimeManagement.Views
             Theme.PrefixIcon(btnAdd, "\u271A");
 
             Theme.StyleButton(btnAdd, ButtonRole.Primary);
+
+            ApplyEditorTheme();
+        }
+
+        // Dresses the editor: a dark section list on the left, a cream page for the chosen
+        // section's fields, and the same button roles used everywhere else in the view.
+        private void ApplyEditorTheme()
+        {
+            pnlEditor.BackColor = Theme.Cream;
+            lblEditorTitle.Font = Theme.TitleFont;
+            lblEditorTitle.ForeColor = Theme.Ink;
+            lblEditorTitle.BackColor = Theme.Cream;
+
+            pnlSectionList.BackColor = Theme.Charcoal;
+            pnlSectionContent.BackColor = Theme.Cream;
+
+            Theme.PrefixIcon(btnBackToList, "\u2190");
+            Theme.StyleSectionItem(btnBackToList);
+
+            foreach (Button button in sectionButtons.Values)
+            {
+                Theme.StyleSectionItem(button);
+            }
+
+            Theme.StyleButton(btnSave, ButtonRole.Primary);
+            Theme.StyleButton(btnCancel, ButtonRole.Ghost);
+            Theme.StyleButton(btnAddFamilyRow, ButtonRole.Dark);
+            Theme.StyleButton(btnRemoveFamilyRow, ButtonRole.Danger);
+        }
+
+        // Shows one section's fields and hides the rest, and marks its button as the chosen
+        // one on the section list. Switching sections never touches a control's value, so
+        // typing in a section survives moving away from it and back.
+        private void ShowSection(EditorSection section)
+        {
+            foreach (KeyValuePair<EditorSection, Control> entry in sectionPanels)
+            {
+                entry.Value.Visible = entry.Key == section;
+            }
+
+            foreach (KeyValuePair<EditorSection, Button> entry in sectionButtons)
+            {
+                Theme.SelectSectionItem(entry.Value, entry.Key == section);
+            }
         }
 
         // Names the store the list belongs to. Nothing on record carries a store's name, so
@@ -129,12 +214,13 @@ namespace EmployeeTimeManagement.Views
         // Swaps the list away and opens the editor on a blank form for a new starter
         private void ShowEditorForNewEmployee()
         {
-            lblEditorTitle.Text = "Add Employee";
+            lblEditorTitle.Text = "Add employee";
             ClearEditor();
             editorStateOnOpen = DescribeEditorState();
 
             pnlList.Visible = false;
             pnlEditor.Visible = true;
+            ShowSection(EditorSection.Personal);
             txtName.Focus();
         }
 
@@ -169,13 +255,14 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
-            lblEditorTitle.Text = "Update Employee";
+            lblEditorTitle.Text = "Update employee: " + record.Employee.FullName;
             ClearEditor();
             FillEditor(record);
             editorStateOnOpen = DescribeEditorState();
 
             pnlList.Visible = false;
             pnlEditor.Visible = true;
+            ShowSection(EditorSection.Personal);
             txtName.Focus();
         }
 
@@ -708,12 +795,53 @@ namespace EmployeeTimeManagement.Views
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
+            LeaveEditor();
+        }
+
+        // Back to list leaves the editor exactly the way Cancel does: same discard check, same destination.
+        private void btnBackToList_Click(object sender, EventArgs e)
+        {
+            LeaveEditor();
+        }
+
+        private void LeaveEditor()
+        {
             if (!ConfirmDiscard())
             {
                 return;
             }
 
             ShowList();
+        }
+
+        private void btnSectionPersonal_Click(object sender, EventArgs e)
+        {
+            ShowSection(EditorSection.Personal);
+        }
+
+        private void btnSectionAddress_Click(object sender, EventArgs e)
+        {
+            ShowSection(EditorSection.Address);
+        }
+
+        private void btnSectionBank_Click(object sender, EventArgs e)
+        {
+            ShowSection(EditorSection.Bank);
+        }
+
+        private void btnSectionContract_Click(object sender, EventArgs e)
+        {
+            ShowSection(EditorSection.Contract);
+        }
+
+        private void btnSectionSpouse_Click(object sender, EventArgs e)
+        {
+            ShowSection(EditorSection.Spouse);
+        }
+
+        private void btnSectionFamily_Click(object sender, EventArgs e)
+        {
+            ShowSection(EditorSection.Family);
         }
 
         private void cboMaritalStatus_SelectedIndexChanged(object sender, EventArgs e)

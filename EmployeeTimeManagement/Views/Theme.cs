@@ -154,6 +154,59 @@ namespace EmployeeTimeManagement.Views
             button.FlatAppearance.BorderColor = button.Enabled ? palette.BorderColour : DisabledBorder;
         }
 
+        // A section item's fill when it is the chosen one, one shade lighter than the rail
+        // behind it so the mustard bar is not the only thing that marks it.
+        private static readonly Color SectionSelectedBack = Color.FromArgb(58, 50, 46);
+        private static readonly Color SectionHoverBack = Color.FromArgb(46, 40, 37);
+        private const int SectionAccentWidth = 4;
+
+        // Wires up one item of a dark section list (the editor's Personal/Address/... rail):
+        // flat, left-aligned, no border, with a mustard bar marking the chosen item. Call it
+        // once per item; call SelectSectionItem after it and on every later change.
+        public static void StyleSectionItem(Button button)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.Font = ButtonFont;
+            button.UseVisualStyleBackColor = false;
+            button.FlatAppearance.BorderSize = 0;
+            button.TextAlign = ContentAlignment.MiddleLeft;
+            button.Padding = new Padding(SectionAccentWidth + 12, 0, 8, 0);
+            button.Cursor = Cursors.Hand;
+
+            SelectSectionItem(button, false);
+
+            button.Paint += (sender, e) =>
+            {
+                if (Equals(button.Tag, true))
+                {
+                    using (var bar = new SolidBrush(Mustard))
+                    {
+                        e.Graphics.FillRectangle(bar, 0, 0, SectionAccentWidth, button.Height);
+                    }
+                }
+
+                if (button.Focused && button.Enabled)
+                {
+                    DrawFocusRing(e.Graphics, button.ClientSize, Mustard);
+                }
+            };
+
+            button.GotFocus += (sender, e) => button.Invalidate();
+            button.LostFocus += (sender, e) => button.Invalidate();
+        }
+
+        // Marks one section item as the chosen one, or not. The chosen item is filled a shade
+        // lighter than the rail and carries the mustard bar; the rest sit flush with it.
+        public static void SelectSectionItem(Button button, bool selected)
+        {
+            button.Tag = selected;
+            button.BackColor = selected ? SectionSelectedBack : Charcoal;
+            button.ForeColor = selected ? OnDark : OnDarkMuted;
+            button.FlatAppearance.MouseOverBackColor = SectionHoverBack;
+            button.FlatAppearance.MouseDownBackColor = SectionHoverBack;
+            button.Invalidate();
+        }
+
         // Draws the two-pixel ring that shows which control the keyboard is on
         private static void DrawFocusRing(Graphics graphics, Size size, Color colour)
         {
