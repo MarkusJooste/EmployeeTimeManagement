@@ -256,9 +256,82 @@ namespace EmployeeTimeManagement.Views
             }
         }
 
-        // Ticket 06 gives this a rule.
+        // Confirms first -- taking somebody's access away on a misclick leaves them standing
+        // at a login screen wondering what happened -- then hands the decision to the seam.
+        // Nothing is written until the seam accepts it.
         private void btnDemote_Click(object sender, EventArgs e)
         {
+            var selected = dgvManagers.CurrentRow?.DataBoundItem as ManagerListItem;
+
+            if (selected == null || CurrentUser.StoreID == null || CurrentUser.ManagerID == null)
+            {
+                return;
+            }
+
+            string fullName = selected.FullName;
+
+            if (!Confirm("Demote " + fullName + "? Their PIN will stop logging in.", "Demote"))
+            {
+                return;
+            }
+
+            List<Manager> managers;
+
+            try
+            {
+                managers = managerController.GetByStore(CurrentUser.StoreID.Value);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not load Managers: " + ex.Message, "Demote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            Manager managerToDemote = managers.FirstOrDefault(manager => manager.ManagerID == selected.ManagerID);
+
+            if (managerToDemote == null)
+            {
+                MessageBox.Show("This Manager could not be found.", "Demote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var request = new DemotionRequest
+            {
+                Manager = managerToDemote,
+                ActingOwnerManagerID = CurrentUser.ManagerID.Value,
+                CapturedBy = CurrentUser.ManagerID.Value,
+                BusinessDate = DateTime.Today
+            };
+
+            DemotionResult result = ManagerAccess.Demote(request);
+
+            if (!result.IsValid)
+            {
+                MessageBox.Show(result.Error, "Demote", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                managerController.Demote(result.Manager);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not demote " + fullName + ": " + ex.Message, "Demote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            LoadData();
+
+            MessageBox.Show("Demoted " + fullName + ".", "Demote", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        // A Yes/No confirmation in the style every hard-to-reverse action in this app asks
+        // before going ahead.
+        private static bool Confirm(string message, string title)
+        {
+            DialogResult result = MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            return result == DialogResult.Yes;
         }
     }
 }

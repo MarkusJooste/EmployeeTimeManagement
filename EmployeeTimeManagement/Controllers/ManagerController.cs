@@ -167,6 +167,15 @@ WHERE ManagerID = @ManagerID;";
             }
         }
 
+        // Withdraws a login. ManagerAccess.Demote already copies EmployeeID, StoreID and Pin
+        // across unchanged, so writing through the same Update the reconnect path in Promote
+        // uses has no effect on them -- only IsActiveManager, BusinessDate and CapturedBy
+        // actually move.
+        public void Demote(Manager manager)
+        {
+            Update(manager);
+        }
+
         private static string ReadText(MySqlDataReader reader, int index)
         {
             if (reader.IsDBNull(index))

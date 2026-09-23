@@ -17,5 +17,10 @@ namespace EmployeeTimeManagement.Models
         public DateTime? PromotedOn { get; set; }
 
         public string PromotedByName { get; set; }
+
+        public string FullName
+        {
+            get { return (Name + " " + Surname).Trim(); }
+        }
     }
 }
