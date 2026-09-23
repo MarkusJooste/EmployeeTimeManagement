@@ -420,17 +420,12 @@ namespace EmployeeTimeManagement.Views
                 return true;
             }
 
-            return Confirm(
+            return ConfirmDialog.Show(
+                this,
+                "Discard unsaved details?",
                 "The details captured on this screen have not been saved. Leaving the editor will discard them.",
-                "Discard unsaved details?");
-        }
-
-        // A Yes/No confirmation in the style every destructive or hard-to-reverse action on
-        // this screen asks before going ahead.
-        private static bool Confirm(string message, string title)
-        {
-            DialogResult result = MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            return result == DialogResult.Yes;
+                "Discard",
+                ButtonRole.DangerSolid);
         }
 
         // Only a married employee has a spouse, so the two fields are open to typing then and
@@ -923,13 +918,6 @@ namespace EmployeeTimeManagement.Views
                     return;
                 }
 
-                if (!Confirm(
-                    "End " + employeeName + "'s employment on " + dialog.EndDate.ToString("yyyy-MM-dd") + "?",
-                    "Terminate employee?"))
-                {
-                    return;
-                }
-
                 bool closed;
 
                 try
@@ -970,9 +958,12 @@ namespace EmployeeTimeManagement.Views
 
             string employeeName = selected.FullName;
 
-            if (!Confirm(
-                "Reactivate " + employeeName + "? This clears their end date and reason for leaving.",
-                "Reactivate employee?"))
+            if (!ConfirmDialog.Show(
+                this,
+                "Reactivate employee?",
+                "Reactivating " + employeeName + " clears their end date and reason for leaving.",
+                "Reactivate",
+                ButtonRole.OkSolid))
             {
                 return;
             }

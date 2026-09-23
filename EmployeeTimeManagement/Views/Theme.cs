@@ -99,6 +99,14 @@ namespace EmployeeTimeManagement.Views
             button.LostFocus += (sender, e) => button.Invalidate();
         }
 
+        // Puts the initial keyboard focus of a dialog on its safe button, so a stray Enter
+        // right after opening lands on Cancel rather than on the confirming action. Call once,
+        // after every control on the dialog exists.
+        public static void FocusSafeChoice(Form dialog, Button safeButton)
+        {
+            dialog.Shown += (sender, e) => safeButton.Focus();
+        }
+
         // Puts an icon in front of a button's caption, so that the caption itself stays in the
         // designer file and the glyph, written as an escape, is the only thing added here.
         // Escaping it keeps every source file plain ASCII, beyond the reach of a code page.

@@ -299,6 +299,12 @@
 
     </Compile>
 
+    <Compile Include="Views\ConfirmDialog.cs">
+
+      <SubType>Form</SubType>
+
+    </Compile>
+
     <Compile Include="Views\PromoteManagerForm.cs">
 
       <SubType>Form</SubType>

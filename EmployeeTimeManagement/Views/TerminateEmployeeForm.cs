@@ -4,71 +4,107 @@ using System.Windows.Forms;
 
 namespace EmployeeTimeManagement.Views
 {
-    // Asks for the end date and reason Terminate writes to the employee's contract. There
-    // is no fixed list of reasons, so the reason is free text rather than a dropdown.
+    // Asks for the last working day and the reason, then asks once, in the same dialog,
+    // whether to end the named employee's contract on that date - so Terminate takes one
+    // confirmation rather than a second Yes/No after this one. There is no fixed list of
+    // reasons, so the reason is free text, and an empty one is refused without closing.
     public class TerminateEmployeeForm : Form
     {
+        private readonly string employeeName;
         private readonly DateTimePicker dtpEndDate;
         private readonly TextBox txtReason;
+        private readonly Label lblReasonError;
+        private readonly Label lblConfirm;
+        private readonly Button btnCancel;
+        private readonly Button btnTerminate;
 
         public TerminateEmployeeForm(string employeeName)
         {
+            this.employeeName = employeeName;
+
             Text = "Terminate employee";
             FormBorderStyle = FormBorderStyle.FixedDialog;
             StartPosition = FormStartPosition.CenterParent;
             MinimizeBox = false;
             MaximizeBox = false;
-            ClientSize = new Size(360, 210);
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            BackColor = Theme.Cream;
+            ClientSize = new Size(380, 268);
 
-            var lblPrompt = new Label();
-            lblPrompt.AutoSize = false;
-            lblPrompt.Location = new Point(12, 9);
-            lblPrompt.Size = new Size(336, 32);
-            lblPrompt.Text = "Ending " + employeeName + "'s employment. When did they leave, and why?";
-
-            var lblEndDate = new Label();
-            lblEndDate.AutoSize = true;
-            lblEndDate.Location = new Point(12, 54);
-            lblEndDate.Text = "End date";
+            var lblEndDateCaption = new Label();
+            lblEndDateCaption.AutoSize = true;
+            lblEndDateCaption.Location = new Point(16, 18);
+            lblEndDateCaption.Text = "Last working day";
+            lblEndDateCaption.Font = Theme.BodyFont;
+            lblEndDateCaption.ForeColor = Theme.Ink;
 
             dtpEndDate = new DateTimePicker();
             dtpEndDate.Format = DateTimePickerFormat.Short;
-            dtpEndDate.Location = new Point(100, 50);
-            dtpEndDate.Size = new Size(248, 20);
+            dtpEndDate.Location = new Point(16, 40);
+            dtpEndDate.Size = new Size(348, 24);
             dtpEndDate.Value = DateTime.Today;
+            dtpEndDate.ValueChanged += (sender, e) => UpdateConfirmText();
 
-            var lblReason = new Label();
-            lblReason.AutoSize = true;
-            lblReason.Location = new Point(12, 84);
-            lblReason.Text = "Reason";
+            var lblReasonCaption = new Label();
+            lblReasonCaption.AutoSize = true;
+            lblReasonCaption.Location = new Point(16, 76);
+            lblReasonCaption.Text = "Reason";
+            lblReasonCaption.Font = Theme.BodyFont;
+            lblReasonCaption.ForeColor = Theme.Ink;
 
             txtReason = new TextBox();
-            txtReason.Location = new Point(100, 81);
-            txtReason.Size = new Size(248, 60);
+            txtReason.Location = new Point(16, 98);
+            txtReason.Size = new Size(348, 60);
             txtReason.Multiline = true;
+            txtReason.Font = Theme.BodyFont;
+            txtReason.TextChanged += (sender, e) => ClearReasonError();
 
-            var btnOk = new Button();
-            btnOk.Text = "Terminate";
-            btnOk.DialogResult = DialogResult.OK;
-            btnOk.Location = new Point(192, 170);
-            btnOk.Size = new Size(75, 25);
+            lblReasonError = new Label();
+            lblReasonError.AutoSize = false;
+            lblReasonError.Location = new Point(16, 160);
+            lblReasonError.Size = new Size(348, 18);
+            lblReasonError.Text = "A reason is needed to end this employment.";
+            lblReasonError.Font = Theme.SmallFont;
+            lblReasonError.ForeColor = Theme.ErrorText;
+            lblReasonError.Visible = false;
 
-            var btnCancel = new Button();
+            lblConfirm = new Label();
+            lblConfirm.AutoSize = false;
+            lblConfirm.Location = new Point(16, 182);
+            lblConfirm.Size = new Size(348, 40);
+            lblConfirm.Font = Theme.BodyFont;
+            lblConfirm.ForeColor = Theme.Ink;
+
+            btnCancel = new Button();
             btnCancel.Text = "Cancel";
             btnCancel.DialogResult = DialogResult.Cancel;
-            btnCancel.Location = new Point(273, 170);
-            btnCancel.Size = new Size(75, 25);
+            btnCancel.Location = new Point(116, 228);
+            btnCancel.Size = new Size(90, 32);
 
-            Controls.Add(lblPrompt);
-            Controls.Add(lblEndDate);
+            btnTerminate = new Button();
+            btnTerminate.Text = "Terminate employee";
+            btnTerminate.Location = new Point(214, 228);
+            btnTerminate.Size = new Size(150, 32);
+            btnTerminate.Click += btnTerminate_Click;
+
+            Controls.Add(lblEndDateCaption);
             Controls.Add(dtpEndDate);
-            Controls.Add(lblReason);
+            Controls.Add(lblReasonCaption);
             Controls.Add(txtReason);
-            Controls.Add(btnOk);
+            Controls.Add(lblReasonError);
+            Controls.Add(lblConfirm);
             Controls.Add(btnCancel);
+            Controls.Add(btnTerminate);
 
-            AcceptButton = btnOk;
+            Theme.StyleButton(btnCancel, ButtonRole.Ghost);
+            Theme.StyleButton(btnTerminate, ButtonRole.DangerSolid);
+
+            AcceptButton = btnTerminate;
             CancelButton = btnCancel;
+
+            UpdateConfirmText();
+            Theme.FocusSafeChoice(this, btnCancel);
         }
 
         // The end date the manager chose, defaulting to today.
@@ -81,6 +117,38 @@ namespace EmployeeTimeManagement.Views
         public string Reason
         {
             get { return txtReason.Text.Trim(); }
+        }
+
+        // Names who is leaving and when, kept in step with the date picker.
+        private void UpdateConfirmText()
+        {
+            lblConfirm.Text = "End " + employeeName + "'s employment on " + dtpEndDate.Value.Date.ToString("yyyy-MM-dd") + "?";
+        }
+
+        private void ClearReasonError()
+        {
+            lblReasonError.Visible = false;
+            txtReason.BackColor = SystemColors.Window;
+        }
+
+        private void ShowReasonError()
+        {
+            lblReasonError.Visible = true;
+            txtReason.BackColor = Theme.ErrorField;
+            txtReason.Focus();
+        }
+
+        // Refuses an empty reason in place rather than closing, since a reason is set by the
+        // DialogResult only once one has been typed.
+        private void btnTerminate_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtReason.Text))
+            {
+                ShowReasonError();
+                return;
+            }
+
+            DialogResult = DialogResult.OK;
         }
     }
 }
