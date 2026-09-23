@@ -851,29 +851,54 @@ VALUES
             return value;
         }
 
-        // Ends one employee's contract: writes the end date and reason for leaving, and
-        // touches no other table. Updates only the latest contract, matching ReadContract.
-        // Returns whether a contract row existed to close: a no-op, not an error, when it
+        // Ends one employee's contract: writes the end date and reason for leaving, and, only
+        // when a contract row actually closed, ends the login on their Manager row in the
+        // same transaction, so access never outlives the contract that granted it. Owner rows
+        // are left alone -- an Owner who is also an Employee cannot lose their own access this
+        // way. Returns whether a contract row existed to close: a no-op, not an error, when it
         // did not, so the caller can tell the manager nothing was actually there to end.
         public bool Terminate(int employeeID, DateTime endDate, string reason)
         {
             WriteAccessGuard.EnsureActive();
 
-            const string query = @"UPDATE TBL_employee_contracts
+            const string contractQuery = @"UPDATE TBL_employee_contracts
 SET EndDate = @EndDate, ReasonForEnding = @ReasonForEnding
 WHERE EmployeeID = @EmployeeID
 ORDER BY ContractID DESC
 LIMIT 1;";
 
+            var managerController = new ManagerController();
+
             using (var connection = DatabaseConnection.GetConnection())
             {
-                using (var command = new MySqlCommand(query, connection))
+                using (var transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
-                    command.Parameters.AddWithValue("@EndDate", endDate.Date);
-                    command.Parameters.AddWithValue("@ReasonForEnding", reason ?? string.Empty);
+                    try
+                    {
+                        bool closed;
 
-                    return command.ExecuteNonQuery() > 0;
+                        using (var command = new MySqlCommand(contractQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                            command.Parameters.AddWithValue("@EndDate", endDate.Date);
+                            command.Parameters.AddWithValue("@ReasonForEnding", reason ?? string.Empty);
+
+                            closed = command.ExecuteNonQuery() > 0;
+                        }
+
+                        if (closed)
+                        {
+                            managerController.DeactivateForEmployee(connection, transaction, employeeID);
+                        }
+
+                        transaction.Commit();
+                        return closed;
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
         }

@@ -176,6 +176,23 @@ WHERE ManagerID = @ManagerID;";
             Update(manager);
         }
 
+        // Ends the login on the Manager row belonging to one Employee, inside the transaction
+        // already open for the Employee write that triggered it -- matching how LeaveController's
+        // mirror methods take part in TimesheetController's transaction. Owner rows are left
+        // alone, and a no-op when the Employee has no Manager row.
+        public void DeactivateForEmployee(MySqlConnection connection, MySqlTransaction transaction, int employeeID)
+        {
+            const string query = @"UPDATE TBL_managers
+SET IsActiveManager = 0
+WHERE EmployeeID = @EmployeeID AND IsAdmin = 0;";
+
+            using (var command = new MySqlCommand(query, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                command.ExecuteNonQuery();
+            }
+        }
+
         // Re-reads whether one login is still active, straight from the database rather than the in-memory session.
         public bool IsActive(int managerID)
         {
