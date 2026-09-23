@@ -155,30 +155,30 @@ namespace EmployeeTimeManagement.Models
         // manager sees. A holder at their own store is named, so they can go and look at
         // that record; a holder anywhere else is not, because a collision message is no
         // way to learn another store's staff.
-        public static EmployeeFieldError DescribeIDNumberClash(EmployeeIDNumberOwner owner, int storeID)
+        public static EmployeeFieldError DescribeIDNumberClash(EmployeeIDNumberHolder holder, int storeID)
         {
-            return DescribeIDNumberClash(owner, storeID, null);
+            return DescribeIDNumberClash(holder, storeID, null);
         }
 
         // Same rule, but an update passes the employee it is editing, so keeping their own
         // ID number unchanged is never reported as a clash against themselves.
-        public static EmployeeFieldError DescribeIDNumberClash(EmployeeIDNumberOwner owner, int storeID, int? editingEmployeeID)
+        public static EmployeeFieldError DescribeIDNumberClash(EmployeeIDNumberHolder holder, int storeID, int? editingEmployeeID)
         {
-            if (owner == null)
+            if (holder == null)
             {
                 return null;
             }
 
-            if (editingEmployeeID.HasValue && owner.EmployeeID == editingEmployeeID.Value)
+            if (editingEmployeeID.HasValue && holder.EmployeeID == editingEmployeeID.Value)
             {
                 return null;
             }
 
-            if (owner.StoreID == storeID)
+            if (holder.StoreID == storeID)
             {
                 return new EmployeeFieldError(
                     "IDNumber",
-                    "This ID number is already on " + owner.FullName + "'s record at this store.");
+                    "This ID number is already on " + holder.FullName + "'s record at this store.");
             }
 
             return new EmployeeFieldError(

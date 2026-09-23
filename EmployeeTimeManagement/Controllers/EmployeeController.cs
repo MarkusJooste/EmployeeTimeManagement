@@ -110,7 +110,7 @@ ORDER BY e.Surname, e.Name;";
         // Returns whoever already holds an ID number, anywhere in the database, or null when
         // nobody does. The unique index on IDNumber spans every store, so the answer can be
         // an employee this manager cannot see.
-        public EmployeeIDNumberOwner FindByIDNumber(string idNumber)
+        public EmployeeIDNumberHolder FindByIDNumber(string idNumber)
         {
             const string query = @"SELECT EmployeeID, StoreID, Name, Surname
 FROM TBL_employees
@@ -130,14 +130,14 @@ LIMIT 1;";
                             return null;
                         }
 
-                        var owner = new EmployeeIDNumberOwner();
+                        var holder = new EmployeeIDNumberHolder();
 
-                        owner.EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID"));
-                        owner.StoreID = reader.GetInt32(reader.GetOrdinal("StoreID"));
-                        owner.Name = ReadText(reader, reader.GetOrdinal("Name"));
-                        owner.Surname = ReadText(reader, reader.GetOrdinal("Surname"));
+                        holder.EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID"));
+                        holder.StoreID = reader.GetInt32(reader.GetOrdinal("StoreID"));
+                        holder.Name = ReadText(reader, reader.GetOrdinal("Name"));
+                        holder.Surname = ReadText(reader, reader.GetOrdinal("Surname"));
 
-                        return owner;
+                        return holder;
                     }
                 }
             }

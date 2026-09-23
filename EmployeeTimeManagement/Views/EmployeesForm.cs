@@ -384,11 +384,11 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
-            EmployeeIDNumberOwner owner;
+            EmployeeIDNumberHolder holder;
 
             try
             {
-                owner = employeeController.FindByIDNumber(result.Record.Employee.IDNumber);
+                holder = employeeController.FindByIDNumber(result.Record.Employee.IDNumber);
             }
             catch (Exception ex)
             {
@@ -396,7 +396,7 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
-            EmployeeFieldError clash = EmployeeCapture.DescribeIDNumberClash(owner, CurrentUser.StoreID.Value, editingEmployeeID);
+            EmployeeFieldError clash = EmployeeCapture.DescribeIDNumberClash(holder, CurrentUser.StoreID.Value, editingEmployeeID);
 
             if (clash != null)
             {
