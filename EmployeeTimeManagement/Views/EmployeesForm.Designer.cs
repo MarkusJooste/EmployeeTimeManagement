@@ -33,6 +33,9 @@ namespace EmployeeTimeManagement.Views
             this.employeePicker = new EmployeeTimeManagement.Views.EmployeePickerControl();
             this.lblStatus = new System.Windows.Forms.Label();
             this.pnlListTop = new System.Windows.Forms.Panel();
+            this.pnlHeader = new System.Windows.Forms.Panel();
+            this.lblViewTitle = new System.Windows.Forms.Label();
+            this.lblStore = new System.Windows.Forms.Label();
             this.btnAdd = new System.Windows.Forms.Button();
             this.btnUpdate = new System.Windows.Forms.Button();
             this.btnTerminate = new System.Windows.Forms.Button();
@@ -112,6 +115,7 @@ namespace EmployeeTimeManagement.Views
             this.tipEditorErrors = new System.Windows.Forms.ToolTip(this.components);
             this.pnlList.SuspendLayout();
             this.pnlListTop.SuspendLayout();
+            this.pnlHeader.SuspendLayout();
             this.pnlEditor.SuspendLayout();
             this.tlpEditor.SuspendLayout();
             this.grpPersonal.SuspendLayout();
@@ -132,6 +136,7 @@ namespace EmployeeTimeManagement.Views
             this.pnlList.Controls.Add(this.employeePicker);
             this.pnlList.Controls.Add(this.lblStatus);
             this.pnlList.Controls.Add(this.pnlListTop);
+            this.pnlList.Controls.Add(this.pnlHeader);
             this.pnlList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlList.Location = new System.Drawing.Point(0, 0);
             this.pnlList.Name = "pnlList";
@@ -141,73 +146,99 @@ namespace EmployeeTimeManagement.Views
             // employeePicker
             //
             this.employeePicker.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.employeePicker.Location = new System.Drawing.Point(0, 40);
+            this.employeePicker.Location = new System.Drawing.Point(0, 104);
             this.employeePicker.Name = "employeePicker";
-            this.employeePicker.Size = new System.Drawing.Size(889, 511);
-            this.employeePicker.TabIndex = 1;
+            this.employeePicker.Size = new System.Drawing.Size(889, 442);
+            this.employeePicker.TabIndex = 2;
             this.employeePicker.SelectionChanged += new System.EventHandler(this.employeePicker_SelectionChanged);
             this.employeePicker.FilterChanged += new System.EventHandler(this.employeePicker_FilterChanged);
             //
             // lblStatus
             //
             this.lblStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.lblStatus.Location = new System.Drawing.Point(0, 551);
+            this.lblStatus.Location = new System.Drawing.Point(0, 546);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(889, 23);
-            this.lblStatus.TabIndex = 2;
+            this.lblStatus.Padding = new System.Windows.Forms.Padding(16, 0, 16, 0);
+            this.lblStatus.Size = new System.Drawing.Size(889, 28);
+            this.lblStatus.TabIndex = 3;
             this.lblStatus.Text = "lblStatus";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // pnlHeader
+            //
+            this.pnlHeader.Controls.Add(this.lblViewTitle);
+            this.pnlHeader.Controls.Add(this.lblStore);
+            this.pnlHeader.Controls.Add(this.btnAdd);
+            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlHeader.Location = new System.Drawing.Point(0, 0);
+            this.pnlHeader.Name = "pnlHeader";
+            this.pnlHeader.Size = new System.Drawing.Size(889, 64);
+            this.pnlHeader.TabIndex = 0;
+            //
+            // lblViewTitle
+            //
+            this.lblViewTitle.AutoSize = true;
+            this.lblViewTitle.Location = new System.Drawing.Point(16, 9);
+            this.lblViewTitle.Name = "lblViewTitle";
+            this.lblViewTitle.Size = new System.Drawing.Size(83, 25);
+            this.lblViewTitle.TabIndex = 0;
+            this.lblViewTitle.Text = "Employees";
+            //
+            // lblStore
+            //
+            this.lblStore.AutoSize = true;
+            this.lblStore.Location = new System.Drawing.Point(18, 38);
+            this.lblStore.Name = "lblStore";
+            this.lblStore.Size = new System.Drawing.Size(45, 15);
+            this.lblStore.TabIndex = 1;
+            this.lblStore.Text = "Store";
+            //
+            // btnAdd
+            //
+            this.btnAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAdd.Location = new System.Drawing.Point(725, 16);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(148, 32);
+            this.btnAdd.TabIndex = 2;
+            this.btnAdd.Text = "Add employee";
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             //
             // pnlListTop
             //
             this.pnlListTop.Controls.Add(this.btnReactivate);
             this.pnlListTop.Controls.Add(this.btnTerminate);
             this.pnlListTop.Controls.Add(this.btnUpdate);
-            this.pnlListTop.Controls.Add(this.btnAdd);
             this.pnlListTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlListTop.Location = new System.Drawing.Point(0, 0);
+            this.pnlListTop.Location = new System.Drawing.Point(0, 64);
             this.pnlListTop.Name = "pnlListTop";
             this.pnlListTop.Size = new System.Drawing.Size(889, 40);
-            this.pnlListTop.TabIndex = 0;
-            //
-            // btnAdd
-            //
-            this.btnAdd.Location = new System.Drawing.Point(12, 9);
-            this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(100, 25);
-            this.btnAdd.TabIndex = 0;
-            this.btnAdd.Text = "Add Employee";
-            this.btnAdd.UseVisualStyleBackColor = true;
-            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            this.pnlListTop.TabIndex = 1;
             //
             // btnUpdate
             //
-            this.btnUpdate.Location = new System.Drawing.Point(118, 9);
+            this.btnUpdate.Location = new System.Drawing.Point(16, 4);
             this.btnUpdate.Name = "btnUpdate";
-            this.btnUpdate.Size = new System.Drawing.Size(75, 25);
-            this.btnUpdate.TabIndex = 1;
+            this.btnUpdate.Size = new System.Drawing.Size(116, 32);
+            this.btnUpdate.TabIndex = 0;
             this.btnUpdate.Text = "Update";
-            this.btnUpdate.UseVisualStyleBackColor = true;
             this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
             //
             // btnTerminate
             //
-            this.btnTerminate.Location = new System.Drawing.Point(199, 9);
+            this.btnTerminate.Location = new System.Drawing.Point(140, 4);
             this.btnTerminate.Name = "btnTerminate";
-            this.btnTerminate.Size = new System.Drawing.Size(75, 25);
-            this.btnTerminate.TabIndex = 2;
+            this.btnTerminate.Size = new System.Drawing.Size(116, 32);
+            this.btnTerminate.TabIndex = 1;
             this.btnTerminate.Text = "Terminate";
-            this.btnTerminate.UseVisualStyleBackColor = true;
             this.btnTerminate.Click += new System.EventHandler(this.btnTerminate_Click);
             //
             // btnReactivate
             //
-            this.btnReactivate.Location = new System.Drawing.Point(280, 9);
+            this.btnReactivate.Location = new System.Drawing.Point(264, 4);
             this.btnReactivate.Name = "btnReactivate";
-            this.btnReactivate.Size = new System.Drawing.Size(75, 25);
-            this.btnReactivate.TabIndex = 3;
+            this.btnReactivate.Size = new System.Drawing.Size(116, 32);
+            this.btnReactivate.TabIndex = 2;
             this.btnReactivate.Text = "Reactivate";
-            this.btnReactivate.UseVisualStyleBackColor = true;
             this.btnReactivate.Click += new System.EventHandler(this.btnReactivate_Click);
             //
             // pnlEditor
@@ -968,7 +999,6 @@ namespace EmployeeTimeManagement.Views
             this.lblEditorStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblEditorStatus.AutoEllipsis = true;
-            this.lblEditorStatus.ForeColor = System.Drawing.Color.Firebrick;
             this.lblEditorStatus.Location = new System.Drawing.Point(9, 9);
             this.lblEditorStatus.Name = "lblEditorStatus";
             this.lblEditorStatus.Size = new System.Drawing.Size(694, 26);
@@ -996,6 +1026,8 @@ namespace EmployeeTimeManagement.Views
             this.Name = "EmployeesForm";
             this.Text = "EmployeesForm";
             this.pnlListTop.ResumeLayout(false);
+            this.pnlHeader.ResumeLayout(false);
+            this.pnlHeader.PerformLayout();
             this.pnlList.ResumeLayout(false);
             this.grpPersonal.ResumeLayout(false);
             this.grpPersonal.PerformLayout();
@@ -1022,6 +1054,9 @@ namespace EmployeeTimeManagement.Views
         #endregion
 
         private System.Windows.Forms.Panel pnlList;
+        private System.Windows.Forms.Panel pnlHeader;
+        private System.Windows.Forms.Label lblViewTitle;
+        private System.Windows.Forms.Label lblStore;
         private System.Windows.Forms.Panel pnlListTop;
         private System.Windows.Forms.Button btnAdd;
         private System.Windows.Forms.Button btnUpdate;

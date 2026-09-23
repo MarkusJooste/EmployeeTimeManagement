@@ -16,9 +16,6 @@ namespace EmployeeTimeManagement.Views
         // Every field the capture seam can refuse, by the name it refuses them under.
         private readonly Dictionary<string, EditorField> editorFields;
 
-        // Pale red, so a field that stopped the save is obvious without shouting at the manager.
-        private static readonly Color ErrorFieldColour = Color.FromArgb(255, 235, 238);
-
         // Every value the editor held when it opened, so Cancel can tell typing from an untouched form.
         private List<string> editorStateOnOpen = new List<string>();
 
@@ -32,15 +29,65 @@ namespace EmployeeTimeManagement.Views
         public EmployeesForm()
         {
             InitializeComponent();
+            ApplyTheme();
             employeeController = new EmployeeController();
             editorFields = BuildEditorFields();
             cboMaritalStatus.Items.AddRange(MaritalStatuses.All());
             LoadData();
         }
 
+        // Dresses the view in the theme: a dark header bar over a cream page, and one themed
+        // role per action button, so what each button does is legible before it is read. The
+        // editor keeps its own layout for now, but its refusal line takes the theme's red,
+        // which leaves no colour named outside the theme.
+        private void ApplyTheme()
+        {
+            pnlList.BackColor = Theme.Cream;
+            pnlListTop.BackColor = Theme.Cream;
+            lblEditorStatus.ForeColor = Theme.ErrorText;
+
+            pnlHeader.BackColor = Theme.Charcoal;
+            lblViewTitle.Font = Theme.TitleFont;
+            lblViewTitle.ForeColor = Theme.OnDark;
+            lblStore.Font = Theme.SmallFont;
+            lblStore.ForeColor = Theme.OnDarkMuted;
+
+            lblStatus.Font = Theme.BodyFont;
+            lblStatus.ForeColor = Theme.InkMuted;
+
+            PrefixIcon(btnAdd, "\u271A");
+            PrefixIcon(btnUpdate, "\u270E");
+            PrefixIcon(btnTerminate, "\u2716");
+            PrefixIcon(btnReactivate, "\u21BB");
+
+            Theme.StyleButton(btnAdd, ButtonRole.Primary);
+            Theme.StyleButton(btnUpdate, ButtonRole.Dark);
+            Theme.StyleButton(btnTerminate, ButtonRole.Danger);
+            Theme.StyleButton(btnReactivate, ButtonRole.Ok);
+        }
+
+        // Puts an icon in front of a button's caption, so that the caption itself stays in the
+        // designer file and the glyph, written as an escape, is the only thing added here.
+        // Escaping it keeps every source file plain ASCII, beyond the reach of a code page.
+        private static void PrefixIcon(Button button, string icon)
+        {
+            button.Text = icon + "  " + button.Text;
+        }
+
+        // Names the store the list belongs to. Nothing on record carries a store's name, so
+        // the header shows its number instead, more plainly than the dashboard's "Store ID".
+        private void ShowStore()
+        {
+            lblStore.Text = CurrentUser.StoreID == null
+                ? "No store assigned"
+                : "Store " + CurrentUser.StoreID.Value.ToString(CultureInfo.InvariantCulture);
+        }
+
         // Fetches the logged-in manager's store from the database and hands it to the employee picker
         private void LoadData()
         {
+            ShowStore();
+
             if (CurrentUser.StoreID == null)
             {
                 employeePicker.SetEmployees(new List<EmployeeListItem>());
@@ -592,7 +639,7 @@ namespace EmployeeTimeManagement.Views
                 return null;
             }
 
-            Colour(field.Input, ErrorFieldColour);
+            Colour(field.Input, Theme.ErrorField);
             tipEditorErrors.SetToolTip(field.Input, error.Message);
 
             return field.DisplayName;

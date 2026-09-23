@@ -229,6 +229,7 @@
     <Compile Include="Controllers\LeaveController.cs" />
     <Compile Include="Controllers\WriteAccessGuard.cs" />
     <Compile Include="Views\AccessRevokedPrompt.cs" />
+    <Compile Include="Views\Theme.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
     <Compile Include="Models\Timesheet.cs" />
 
