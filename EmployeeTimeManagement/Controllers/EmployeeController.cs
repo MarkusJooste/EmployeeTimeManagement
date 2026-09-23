@@ -19,8 +19,10 @@ namespace EmployeeTimeManagement.Controllers
        e.IDNumber,
        e.MobileNumber,
        c.JobDescription,
+       c.Department,
        c.StartDate,
        c.EndDate,
+       c.ReasonForEnding,
        c.OpeningPTODays,
        c.OpeningBalanceAsAt
 FROM TBL_employees e
@@ -49,8 +51,10 @@ ORDER BY e.Surname, e.Name;";
                         int idNumberIndex = reader.GetOrdinal("IDNumber");
                         int mobileIndex = reader.GetOrdinal("MobileNumber");
                         int jobIndex = reader.GetOrdinal("JobDescription");
+                        int departmentIndex = reader.GetOrdinal("Department");
                         int startDateIndex = reader.GetOrdinal("StartDate");
                         int endDateIndex = reader.GetOrdinal("EndDate");
+                        int reasonForEndingIndex = reader.GetOrdinal("ReasonForEnding");
                         int openingPTODaysIndex = reader.GetOrdinal("OpeningPTODays");
                         int openingBalanceAsAtIndex = reader.GetOrdinal("OpeningBalanceAsAt");
 
@@ -65,6 +69,8 @@ ORDER BY e.Surname, e.Name;";
                             item.IDNumber = ReadText(reader, idNumberIndex);
                             item.MobileNumber = ReadText(reader, mobileIndex);
                             item.JobDescription = ReadText(reader, jobIndex);
+                            item.Department = ReadText(reader, departmentIndex);
+                            item.ReasonForEnding = ReadText(reader, reasonForEndingIndex);
 
                             item.ContractStartDate = reader.IsDBNull(startDateIndex)
                                 ? (DateTime?)null

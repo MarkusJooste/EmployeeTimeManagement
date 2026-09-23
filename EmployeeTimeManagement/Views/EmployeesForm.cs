@@ -43,7 +43,7 @@ namespace EmployeeTimeManagement.Views
         private void ApplyTheme()
         {
             pnlList.BackColor = Theme.Cream;
-            pnlListTop.BackColor = Theme.Cream;
+            pnlSplit.BackColor = Theme.Cream;
             lblEditorStatus.ForeColor = Theme.ErrorText;
 
             pnlHeader.BackColor = Theme.Charcoal;
@@ -55,23 +55,9 @@ namespace EmployeeTimeManagement.Views
             lblStatus.Font = Theme.BodyFont;
             lblStatus.ForeColor = Theme.InkMuted;
 
-            PrefixIcon(btnAdd, "\u271A");
-            PrefixIcon(btnUpdate, "\u270E");
-            PrefixIcon(btnTerminate, "\u2716");
-            PrefixIcon(btnReactivate, "\u21BB");
+            Theme.PrefixIcon(btnAdd, "\u271A");
 
             Theme.StyleButton(btnAdd, ButtonRole.Primary);
-            Theme.StyleButton(btnUpdate, ButtonRole.Dark);
-            Theme.StyleButton(btnTerminate, ButtonRole.Danger);
-            Theme.StyleButton(btnReactivate, ButtonRole.Ok);
-        }
-
-        // Puts an icon in front of a button's caption, so that the caption itself stays in the
-        // designer file and the glyph, written as an escape, is the only thing added here.
-        // Escaping it keeps every source file plain ASCII, beyond the reach of a code page.
-        private static void PrefixIcon(Button button, string icon)
-        {
-            button.Text = icon + "  " + button.Text;
         }
 
         // Names the store the list belongs to. Nothing on record carries a store's name, so
@@ -125,27 +111,19 @@ namespace EmployeeTimeManagement.Views
             lblStatus.Text = employees.Count == 1 ? "1 employee" : $"{employees.Count} employees";
         }
 
-        // Update, Terminate and Reactivate act on one person, so they stay disabled while no
-        // row is selected. Terminate and Reactivate are further split by status, so the two
-        // are never both available and neither can be clicked on the wrong person.
-        private void UpdateButtonState()
+        // Hands the picker's current selection to the details panel, which works out its own
+        // display and its own Update/Terminate/Reactivate enable rules from it.
+        private void RefreshDetails()
         {
-            EmployeeListItem selected = employeePicker.SelectedEmployee;
-            bool hasSelection = selected != null;
-
-            btnUpdate.Enabled = hasSelection;
-            btnTerminate.Enabled = hasSelection && selected.IsActive;
-            btnReactivate.Enabled = hasSelection && !selected.IsActive;
+            employeeDetails.ShowEmployee(employeePicker.SelectedEmployee);
         }
 
         // Nothing on this screen is safe to press when there is no store to act on
         private void DisableAllButtons()
         {
             btnAdd.Enabled = false;
-            btnUpdate.Enabled = false;
-            btnTerminate.Enabled = false;
-            btnReactivate.Enabled = false;
             employeePicker.Enabled = false;
+            employeeDetails.Enabled = false;
         }
 
         // Swaps the list away and opens the editor on a blank form for a new starter
@@ -760,19 +738,19 @@ namespace EmployeeTimeManagement.Views
 
         private void employeePicker_SelectionChanged(object sender, EventArgs e)
         {
-            UpdateButtonState();
+            RefreshDetails();
         }
 
         private void employeePicker_FilterChanged(object sender, EventArgs e)
         {
             ShowCount(employeePicker.VisibleEmployees);
-            UpdateButtonState();
+            RefreshDetails();
         }
 
         // Double-clicking a row, or pressing Enter on it, means the same as pressing Update.
         private void employeePicker_EmployeeActivated(object sender, EventArgs e)
         {
-            if (!btnUpdate.Enabled)
+            if (!employeeDetails.UpdateEnabled)
             {
                 return;
             }

@@ -30,16 +30,14 @@ namespace EmployeeTimeManagement.Views
         {
             this.components = new System.ComponentModel.Container();
             this.pnlList = new System.Windows.Forms.Panel();
+            this.pnlSplit = new System.Windows.Forms.Panel();
+            this.employeeDetails = new EmployeeTimeManagement.Views.EmployeeDetailsPanel();
             this.employeePicker = new EmployeeTimeManagement.Views.EmployeePickerControl();
             this.lblStatus = new System.Windows.Forms.Label();
-            this.pnlListTop = new System.Windows.Forms.Panel();
             this.pnlHeader = new System.Windows.Forms.Panel();
             this.lblViewTitle = new System.Windows.Forms.Label();
             this.lblStore = new System.Windows.Forms.Label();
             this.btnAdd = new System.Windows.Forms.Button();
-            this.btnUpdate = new System.Windows.Forms.Button();
-            this.btnTerminate = new System.Windows.Forms.Button();
-            this.btnReactivate = new System.Windows.Forms.Button();
             this.pnlEditor = new System.Windows.Forms.Panel();
             this.tlpEditor = new System.Windows.Forms.TableLayoutPanel();
             this.grpPersonal = new System.Windows.Forms.GroupBox();
@@ -114,7 +112,7 @@ namespace EmployeeTimeManagement.Views
             this.lblEditorStatus = new System.Windows.Forms.Label();
             this.tipEditorErrors = new System.Windows.Forms.ToolTip(this.components);
             this.pnlList.SuspendLayout();
-            this.pnlListTop.SuspendLayout();
+            this.pnlSplit.SuspendLayout();
             this.pnlHeader.SuspendLayout();
             this.pnlEditor.SuspendLayout();
             this.tlpEditor.SuspendLayout();
@@ -133,9 +131,8 @@ namespace EmployeeTimeManagement.Views
             //
             // pnlList
             //
-            this.pnlList.Controls.Add(this.employeePicker);
+            this.pnlList.Controls.Add(this.pnlSplit);
             this.pnlList.Controls.Add(this.lblStatus);
-            this.pnlList.Controls.Add(this.pnlListTop);
             this.pnlList.Controls.Add(this.pnlHeader);
             this.pnlList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlList.Location = new System.Drawing.Point(0, 0);
@@ -143,16 +140,37 @@ namespace EmployeeTimeManagement.Views
             this.pnlList.Size = new System.Drawing.Size(889, 574);
             this.pnlList.TabIndex = 0;
             //
+            // pnlSplit
+            //
+            this.pnlSplit.Controls.Add(this.employeeDetails);
+            this.pnlSplit.Controls.Add(this.employeePicker);
+            this.pnlSplit.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlSplit.Location = new System.Drawing.Point(0, 64);
+            this.pnlSplit.Name = "pnlSplit";
+            this.pnlSplit.Size = new System.Drawing.Size(889, 482);
+            this.pnlSplit.TabIndex = 1;
+            //
             // employeePicker
             //
-            this.employeePicker.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.employeePicker.Location = new System.Drawing.Point(0, 104);
+            this.employeePicker.Dock = System.Windows.Forms.DockStyle.Left;
+            this.employeePicker.Location = new System.Drawing.Point(0, 0);
             this.employeePicker.Name = "employeePicker";
-            this.employeePicker.Size = new System.Drawing.Size(889, 442);
-            this.employeePicker.TabIndex = 2;
+            this.employeePicker.Size = new System.Drawing.Size(300, 482);
+            this.employeePicker.TabIndex = 0;
             this.employeePicker.SelectionChanged += new System.EventHandler(this.employeePicker_SelectionChanged);
             this.employeePicker.FilterChanged += new System.EventHandler(this.employeePicker_FilterChanged);
             this.employeePicker.EmployeeActivated += new System.EventHandler(this.employeePicker_EmployeeActivated);
+            //
+            // employeeDetails
+            //
+            this.employeeDetails.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.employeeDetails.Location = new System.Drawing.Point(300, 0);
+            this.employeeDetails.Name = "employeeDetails";
+            this.employeeDetails.Size = new System.Drawing.Size(589, 482);
+            this.employeeDetails.TabIndex = 1;
+            this.employeeDetails.UpdateClicked += new System.EventHandler(this.btnUpdate_Click);
+            this.employeeDetails.TerminateClicked += new System.EventHandler(this.btnTerminate_Click);
+            this.employeeDetails.ReactivateClicked += new System.EventHandler(this.btnReactivate_Click);
             //
             // lblStatus
             //
@@ -203,44 +221,6 @@ namespace EmployeeTimeManagement.Views
             this.btnAdd.TabIndex = 2;
             this.btnAdd.Text = "Add employee";
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
-            //
-            // pnlListTop
-            //
-            this.pnlListTop.Controls.Add(this.btnReactivate);
-            this.pnlListTop.Controls.Add(this.btnTerminate);
-            this.pnlListTop.Controls.Add(this.btnUpdate);
-            this.pnlListTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlListTop.Location = new System.Drawing.Point(0, 64);
-            this.pnlListTop.Name = "pnlListTop";
-            this.pnlListTop.Size = new System.Drawing.Size(889, 40);
-            this.pnlListTop.TabIndex = 1;
-            //
-            // btnUpdate
-            //
-            this.btnUpdate.Location = new System.Drawing.Point(16, 4);
-            this.btnUpdate.Name = "btnUpdate";
-            this.btnUpdate.Size = new System.Drawing.Size(116, 32);
-            this.btnUpdate.TabIndex = 0;
-            this.btnUpdate.Text = "Update";
-            this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
-            //
-            // btnTerminate
-            //
-            this.btnTerminate.Location = new System.Drawing.Point(140, 4);
-            this.btnTerminate.Name = "btnTerminate";
-            this.btnTerminate.Size = new System.Drawing.Size(116, 32);
-            this.btnTerminate.TabIndex = 1;
-            this.btnTerminate.Text = "Terminate";
-            this.btnTerminate.Click += new System.EventHandler(this.btnTerminate_Click);
-            //
-            // btnReactivate
-            //
-            this.btnReactivate.Location = new System.Drawing.Point(264, 4);
-            this.btnReactivate.Name = "btnReactivate";
-            this.btnReactivate.Size = new System.Drawing.Size(116, 32);
-            this.btnReactivate.TabIndex = 2;
-            this.btnReactivate.Text = "Reactivate";
-            this.btnReactivate.Click += new System.EventHandler(this.btnReactivate_Click);
             //
             // pnlEditor
             //
@@ -1026,7 +1006,7 @@ namespace EmployeeTimeManagement.Views
             this.Controls.Add(this.pnlList);
             this.Name = "EmployeesForm";
             this.Text = "EmployeesForm";
-            this.pnlListTop.ResumeLayout(false);
+            this.pnlSplit.ResumeLayout(false);
             this.pnlHeader.ResumeLayout(false);
             this.pnlHeader.PerformLayout();
             this.pnlList.ResumeLayout(false);
@@ -1058,13 +1038,11 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Panel pnlHeader;
         private System.Windows.Forms.Label lblViewTitle;
         private System.Windows.Forms.Label lblStore;
-        private System.Windows.Forms.Panel pnlListTop;
+        private System.Windows.Forms.Panel pnlSplit;
         private System.Windows.Forms.Button btnAdd;
-        private System.Windows.Forms.Button btnUpdate;
-        private System.Windows.Forms.Button btnTerminate;
-        private System.Windows.Forms.Button btnReactivate;
         private System.Windows.Forms.Label lblStatus;
         private EmployeeTimeManagement.Views.EmployeePickerControl employeePicker;
+        private EmployeeTimeManagement.Views.EmployeeDetailsPanel employeeDetails;
         private System.Windows.Forms.Panel pnlEditor;
         private System.Windows.Forms.Label lblEditorTitle;
         private System.Windows.Forms.TableLayoutPanel tlpEditor;

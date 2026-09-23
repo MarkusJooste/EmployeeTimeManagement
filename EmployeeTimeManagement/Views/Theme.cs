@@ -99,6 +99,14 @@ namespace EmployeeTimeManagement.Views
             button.LostFocus += (sender, e) => button.Invalidate();
         }
 
+        // Puts an icon in front of a button's caption, so that the caption itself stays in the
+        // designer file and the glyph, written as an escape, is the only thing added here.
+        // Escaping it keeps every source file plain ASCII, beyond the reach of a code page.
+        public static void PrefixIcon(Button button, string icon)
+        {
+            button.Text = icon + "  " + button.Text;
+        }
+
         // Wires up a filter tab: flat, bold, and a focus ring, with no handler that has to be
         // renewed when the chosen tab changes. Call it once per tab; call SelectTab after it
         // and on every later change to say which tab is the chosen one.

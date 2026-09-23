@@ -12,8 +12,10 @@ namespace EmployeeTimeManagement.Models
         public string IDNumber { get; set; }
         public string MobileNumber { get; set; }
         public string JobDescription { get; set; }
+        public string Department { get; set; }
         public DateTime? ContractStartDate { get; set; }
         public DateTime? ContractEndDate { get; set; }
+        public string ReasonForEnding { get; set; }
 
         // PTO's Opening Balance, from the latest contract. Zero and null respectively when
         // the employee has no contract row at all.

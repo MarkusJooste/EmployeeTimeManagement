@@ -334,6 +334,18 @@
     <Compile Include="Views\EmployeePickerControl.Designer.cs">
       <DependentUpon>EmployeePickerControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\EmployeeDetailsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\EmployeeDetailsPanel.Designer.cs">
+      <DependentUpon>EmployeeDetailsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FactBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\FactBox.Designer.cs">
+      <DependentUpon>FactBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\ManagersForm.cs">
       <SubType>Form</SubType>
     </Compile>
