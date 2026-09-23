@@ -28,9 +28,10 @@ namespace EmployeeTimeManagement.Models
         public bool IsAdmin { get; set; }
 
         // Overwritten on every promotion or demotion, so it records the most recent one
-        // rather than the first.
-        public DateTime BusinessDate { get; set; }
+        // rather than the first. Null for a row the migration added the column to but this
+        // app has never written, since nothing was backfilled.
+        public DateTime? BusinessDate { get; set; }
 
-        public int CapturedBy { get; set; }
+        public int? CapturedBy { get; set; }
     }
 }

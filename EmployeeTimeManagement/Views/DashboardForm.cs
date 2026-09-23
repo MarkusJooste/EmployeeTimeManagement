@@ -98,7 +98,7 @@ namespace EmployeeTimeManagement.Views
 
         private void btnManagers_Click(object sender, EventArgs e)
         {
-
+            ShowView(new ManagersForm());
         }
 
         private void btnLogout_Click(object sender, EventArgs e)

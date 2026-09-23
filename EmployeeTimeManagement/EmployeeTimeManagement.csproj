@@ -222,6 +222,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\EmployeeController.cs" />
+    <Compile Include="Controllers\ManagerController.cs" />
 
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\TimesheetController.cs" />
@@ -234,6 +235,7 @@
     <Compile Include="Models\Employee.cs" />
 
     <Compile Include="Models\EmployeeListItem.cs" />
+    <Compile Include="Models\ManagerListItem.cs" />
 
     <Compile Include="Models\EmployeeAddress.cs" />
 
@@ -321,6 +323,12 @@
     </Compile>
     <Compile Include="Views\EmployeePickerControl.Designer.cs">
       <DependentUpon>EmployeePickerControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ManagersForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ManagersForm.Designer.cs">
+      <DependentUpon>ManagersForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\ViewTimesheetsForm.cs">
       <SubType>Form</SubType>
