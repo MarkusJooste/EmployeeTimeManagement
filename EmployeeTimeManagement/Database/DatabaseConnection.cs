@@ -16,7 +16,8 @@ namespace EmployeeTimeManagement.Database
         {
             if (!_envLoaded)
             {
-                DotNetEnv.Env.Load();
+                string envPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
+                DotNetEnv.Env.Load(envPath);
                 _envLoaded = true;
             }
 
