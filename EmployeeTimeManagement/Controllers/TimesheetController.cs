@@ -217,6 +217,8 @@ WHERE t.WorkDate = @WorkDate
         // reconciled in the same transaction, per ADR-0002.
         public void Save(IEnumerable<Timesheet> timesheets)
         {
+            WriteAccessGuard.EnsureActive();
+
             var leaveController = new LeaveController();
 
             using (var connection = DatabaseConnection.GetConnection())

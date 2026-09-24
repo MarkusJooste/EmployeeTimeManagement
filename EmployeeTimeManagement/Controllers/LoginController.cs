@@ -13,7 +13,7 @@ namespace EmployeeTimeManagement.Controllers
     {
         public Manager Login(string pin)
         {
-            const string query = @"SELECT ManagerID, ManagerName, StoreID, IsAdmin FROM TBL_managers WHERE Password = @Password;";
+            const string query = @"SELECT ManagerID, ManagerName, StoreID, IsAdmin FROM TBL_managers WHERE Password = @Password AND IsActiveManager = 1;";
 
             using (var connection = DatabaseConnection.GetConnection())
             {

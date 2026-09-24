@@ -222,10 +222,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\EmployeeController.cs" />
+    <Compile Include="Controllers\ManagerController.cs" />
 
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\TimesheetController.cs" />
     <Compile Include="Controllers\LeaveController.cs" />
+    <Compile Include="Controllers\WriteAccessGuard.cs" />
+    <Compile Include="Views\AccessRevokedPrompt.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
     <Compile Include="Models\Timesheet.cs" />
 
@@ -234,6 +237,7 @@
     <Compile Include="Models\Employee.cs" />
 
     <Compile Include="Models\EmployeeListItem.cs" />
+    <Compile Include="Models\ManagerListItem.cs" />
 
     <Compile Include="Models\EmployeeAddress.cs" />
 
@@ -246,7 +250,7 @@
     <Compile Include="Models\EmployeeSpouse.cs" />
 
     <Compile Include="Models\EmployeeRecord.cs" />
-    <Compile Include="Models\EmployeeIDNumberOwner.cs" />
+    <Compile Include="Models\EmployeeIDNumberHolder.cs" />
 
     <Compile Include="Models\MaritalStatus.cs" />
 
@@ -258,6 +262,7 @@
 
     <Compile Include="Models\CurrentUser.cs" />
     <Compile Include="Models\Manager.cs" />
+    <Compile Include="Models\ManagerAccess.cs" />
     <Compile Include="Models\TimesheetSummary.cs" />
     <Compile Include="Models\LeaveType.cs" />
     <Compile Include="Models\Absence.cs" />
@@ -286,6 +291,12 @@
     </Compile>
 
     <Compile Include="Views\TerminateEmployeeForm.cs">
+
+      <SubType>Form</SubType>
+
+    </Compile>
+
+    <Compile Include="Views\PromoteManagerForm.cs">
 
       <SubType>Form</SubType>
 
@@ -320,6 +331,12 @@
     </Compile>
     <Compile Include="Views\EmployeePickerControl.Designer.cs">
       <DependentUpon>EmployeePickerControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ManagersForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ManagersForm.Designer.cs">
+      <DependentUpon>ManagersForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\ViewTimesheetsForm.cs">
       <SubType>Form</SubType>

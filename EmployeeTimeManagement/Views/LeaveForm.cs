@@ -342,6 +342,11 @@ namespace EmployeeTimeManagement.Views
                     leaveController.Insert(result.Absence, CurrentUser.ManagerID.Value);
                 }
             }
+            catch (AccessRevokedException ex)
+            {
+                AccessRevokedPrompt.Show(ex);
+                return;
+            }
             catch (Exception ex)
             {
                 ShowBookingMessage("Could not save Absence: " + ex.Message, isError: true);
@@ -382,6 +387,11 @@ namespace EmployeeTimeManagement.Views
             try
             {
                 leaveController.Delete(editingAbsence.LeaveID, CurrentUser.StoreID.Value);
+            }
+            catch (AccessRevokedException ex)
+            {
+                AccessRevokedPrompt.Show(ex);
+                return;
             }
             catch (Exception ex)
             {

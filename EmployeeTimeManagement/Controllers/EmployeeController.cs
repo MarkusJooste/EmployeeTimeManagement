@@ -110,7 +110,7 @@ ORDER BY e.Surname, e.Name;";
         // Returns whoever already holds an ID number, anywhere in the database, or null when
         // nobody does. The unique index on IDNumber spans every store, so the answer can be
         // an employee this manager cannot see.
-        public EmployeeIDNumberOwner FindByIDNumber(string idNumber)
+        public EmployeeIDNumberHolder FindByIDNumber(string idNumber)
         {
             const string query = @"SELECT EmployeeID, StoreID, Name, Surname
 FROM TBL_employees
@@ -130,14 +130,14 @@ LIMIT 1;";
                             return null;
                         }
 
-                        var owner = new EmployeeIDNumberOwner();
+                        var holder = new EmployeeIDNumberHolder();
 
-                        owner.EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID"));
-                        owner.StoreID = reader.GetInt32(reader.GetOrdinal("StoreID"));
-                        owner.Name = ReadText(reader, reader.GetOrdinal("Name"));
-                        owner.Surname = ReadText(reader, reader.GetOrdinal("Surname"));
+                        holder.EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID"));
+                        holder.StoreID = reader.GetInt32(reader.GetOrdinal("StoreID"));
+                        holder.Name = ReadText(reader, reader.GetOrdinal("Name"));
+                        holder.Surname = ReadText(reader, reader.GetOrdinal("Surname"));
 
-                        return owner;
+                        return holder;
                     }
                 }
             }
@@ -394,6 +394,8 @@ ORDER BY FamilyMemberID;";
         // since they are off this form entirely.
         public void Update(EmployeeRecord record)
         {
+            WriteAccessGuard.EnsureActive();
+
             using (var connection = DatabaseConnection.GetConnection())
             {
                 using (var transaction = connection.BeginTransaction())
@@ -649,6 +651,8 @@ WHERE FamilyMemberID = @FamilyMemberID;";
         // failure part-way leaves nothing behind rather than an employee payroll cannot pay.
         public void Insert(EmployeeRecord record)
         {
+            WriteAccessGuard.EnsureActive();
+
             using (var connection = DatabaseConnection.GetConnection())
             {
                 using (var transaction = connection.BeginTransaction())
@@ -847,27 +851,54 @@ VALUES
             return value;
         }
 
-        // Ends one employee's contract: writes the end date and reason for leaving, and
-        // touches no other table. Updates only the latest contract, matching ReadContract.
-        // Returns whether a contract row existed to close: a no-op, not an error, when it
+        // Ends one employee's contract: writes the end date and reason for leaving, and, only
+        // when a contract row actually closed, ends the login on their Manager row in the
+        // same transaction, so access never outlives the contract that granted it. Owner rows
+        // are left alone -- an Owner who is also an Employee cannot lose their own access this
+        // way. Returns whether a contract row existed to close: a no-op, not an error, when it
         // did not, so the caller can tell the manager nothing was actually there to end.
         public bool Terminate(int employeeID, DateTime endDate, string reason)
         {
-            const string query = @"UPDATE TBL_employee_contracts
+            WriteAccessGuard.EnsureActive();
+
+            const string contractQuery = @"UPDATE TBL_employee_contracts
 SET EndDate = @EndDate, ReasonForEnding = @ReasonForEnding
 WHERE EmployeeID = @EmployeeID
 ORDER BY ContractID DESC
 LIMIT 1;";
 
+            var managerController = new ManagerController();
+
             using (var connection = DatabaseConnection.GetConnection())
             {
-                using (var command = new MySqlCommand(query, connection))
+                using (var transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
-                    command.Parameters.AddWithValue("@EndDate", endDate.Date);
-                    command.Parameters.AddWithValue("@ReasonForEnding", reason ?? string.Empty);
+                    try
+                    {
+                        bool closed;
 
-                    return command.ExecuteNonQuery() > 0;
+                        using (var command = new MySqlCommand(contractQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                            command.Parameters.AddWithValue("@EndDate", endDate.Date);
+                            command.Parameters.AddWithValue("@ReasonForEnding", reason ?? string.Empty);
+
+                            closed = command.ExecuteNonQuery() > 0;
+                        }
+
+                        if (closed)
+                        {
+                            managerController.DeactivateForEmployee(connection, transaction, employeeID);
+                        }
+
+                        transaction.Commit();
+                        return closed;
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
         }

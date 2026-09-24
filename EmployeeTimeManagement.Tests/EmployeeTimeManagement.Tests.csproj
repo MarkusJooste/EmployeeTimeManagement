@@ -31,7 +31,7 @@
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeSpouse.cs" Link="Seams\EmployeeSpouse.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeRecord.cs" Link="Seams\EmployeeRecord.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\MaritalStatus.cs" Link="Seams\MaritalStatus.cs" />
-    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeIDNumberOwner.cs" Link="Seams\EmployeeIDNumberOwner.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeIDNumberHolder.cs" Link="Seams\EmployeeIDNumberHolder.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeCapture.cs" Link="Seams\EmployeeCapture.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\LeaveType.cs" Link="Seams\LeaveType.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Absence.cs" Link="Seams\Absence.cs" />
@@ -39,6 +39,8 @@
     <Compile Include="..\EmployeeTimeManagement\Models\LeaveBalance.cs" Link="Seams\LeaveBalance.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\AWOLMirror.cs" Link="Seams\AWOLMirror.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\LeavePrefill.cs" Link="Seams\LeavePrefill.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Manager.cs" Link="Seams\Manager.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\ManagerAccess.cs" Link="Seams\ManagerAccess.cs" />
   </ItemGroup>
 
 </Project>

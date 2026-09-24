@@ -9,14 +9,14 @@ namespace EmployeeTimeManagement.Tests
         private const int ThisStore = 3;
         private const int AnotherStore = 8;
 
-        private static EmployeeIDNumberOwner OwnerAt(int storeID)
+        private static EmployeeIDNumberHolder HolderAt(int storeID)
         {
-            return OwnerAt(storeID, 42);
+            return HolderAt(storeID, 42);
         }
 
-        private static EmployeeIDNumberOwner OwnerAt(int storeID, int employeeID)
+        private static EmployeeIDNumberHolder HolderAt(int storeID, int employeeID)
         {
-            return new EmployeeIDNumberOwner
+            return new EmployeeIDNumberHolder
             {
                 EmployeeID = employeeID,
                 StoreID = storeID,
@@ -34,7 +34,7 @@ namespace EmployeeTimeManagement.Tests
         [Test]
         public void An_id_number_held_at_this_store_is_refused()
         {
-            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(ThisStore), ThisStore);
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(HolderAt(ThisStore), ThisStore);
 
             Assert.That(error, Is.Not.Null);
             Assert.That(error.Field, Is.EqualTo("IDNumber"));
@@ -43,7 +43,7 @@ namespace EmployeeTimeManagement.Tests
         [Test]
         public void An_id_number_held_at_this_store_names_the_employee_holding_it()
         {
-            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(ThisStore), ThisStore);
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(HolderAt(ThisStore), ThisStore);
 
             Assert.That(error.Message, Does.Contain("Thandi"));
             Assert.That(error.Message, Does.Contain("Mokoena"));
@@ -52,7 +52,7 @@ namespace EmployeeTimeManagement.Tests
         [Test]
         public void An_id_number_held_at_another_store_is_refused()
         {
-            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(AnotherStore), ThisStore);
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(HolderAt(AnotherStore), ThisStore);
 
             Assert.That(error, Is.Not.Null);
             Assert.That(error.Field, Is.EqualTo("IDNumber"));
@@ -61,7 +61,7 @@ namespace EmployeeTimeManagement.Tests
         [Test]
         public void An_id_number_held_at_another_store_names_neither_the_employee_nor_the_store()
         {
-            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(AnotherStore), ThisStore);
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(HolderAt(AnotherStore), ThisStore);
 
             Assert.That(error.Message, Does.Not.Contain("Thandi"));
             Assert.That(error.Message, Does.Not.Contain("Mokoena"));
@@ -71,7 +71,7 @@ namespace EmployeeTimeManagement.Tests
         [Test]
         public void An_id_number_held_at_another_store_still_says_it_is_taken()
         {
-            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(AnotherStore), ThisStore);
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(HolderAt(AnotherStore), ThisStore);
 
             Assert.That(error.Message, Does.Contain("another store"));
         }
@@ -79,7 +79,7 @@ namespace EmployeeTimeManagement.Tests
         [Test]
         public void An_employee_keeping_their_own_id_number_does_not_clash_against_themselves()
         {
-            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(ThisStore, 42), ThisStore, 42);
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(HolderAt(ThisStore, 42), ThisStore, 42);
 
             Assert.That(error, Is.Null);
         }
@@ -87,7 +87,7 @@ namespace EmployeeTimeManagement.Tests
         [Test]
         public void An_id_number_held_by_somebody_else_at_this_store_still_clashes_during_an_update()
         {
-            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(OwnerAt(ThisStore, 42), ThisStore, 99);
+            EmployeeFieldError error = EmployeeCapture.DescribeIDNumberClash(HolderAt(ThisStore, 42), ThisStore, 99);
 
             Assert.That(error, Is.Not.Null);
         }

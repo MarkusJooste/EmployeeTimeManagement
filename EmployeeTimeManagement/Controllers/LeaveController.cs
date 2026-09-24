@@ -139,6 +139,8 @@ WHERE t.EmployeeID = @EmployeeID
         // validated, so a refused booking never reaches this far.
         public void Insert(Absence absence, int capturedBy)
         {
+            WriteAccessGuard.EnsureActive();
+
             const string query = @"INSERT INTO TBL_leave
     (EmployeeID, LeaveType, StartDate, EndDate, Reason, OverrideReason, BusinessDate, CapturedBy)
 VALUES
@@ -169,6 +171,8 @@ VALUES
         // already validated.
         public void Update(Absence absence, int storeID)
         {
+            WriteAccessGuard.EnsureActive();
+
             const string query = @"UPDATE TBL_leave l
 JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
 SET l.LeaveType = @LeaveType,
@@ -199,6 +203,8 @@ WHERE l.LeaveID = @LeaveID
         // Deletes one booked Absence, scoped to the manager's store for the same reason Update is.
         public void Delete(int leaveID, int storeID)
         {
+            WriteAccessGuard.EnsureActive();
+
             const string query = @"DELETE l
 FROM TBL_leave l
 JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID

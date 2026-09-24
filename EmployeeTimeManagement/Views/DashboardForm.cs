@@ -23,6 +23,14 @@ namespace EmployeeTimeManagement.Views
             LoadUserInformation();
             ConfigurePermissions();
             ShowHome();
+            CurrentUser.AccessRevoked += HandleAccessRevoked;
+        }
+
+        // Closes the dashboard the same way Logout does, returning to the login screen.
+        private void HandleAccessRevoked()
+        {
+            isLoggingOut = true;
+            Close();
         }
 
         private void LoadUserInformation()
@@ -98,7 +106,7 @@ namespace EmployeeTimeManagement.Views
 
         private void btnManagers_Click(object sender, EventArgs e)
         {
-
+            ShowView(new ManagersForm());
         }
 
         private void btnLogout_Click(object sender, EventArgs e)
@@ -114,6 +122,8 @@ namespace EmployeeTimeManagement.Views
 
         private void DashboardForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            CurrentUser.AccessRevoked -= HandleAccessRevoked;
+
             // Removes current user session
             CurrentUser.Logout();
             // Exits the app if the user clicked the X
