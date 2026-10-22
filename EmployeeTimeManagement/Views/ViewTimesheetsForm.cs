@@ -15,6 +15,7 @@ namespace EmployeeTimeManagement.Views
     public partial class ViewTimesheetsForm : Form
     {
         private readonly TimesheetController timesheetController;
+        private readonly ReportController reportController;
         private List<TimesheetSummary> allRows = new List<TimesheetSummary>();
         private DateTime fromDate;
         private DateTime toDate;
@@ -23,6 +24,7 @@ namespace EmployeeTimeManagement.Views
         {
             InitializeComponent();
             timesheetController = new TimesheetController();
+            reportController = new ReportController();
             ShowWeekly();
         }
 
@@ -179,6 +181,64 @@ namespace EmployeeTimeManagement.Views
             decimal payable = rows.Sum(row => row.PayableHours);
 
             lblStatus.Text = $"{rows.Count} employees · {hours:N2} hours · {payable:N2} payable";
+        }
+
+        private void btnPrint_Click(object sender, EventArgs e)
+        {
+            if (allRows == null || allRows.Count == 0)
+            {
+                MessageBox.Show("There are no timesheet records to include in the report.","No Data",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                return;
+            }
+
+            string search = txtSearch.Text.Trim();
+
+            List<TimesheetSummary> rows;
+
+            if (search.Length == 0)
+            {
+                rows = allRows;
+            }
+            else
+            {
+                rows = allRows
+                    .Where(row =>
+                        row.Name.IndexOf(
+                            search,
+                            StringComparison.CurrentCultureIgnoreCase) >= 0
+                        ||
+                        row.Surname.IndexOf(
+                            search,
+                            StringComparison.CurrentCultureIgnoreCase) >= 0)
+                    .ToList();
+            }
+
+            if (rows.Count == 0)
+            {
+                MessageBox.Show("There are no employees matching the current search.","No Data",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                string filePath = reportController.GenerateTimesheetReport(fromDate,toDate,rows);
+
+                DialogResult result = MessageBox.Show($"The PDF report has been created successfully.\n\n" +$"Saved to:\n{filePath}\n\n" +"Would you like to open it?","Report Created",MessageBoxButtons.YesNo,MessageBoxIcon.Information);
+
+                if (result == DialogResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(
+                        new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = filePath,
+                            UseShellExecute = true
+                        });
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not create the PDF report:\n\n" + ex.Message,"Report Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+            }
         }
     }
 }
