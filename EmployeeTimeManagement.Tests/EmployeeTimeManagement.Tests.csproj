@@ -41,6 +41,8 @@
     <Compile Include="..\EmployeeTimeManagement\Models\LeavePrefill.cs" Link="Seams\LeavePrefill.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Manager.cs" Link="Seams\Manager.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\ManagerAccess.cs" Link="Seams\ManagerAccess.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\ContractBlanks.cs" Link="Seams\ContractBlanks.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\ContractData.cs" Link="Seams\ContractData.cs" />
   </ItemGroup>
 
 </Project>

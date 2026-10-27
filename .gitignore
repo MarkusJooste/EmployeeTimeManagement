@@ -429,3 +429,7 @@ FodyWeavers.xsd
 *.msp
 
 *.md
+
+# EmployeeTimeManagement/ContractTemplates/README.txt).
+EmployeeTimeManagement/ContractTemplates/**/*.pdf
+/schema.csv

@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\PdfiumViewer.Native.x86_64.v8-xfa.2018.4.8.256\Build\PdfiumViewer.Native.x86_64.v8-xfa.props" Condition="Exists('..\packages\PdfiumViewer.Native.x86_64.v8-xfa.2018.4.8.256\Build\PdfiumViewer.Native.x86_64.v8-xfa.props')" />
+  <Import Project="..\packages\PdfiumViewer.Native.x86.v8-xfa.2018.4.8.256\Build\PdfiumViewer.Native.x86.v8-xfa.props" Condition="Exists('..\packages\PdfiumViewer.Native.x86.v8-xfa.2018.4.8.256\Build\PdfiumViewer.Native.x86.v8-xfa.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -99,6 +101,9 @@
     </Reference>
     <Reference Include="PdfSharp.WPFonts, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
       <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.WPFonts.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfiumViewer, Version=2.13.0.0, Culture=neutral, PublicKeyToken=91e4789cfb0609e0, processorArchitecture=MSIL">
+      <HintPath>..\packages\PdfiumViewer.2.13.0.0\lib\net20\PdfiumViewer.dll</HintPath>
     </Reference>
     <Reference Include="Superpower, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aec39280ded1b3a7, processorArchitecture=MSIL">
       <HintPath>..\packages\Superpower.3.0.0\lib\netstandard2.0\Superpower.dll</HintPath>
@@ -261,6 +266,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\ContractController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
     <Compile Include="Controllers\ManagerController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
@@ -297,6 +303,8 @@
     <Compile Include="Models\LeaveBalance.cs" />
     <Compile Include="Models\AWOLMirror.cs" />
     <Compile Include="Models\LeavePrefill.cs" />
+    <Compile Include="Models\ContractBlanks.cs" />
+    <Compile Include="Models\ContractData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\CaptureTimesheetsForm.cs">
@@ -313,6 +321,16 @@
     </Compile>
     <Compile Include="Views\PromoteManagerForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ContractPdf.cs" />
+    <Compile Include="Views\ContractPreviewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ContractsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ContractsForm.Designer.cs">
+      <DependentUpon>ContractsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\DashboardForm.cs">
       <SubType>Form</SubType>
@@ -387,6 +405,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <!-- The client's PDFs are git-ignored; the wildcard copies whichever are present. -->
+    <Content Include="ContractTemplates\**\*.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="ContractTemplates\README.txt" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
