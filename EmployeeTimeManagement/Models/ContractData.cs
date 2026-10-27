@@ -100,7 +100,6 @@ namespace EmployeeTimeManagement.Models
         }
 
         public Employee Employee { get; set; }
-        public EmployeeDetails Details { get; set; }
         public string StoreName { get; set; }
 
         // Null when nothing was captured.
@@ -173,8 +172,8 @@ namespace EmployeeTimeManagement.Models
             {
                 Template = template,
                 FullName = Employee == null ? null : Employee.FullName,
-                IDNumber = Details == null ? null : Details.IDNumber,
-                TelephoneNumber = Details == null ? null : Details.MobileNumber,
+                IDNumber = Employee == null ? null : Employee.IDNumber,
+                TelephoneNumber = Employee == null ? null : Employee.MobileNumber,
                 NextOfKinName = nextOfKin.Name,
                 NextOfKinRelationship = nextOfKin.Relationship,
                 NextOfKinNumber = nextOfKin.ContactNumber,

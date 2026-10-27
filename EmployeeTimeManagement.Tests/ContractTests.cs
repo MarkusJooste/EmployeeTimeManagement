@@ -465,8 +465,11 @@ namespace EmployeeTimeManagement.Tests
         {
             var source = new ContractSource
             {
-                Employee = new Employee { EmployeeID = 7, StoreID = 1, Name = "Thandi", Surname = "Mokoena" },
-                Details = new EmployeeDetails { EmployeeID = 7, IDNumber = "9001015009087", MobileNumber = "0821234567" },
+                Employee = new Employee
+                {
+                    EmployeeID = 7, StoreID = 1, Name = "Thandi", Surname = "Mokoena",
+                    IDNumber = "9001015009087", MobileNumber = "0821234567"
+                },
                 StoreName = "Wimpy Paarl Mall",
                 IsLinkedManager = linkedManager
             };

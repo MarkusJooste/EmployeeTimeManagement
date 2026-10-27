@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace EmployeeTimeManagement.Models
 {
-    internal class EmployeeFamilyMember
+    // Somebody to phone about an employee. One row of TBL_employee_family.
+    public class EmployeeFamilyMember
     {
+        public int? FamilyMemberID { get; set; }
         public int EmployeeID { get; set; }
         public string FamilyMemberName { get; set; }
 

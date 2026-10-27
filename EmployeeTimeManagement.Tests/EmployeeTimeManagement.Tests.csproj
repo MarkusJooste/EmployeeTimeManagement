@@ -23,14 +23,26 @@
     <Compile Include="..\EmployeeTimeManagement\Models\DayType.cs" Link="Seams\DayType.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Timesheet.cs" Link="Seams\Timesheet.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\TimesheetCapture.cs" Link="Seams\TimesheetCapture.cs" />
-    <Compile Include="..\EmployeeTimeManagement\Models\ContractBlanks.cs" Link="Seams\ContractBlanks.cs" />
-    <Compile Include="..\EmployeeTimeManagement\Models\ContractData.cs" Link="Seams\ContractData.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Employee.cs" Link="Seams\Employee.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeAddress.cs" Link="Seams\EmployeeAddress.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeBank.cs" Link="Seams\EmployeeBank.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeContract.cs" Link="Seams\EmployeeContract.cs" />
-    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeDetails.cs" Link="Seams\EmployeeDetails.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeFamilyMember.cs" Link="Seams\EmployeeFamilyMember.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\EmployeeSpouse.cs" Link="Seams\EmployeeSpouse.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeRecord.cs" Link="Seams\EmployeeRecord.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\MaritalStatus.cs" Link="Seams\MaritalStatus.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeIDNumberHolder.cs" Link="Seams\EmployeeIDNumberHolder.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\EmployeeCapture.cs" Link="Seams\EmployeeCapture.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeaveType.cs" Link="Seams\LeaveType.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Absence.cs" Link="Seams\Absence.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeaveBooking.cs" Link="Seams\LeaveBooking.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeaveBalance.cs" Link="Seams\LeaveBalance.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\AWOLMirror.cs" Link="Seams\AWOLMirror.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\LeavePrefill.cs" Link="Seams\LeavePrefill.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\Manager.cs" Link="Seams\Manager.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\ManagerAccess.cs" Link="Seams\ManagerAccess.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\ContractBlanks.cs" Link="Seams\ContractBlanks.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\ContractData.cs" Link="Seams\ContractData.cs" />
   </ItemGroup>
 
 </Project>

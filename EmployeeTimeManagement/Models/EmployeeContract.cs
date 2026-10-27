@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace EmployeeTimeManagement.Models
 {
-    internal class EmployeeContract
+    // The terms an employee works under, and the rate payroll pays them. One row of TBL_employee_contracts.
+    public class EmployeeContract
     {
+        public int? ContractID { get; set; }
         public int EmployeeID { get; set; }
         public string ContractType { get; set; }
         public DateTime StartDate { get; set; }

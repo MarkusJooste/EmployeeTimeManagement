@@ -116,11 +116,7 @@ WHERE e.EmployeeID = @EmployeeID
                             EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID")),
                             StoreID = reader.GetInt32(reader.GetOrdinal("StoreID")),
                             Name = ReadString(reader, "Name") ?? string.Empty,
-                            Surname = ReadString(reader, "Surname") ?? string.Empty
-                        },
-                        Details = new EmployeeDetails
-                        {
-                            EmployeeID = employeeID,
+                            Surname = ReadString(reader, "Surname") ?? string.Empty,
                             IDNumber = ReadString(reader, "IDNumber"),
                             MobileNumber = ReadString(reader, "MobileNumber")
                         },

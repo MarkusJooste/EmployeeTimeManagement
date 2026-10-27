@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace EmployeeTimeManagement.Models
 {
-    internal class EmployeeAddress
+    // Where an employee lives. One row of TBL_employee_addresses.
+    public class EmployeeAddress
     {
+        public int? AddressID { get; set; }
         public int EmployeeID { get; set; }
         public string HouseFlatNumber { get; set; }
 

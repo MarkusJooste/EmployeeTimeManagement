@@ -75,23 +75,35 @@
     <Reference Include="MySqlConnector, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d33d3e53aa5f8c92, processorArchitecture=MSIL">
       <HintPath>..\packages\MySqlConnector.2.6.2\lib\net48\MySqlConnector.dll</HintPath>
     </Reference>
-    <Reference Include="PdfiumViewer, Version=2.13.0.0, Culture=neutral, PublicKeyToken=91e4789cfb0609e0, processorArchitecture=MSIL">
-      <HintPath>..\packages\PdfiumViewer.2.13.0.0\lib\net20\PdfiumViewer.dll</HintPath>
-    </Reference>
-    <Reference Include="PdfSharp-gdi">
+    <Reference Include="PdfSharp-gdi, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
       <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp-gdi.dll</HintPath>
     </Reference>
-    <Reference Include="PdfSharp.Cryptography">
+    <Reference Include="PdfSharp.BarCodes-gdi, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.BarCodes-gdi.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfSharp.Charting-gdi, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.Charting-gdi.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfSharp.Cryptography, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
       <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.Cryptography.dll</HintPath>
     </Reference>
-    <Reference Include="PdfSharp.Shared">
+    <Reference Include="PdfSharp.Quality-gdi, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.Quality-gdi.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfSharp.Shared, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
       <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.Shared.dll</HintPath>
     </Reference>
-    <Reference Include="PdfSharp.System">
+    <Reference Include="PdfSharp.Snippets-gdi, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.Snippets-gdi.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfSharp.System, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
       <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.System.dll</HintPath>
     </Reference>
-    <Reference Include="PdfSharp.WPFonts">
+    <Reference Include="PdfSharp.WPFonts, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
       <HintPath>..\packages\PDFsharp-GDI.6.2.4\lib\net462\PdfSharp.WPFonts.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfiumViewer, Version=2.13.0.0, Culture=neutral, PublicKeyToken=91e4789cfb0609e0, processorArchitecture=MSIL">
+      <HintPath>..\packages\PdfiumViewer.2.13.0.0\lib\net20\PdfiumViewer.dll</HintPath>
     </Reference>
     <Reference Include="Superpower, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aec39280ded1b3a7, processorArchitecture=MSIL">
       <HintPath>..\packages\Superpower.3.0.0\lib\netstandard2.0\Superpower.dll</HintPath>
@@ -230,10 +242,6 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Security" />
-    <Reference Include="System.Security.Cryptography.Pkcs, Version=8.0.0.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Cryptography.Pkcs.8.0.1\lib\net462\System.Security.Cryptography.Pkcs.dll</HintPath>
-    </Reference>
     <Reference Include="System.Text.RegularExpressions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.RegularExpressions.4.3.0\lib\net463\System.Text.RegularExpressions.dll</HintPath>
       <Private>True</Private>
@@ -259,9 +267,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ContractController.cs" />
-    <Compile Include="Controllers\EmployeeCaptureController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
-
+    <Compile Include="Controllers\ManagerController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\TimesheetController.cs" />
@@ -270,22 +277,34 @@
     <Compile Include="Models\TimesheetReport.cs" />
     <Compile Include="Views\AccessRevokedPrompt.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
-    <Compile Include="Models\EmployeeAddress.cs" />
-    <Compile Include="Models\EmployeeBank.cs" />
-    <Compile Include="Models\EmployeeContract.cs" />
-    <Compile Include="Models\EmployeeDetails.cs" />
-    <Compile Include="Models\EmployeeFamilyMember.cs" />
-    <Compile Include="Models\EmployeeSpouse.cs" />
     <Compile Include="Models\Timesheet.cs" />
     <Compile Include="Models\TimesheetCapture.cs" />
     <Compile Include="Models\Employee.cs" />
-
+    <Compile Include="Models\EmployeeListItem.cs" />
+    <Compile Include="Models\ManagerListItem.cs" />
+    <Compile Include="Models\EmployeeAddress.cs" />
+    <Compile Include="Models\EmployeeBank.cs" />
+    <Compile Include="Models\EmployeeContract.cs" />
+    <Compile Include="Models\EmployeeFamilyMember.cs" />
+    <Compile Include="Models\EmployeeSpouse.cs" />
+    <Compile Include="Models\EmployeeRecord.cs" />
+    <Compile Include="Models\EmployeeIDNumberHolder.cs" />
+    <Compile Include="Models\MaritalStatus.cs" />
+    <Compile Include="Models\EmployeeCapture.cs" />
     <Compile Include="Models\DayType.cs" />
     <Compile Include="Models\SouthAfricanHolidays.cs" />
     <Compile Include="Models\CurrentUser.cs" />
     <Compile Include="Models\Manager.cs" />
     <Compile Include="Models\ManagerAccess.cs" />
     <Compile Include="Models\TimesheetSummary.cs" />
+    <Compile Include="Models\LeaveType.cs" />
+    <Compile Include="Models\Absence.cs" />
+    <Compile Include="Models\LeaveBooking.cs" />
+    <Compile Include="Models\LeaveBalance.cs" />
+    <Compile Include="Models\AWOLMirror.cs" />
+    <Compile Include="Models\LeavePrefill.cs" />
+    <Compile Include="Models\ContractBlanks.cs" />
+    <Compile Include="Models\ContractData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\CaptureTimesheetsForm.cs">
@@ -295,9 +314,23 @@
       <DependentUpon>CaptureTimesheetsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\TimesheetPickerForm.cs">
-
       <SubType>Form</SubType>
-
+    </Compile>
+    <Compile Include="Views\TerminateEmployeeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\PromoteManagerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ContractPdf.cs" />
+    <Compile Include="Views\ContractPreviewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ContractsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ContractsForm.Designer.cs">
+      <DependentUpon>ContractsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\DashboardForm.cs">
       <SubType>Form</SubType>
