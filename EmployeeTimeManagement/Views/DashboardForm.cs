@@ -78,7 +78,7 @@ namespace EmployeeTimeManagement.Views
 
         private void btnContracts_Click(object sender, EventArgs e)
         {
-
+            ShowView(new ContractsForm());
         }
 
         private void btnCaptureTimesheets_Click(object sender, EventArgs e)

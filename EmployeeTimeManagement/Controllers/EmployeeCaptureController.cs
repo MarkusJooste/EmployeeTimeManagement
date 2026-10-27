@@ -82,7 +82,7 @@ VALUES
                         command.Parameters.AddWithValue(
                             "@SARSNumber",
                             string.IsNullOrWhiteSpace(details.SARSNumber)
-                                ? DBNull.Value
+                                ? (object)DBNull.Value
                                 : details.SARSNumber);
 
                         command.Parameters.AddWithValue(
@@ -310,7 +310,7 @@ VALUES
                         command.Parameters.AddWithValue(
                             "@EndDate",
                             contract.EndDate.HasValue
-                                ? contract.EndDate.Value
+                                ? (object)contract.EndDate.Value
                                 : DBNull.Value);
 
                         command.Parameters.AddWithValue(
@@ -380,7 +380,7 @@ VALUES
                 command.Parameters.AddWithValue(
                     "@MobileNumber",
                     string.IsNullOrWhiteSpace(familyMember.MobileNumber)
-                        ? DBNull.Value
+                        ? (object)DBNull.Value
                         : familyMember.MobileNumber);
 
                 command.Parameters.AddWithValue(
