@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace EmployeeTimeManagement.Models
 {
-    internal class EmployeeBank
     {
-        public int BankID { get; set; }
         public int EmployeeID { get; set; }
         public string BankName { get; set; }
         public string AccountType { get; set; }

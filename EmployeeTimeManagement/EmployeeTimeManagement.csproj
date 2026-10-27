@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\PdfiumViewer.Native.x86_64.v8-xfa.2018.4.8.256\Build\PdfiumViewer.Native.x86_64.v8-xfa.props" Condition="Exists('..\packages\PdfiumViewer.Native.x86_64.v8-xfa.2018.4.8.256\Build\PdfiumViewer.Native.x86_64.v8-xfa.props')" />
   <Import Project="..\packages\PdfiumViewer.Native.x86.v8-xfa.2018.4.8.256\Build\PdfiumViewer.Native.x86.v8-xfa.props" Condition="Exists('..\packages\PdfiumViewer.Native.x86.v8-xfa.2018.4.8.256\Build\PdfiumViewer.Native.x86.v8-xfa.props')" />
@@ -62,6 +62,15 @@
       <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
       <Private>True</Private>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="MigraDoc.DocumentObjectModel, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp-MigraDoc-GDI.6.2.4\lib\net462\MigraDoc.DocumentObjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="MigraDoc.Rendering-gdi, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp-MigraDoc-GDI.6.2.4\lib\net462\MigraDoc.Rendering-gdi.dll</HintPath>
+    </Reference>
+    <Reference Include="MigraDoc.RtfRendering-gdi, Version=6.2.4.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp-MigraDoc-GDI.6.2.4\lib\net462\MigraDoc.RtfRendering-gdi.dll</HintPath>
     </Reference>
     <Reference Include="MySqlConnector, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d33d3e53aa5f8c92, processorArchitecture=MSIL">
       <HintPath>..\packages\MySqlConnector.2.6.2\lib\net48\MySqlConnector.dll</HintPath>
@@ -197,6 +206,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
       <Private>True</Private>
@@ -206,6 +216,9 @@
       <HintPath>..\packages\System.Security.Cryptography.Encoding.4.3.0\lib\net46\System.Security.Cryptography.Encoding.dll</HintPath>
       <Private>True</Private>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Pkcs, Version=8.0.0.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Pkcs.8.0.1\lib\net462\System.Security.Cryptography.Pkcs.dll</HintPath>
     </Reference>
     <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
@@ -248,8 +261,14 @@
     <Compile Include="Controllers\ContractController.cs" />
     <Compile Include="Controllers\EmployeeCaptureController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
+
     <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\TimesheetController.cs" />
+    <Compile Include="Controllers\LeaveController.cs" />
+    <Compile Include="Controllers\WriteAccessGuard.cs" />
+    <Compile Include="Models\TimesheetReport.cs" />
+    <Compile Include="Views\AccessRevokedPrompt.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
     <Compile Include="Models\EmployeeAddress.cs" />
     <Compile Include="Models\EmployeeBank.cs" />
@@ -260,13 +279,13 @@
     <Compile Include="Models\Timesheet.cs" />
     <Compile Include="Models\TimesheetCapture.cs" />
     <Compile Include="Models\Employee.cs" />
+
     <Compile Include="Models\DayType.cs" />
     <Compile Include="Models\SouthAfricanHolidays.cs" />
     <Compile Include="Models\CurrentUser.cs" />
     <Compile Include="Models\Manager.cs" />
+    <Compile Include="Models\ManagerAccess.cs" />
     <Compile Include="Models\TimesheetSummary.cs" />
-    <Compile Include="Models\ContractBlanks.cs" />
-    <Compile Include="Models\ContractData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\CaptureTimesheetsForm.cs">
@@ -276,17 +295,9 @@
       <DependentUpon>CaptureTimesheetsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\TimesheetPickerForm.cs">
+
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Views\ContractPdf.cs" />
-    <Compile Include="Views\ContractPreviewForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Views\ContractsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Views\ContractsForm.Designer.cs">
-      <DependentUpon>ContractsForm.cs</DependentUpon>
+
     </Compile>
     <Compile Include="Views\DashboardForm.cs">
       <SubType>Form</SubType>
@@ -306,11 +317,35 @@
     <Compile Include="Views\LoginForm.Designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\EmployeesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\EmployeesForm.Designer.cs">
+      <DependentUpon>EmployeesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EmployeePickerControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\EmployeePickerControl.Designer.cs">
+      <DependentUpon>EmployeePickerControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ManagersForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ManagersForm.Designer.cs">
+      <DependentUpon>ManagersForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\ViewTimesheetsForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Views\ViewTimesheetsForm.Designer.cs">
       <DependentUpon>ViewTimesheetsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LeaveForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\LeaveForm.Designer.cs">
+      <DependentUpon>LeaveForm.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
