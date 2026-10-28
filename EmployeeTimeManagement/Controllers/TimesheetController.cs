@@ -12,7 +12,8 @@ namespace EmployeeTimeManagement.Controllers
     internal class TimesheetController
     {
         // Returns per-employee hours worked between two dates for one store, net of breaks, with Sunday and public-holiday premium hours broken out.
-        public List<TimesheetSummary> GetSummary(DateTime fromDate, DateTime toDate, int storeID)
+        // A null storeID covers every store, for the owner's dashboard.
+        public List<TimesheetSummary> GetSummary(DateTime fromDate, DateTime toDate, int? storeID)
         {
             const string query = @"SELECT a.EmployeeID,
        MAX(e.Name)              AS Name,
@@ -44,7 +45,7 @@ FROM (
     GROUP BY r.EmployeeID
 ) a
 INNER JOIN TBL_employees e ON e.EmployeeID = a.EmployeeID
-WHERE e.StoreID = @StoreID
+WHERE (@StoreID IS NULL OR e.StoreID = @StoreID)
 GROUP BY a.EmployeeID
 ORDER BY MAX(e.Surname), MAX(e.Name);";
 
@@ -56,7 +57,7 @@ ORDER BY MAX(e.Surname), MAX(e.Name);";
                 {
                     command.Parameters.AddWithValue("@FromDate", fromDate.Date);
                     command.Parameters.AddWithValue("@ToDate", toDate.Date);
-                    command.Parameters.AddWithValue("@StoreID", storeID);
+                    command.Parameters.AddWithValue("@StoreID", storeID.HasValue ? (object)storeID.Value : DBNull.Value);
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -210,6 +211,82 @@ WHERE t.WorkDate = @WorkDate
             }
 
             return employeeIDs;
+        }
+
+        // Returns every employee with their latest contract's dates and whether a Timesheet
+        // and booked leave exist for one WorkDate, for the dashboard's "not captured yet"
+        // list. A null storeID is the owner, who sees every store.
+        public List<EmployeeDayStatus> GetDayStatus(DateTime workDate, int? storeID)
+        {
+            const string query = @"SELECT e.EmployeeID,
+       e.StoreID,
+       s.StoreName,
+       e.Name,
+       e.Surname,
+       c.StartDate,
+       c.EndDate,
+       EXISTS (SELECT 1
+               FROM TBL_timesheets t
+               WHERE t.EmployeeID = e.EmployeeID
+                 AND t.WorkDate = @WorkDate) AS HasTimesheet,
+       EXISTS (SELECT 1
+               FROM TBL_leave l
+               WHERE l.EmployeeID = e.EmployeeID
+                 AND l.LeaveType != @AWOL
+                 AND @WorkDate BETWEEN l.StartDate AND l.EndDate) AS IsOnLeave
+FROM TBL_employees e
+LEFT JOIN TBL_stores s ON s.StoreID = e.StoreID
+LEFT JOIN TBL_employee_contracts c
+       ON c.EmployeeID = e.EmployeeID
+      AND c.ContractID = (SELECT MAX(latest.ContractID)
+                          FROM TBL_employee_contracts latest
+                          WHERE latest.EmployeeID = e.EmployeeID)
+WHERE (@StoreID IS NULL OR e.StoreID = @StoreID);";
+
+            var statuses = new List<EmployeeDayStatus>();
+
+            using (var connection = DatabaseConnection.GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@WorkDate", workDate.Date);
+                    command.Parameters.AddWithValue("@StoreID", storeID.HasValue ? (object)storeID.Value : DBNull.Value);
+                    command.Parameters.AddWithValue("@AWOL", LeaveType.AWOL.ToDatabaseValue());
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        int employeeIDIndex = reader.GetOrdinal("EmployeeID");
+                        int storeIDIndex = reader.GetOrdinal("StoreID");
+                        int storeNameIndex = reader.GetOrdinal("StoreName");
+                        int nameIndex = reader.GetOrdinal("Name");
+                        int surnameIndex = reader.GetOrdinal("Surname");
+                        int startDateIndex = reader.GetOrdinal("StartDate");
+                        int endDateIndex = reader.GetOrdinal("EndDate");
+                        int hasTimesheetIndex = reader.GetOrdinal("HasTimesheet");
+                        int isOnLeaveIndex = reader.GetOrdinal("IsOnLeave");
+
+                        while (reader.Read())
+                        {
+                            statuses.Add(new EmployeeDayStatus
+                            {
+                                EmployeeID = reader.GetInt32(employeeIDIndex),
+                                StoreID = reader.GetInt32(storeIDIndex),
+                                StoreName = reader.IsDBNull(storeNameIndex) ? string.Empty : reader.GetString(storeNameIndex),
+                                Name = reader.IsDBNull(nameIndex) ? string.Empty : reader.GetString(nameIndex),
+                                Surname = reader.IsDBNull(surnameIndex) ? string.Empty : reader.GetString(surnameIndex),
+                                ContractStartDate = reader.IsDBNull(startDateIndex) ? (DateTime?)null : reader.GetDateTime(startDateIndex),
+                                ContractEndDate = reader.IsDBNull(endDateIndex) ? (DateTime?)null : reader.GetDateTime(endDateIndex),
+
+                                // EXISTS comes back as a 0/1 integer.
+                                HasTimesheet = Convert.ToInt64(reader.GetValue(hasTimesheetIndex)) != 0,
+                                IsOnLeave = Convert.ToInt64(reader.GetValue(isOnLeaveIndex)) != 0
+                            });
+                        }
+                    }
+                }
+            }
+
+            return statuses;
         }
 
         // Writes a whole day of Timesheets in one transaction, so a failure part way

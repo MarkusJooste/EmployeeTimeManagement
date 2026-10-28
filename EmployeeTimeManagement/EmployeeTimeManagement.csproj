@@ -267,6 +267,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ContractController.cs" />
+    <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
     <Compile Include="Controllers\ManagerController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
@@ -303,6 +304,8 @@
     <Compile Include="Models\LeaveBalance.cs" />
     <Compile Include="Models\AWOLMirror.cs" />
     <Compile Include="Models\LeavePrefill.cs" />
+    <Compile Include="Models\TimesheetCompletion.cs" />
+    <Compile Include="Models\DashboardChecks.cs" />
     <Compile Include="Models\ContractBlanks.cs" />
     <Compile Include="Models\ContractData.cs" />
     <Compile Include="Program.cs" />
@@ -323,6 +326,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Views\ContractPdf.cs" />
+    <Compile Include="Views\DashboardListCard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Views\ContractPreviewForm.cs">
       <SubType>Form</SubType>
     </Compile>

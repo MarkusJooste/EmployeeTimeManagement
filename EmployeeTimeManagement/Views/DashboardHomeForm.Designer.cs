@@ -1,4 +1,4 @@
-﻿namespace EmployeeTimeManagement.Views
+namespace EmployeeTimeManagement.Views
 {
     partial class DashboardHomeForm
     {
@@ -35,9 +35,14 @@
             this.pnlLeave = new System.Windows.Forms.Panel();
             this.pnlAwol = new System.Windows.Forms.Panel();
             this.lblEmployeeCount = new System.Windows.Forms.Label();
-            this.lblHoursToday = new System.Windows.Forms.Label();
+            this.lblHoursWeek = new System.Windows.Forms.Label();
             this.lblLeaveToday = new System.Windows.Forms.Label();
-            this.lblAwolToday = new System.Windows.Forms.Label();
+            this.lblAwolWeek = new System.Windows.Forms.Label();
+            this.lblEmployeesCaption = new System.Windows.Forms.Label();
+            this.lblHoursCaption = new System.Windows.Forms.Label();
+            this.lblLeaveCaption = new System.Windows.Forms.Label();
+            this.lblAwolCaption = new System.Windows.Forms.Label();
+            this.tlpCards = new System.Windows.Forms.TableLayoutPanel();
             this.pnlEmployees.SuspendLayout();
             this.pnlHours.SuspendLayout();
             this.pnlLeave.SuspendLayout();
@@ -64,77 +69,152 @@
             // 
             // pnlEmployees
             // 
+            this.pnlEmployees.BackColor = System.Drawing.Color.White;
+            this.pnlEmployees.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlEmployees.Controls.Add(this.lblEmployeeCount);
-            this.pnlEmployees.Location = new System.Drawing.Point(42, 92);
+            this.pnlEmployees.Controls.Add(this.lblEmployeesCaption);
+            this.pnlEmployees.Location = new System.Drawing.Point(39, 75);
             this.pnlEmployees.Name = "pnlEmployees";
-            this.pnlEmployees.Size = new System.Drawing.Size(200, 100);
+            this.pnlEmployees.Size = new System.Drawing.Size(190, 70);
             this.pnlEmployees.TabIndex = 2;
             // 
-            // pnlHours
+            // lblEmployeesCaption
             // 
-            this.pnlHours.Controls.Add(this.lblHoursToday);
-            this.pnlHours.Location = new System.Drawing.Point(319, 92);
-            this.pnlHours.Name = "pnlHours";
-            this.pnlHours.Size = new System.Drawing.Size(200, 100);
-            this.pnlHours.TabIndex = 3;
-            // 
-            // pnlLeave
-            // 
-            this.pnlLeave.Controls.Add(this.lblLeaveToday);
-            this.pnlLeave.Location = new System.Drawing.Point(42, 215);
-            this.pnlLeave.Name = "pnlLeave";
-            this.pnlLeave.Size = new System.Drawing.Size(200, 100);
-            this.pnlLeave.TabIndex = 4;
-            // 
-            // pnlAwol
-            // 
-            this.pnlAwol.Controls.Add(this.lblAwolToday);
-            this.pnlAwol.Location = new System.Drawing.Point(319, 215);
-            this.pnlAwol.Name = "pnlAwol";
-            this.pnlAwol.Size = new System.Drawing.Size(200, 100);
-            this.pnlAwol.TabIndex = 5;
+            this.lblEmployeesCaption.AutoSize = true;
+            this.lblEmployeesCaption.ForeColor = System.Drawing.Color.DimGray;
+            this.lblEmployeesCaption.Location = new System.Drawing.Point(10, 8);
+            this.lblEmployeesCaption.Name = "lblEmployeesCaption";
+            this.lblEmployeesCaption.Size = new System.Drawing.Size(60, 13);
+            this.lblEmployeesCaption.TabIndex = 0;
+            this.lblEmployeesCaption.Text = "Employees";
             // 
             // lblEmployeeCount
             // 
             this.lblEmployeeCount.AutoSize = true;
-            this.lblEmployeeCount.Location = new System.Drawing.Point(65, 34);
+            this.lblEmployeeCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEmployeeCount.Location = new System.Drawing.Point(8, 28);
             this.lblEmployeeCount.Name = "lblEmployeeCount";
-            this.lblEmployeeCount.Size = new System.Drawing.Size(35, 13);
-            this.lblEmployeeCount.TabIndex = 0;
-            this.lblEmployeeCount.Text = "label1";
+            this.lblEmployeeCount.Size = new System.Drawing.Size(26, 29);
+            this.lblEmployeeCount.TabIndex = 1;
+            this.lblEmployeeCount.Text = "0";
             // 
-            // lblHoursToday
+            // pnlHours
             // 
-            this.lblHoursToday.AutoSize = true;
-            this.lblHoursToday.Location = new System.Drawing.Point(94, 34);
-            this.lblHoursToday.Name = "lblHoursToday";
-            this.lblHoursToday.Size = new System.Drawing.Size(35, 13);
-            this.lblHoursToday.TabIndex = 0;
-            this.lblHoursToday.Text = "label1";
+            this.pnlHours.BackColor = System.Drawing.Color.White;
+            this.pnlHours.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlHours.Controls.Add(this.lblHoursWeek);
+            this.pnlHours.Controls.Add(this.lblHoursCaption);
+            this.pnlHours.Location = new System.Drawing.Point(241, 75);
+            this.pnlHours.Name = "pnlHours";
+            this.pnlHours.Size = new System.Drawing.Size(190, 70);
+            this.pnlHours.TabIndex = 3;
+            // 
+            // lblHoursCaption
+            // 
+            this.lblHoursCaption.AutoSize = true;
+            this.lblHoursCaption.ForeColor = System.Drawing.Color.DimGray;
+            this.lblHoursCaption.Location = new System.Drawing.Point(10, 8);
+            this.lblHoursCaption.Name = "lblHoursCaption";
+            this.lblHoursCaption.Size = new System.Drawing.Size(60, 13);
+            this.lblHoursCaption.TabIndex = 0;
+            this.lblHoursCaption.Text = "Hours this week";
+            // 
+            // lblHoursWeek
+            // 
+            this.lblHoursWeek.AutoSize = true;
+            this.lblHoursWeek.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblHoursWeek.Location = new System.Drawing.Point(8, 28);
+            this.lblHoursWeek.Name = "lblHoursWeek";
+            this.lblHoursWeek.Size = new System.Drawing.Size(26, 29);
+            this.lblHoursWeek.TabIndex = 1;
+            this.lblHoursWeek.Text = "0";
+            // 
+            // pnlLeave
+            // 
+            this.pnlLeave.BackColor = System.Drawing.Color.White;
+            this.pnlLeave.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlLeave.Controls.Add(this.lblLeaveToday);
+            this.pnlLeave.Controls.Add(this.lblLeaveCaption);
+            this.pnlLeave.Location = new System.Drawing.Point(443, 75);
+            this.pnlLeave.Name = "pnlLeave";
+            this.pnlLeave.Size = new System.Drawing.Size(190, 70);
+            this.pnlLeave.TabIndex = 4;
+            // 
+            // lblLeaveCaption
+            // 
+            this.lblLeaveCaption.AutoSize = true;
+            this.lblLeaveCaption.ForeColor = System.Drawing.Color.DimGray;
+            this.lblLeaveCaption.Location = new System.Drawing.Point(10, 8);
+            this.lblLeaveCaption.Name = "lblLeaveCaption";
+            this.lblLeaveCaption.Size = new System.Drawing.Size(60, 13);
+            this.lblLeaveCaption.TabIndex = 0;
+            this.lblLeaveCaption.Text = "On leave today";
             // 
             // lblLeaveToday
             // 
             this.lblLeaveToday.AutoSize = true;
-            this.lblLeaveToday.Location = new System.Drawing.Point(64, 35);
+            this.lblLeaveToday.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLeaveToday.Location = new System.Drawing.Point(8, 28);
             this.lblLeaveToday.Name = "lblLeaveToday";
-            this.lblLeaveToday.Size = new System.Drawing.Size(35, 13);
-            this.lblLeaveToday.TabIndex = 0;
-            this.lblLeaveToday.Text = "label1";
+            this.lblLeaveToday.Size = new System.Drawing.Size(26, 29);
+            this.lblLeaveToday.TabIndex = 1;
+            this.lblLeaveToday.Text = "0";
             // 
-            // lblAwolToday
+            // pnlAwol
             // 
-            this.lblAwolToday.AutoSize = true;
-            this.lblAwolToday.Location = new System.Drawing.Point(94, 35);
-            this.lblAwolToday.Name = "lblAwolToday";
-            this.lblAwolToday.Size = new System.Drawing.Size(35, 13);
-            this.lblAwolToday.TabIndex = 0;
-            this.lblAwolToday.Text = "label1";
+            this.pnlAwol.BackColor = System.Drawing.Color.White;
+            this.pnlAwol.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlAwol.Controls.Add(this.lblAwolWeek);
+            this.pnlAwol.Controls.Add(this.lblAwolCaption);
+            this.pnlAwol.Location = new System.Drawing.Point(645, 75);
+            this.pnlAwol.Name = "pnlAwol";
+            this.pnlAwol.Size = new System.Drawing.Size(190, 70);
+            this.pnlAwol.TabIndex = 5;
+            // 
+            // lblAwolCaption
+            // 
+            this.lblAwolCaption.AutoSize = true;
+            this.lblAwolCaption.ForeColor = System.Drawing.Color.DimGray;
+            this.lblAwolCaption.Location = new System.Drawing.Point(10, 8);
+            this.lblAwolCaption.Name = "lblAwolCaption";
+            this.lblAwolCaption.Size = new System.Drawing.Size(60, 13);
+            this.lblAwolCaption.TabIndex = 0;
+            this.lblAwolCaption.Text = "AWOL this week";
+            // 
+            // lblAwolWeek
+            // 
+            this.lblAwolWeek.AutoSize = true;
+            this.lblAwolWeek.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblAwolWeek.Location = new System.Drawing.Point(8, 28);
+            this.lblAwolWeek.Name = "lblAwolWeek";
+            this.lblAwolWeek.Size = new System.Drawing.Size(26, 29);
+            this.lblAwolWeek.TabIndex = 1;
+            this.lblAwolWeek.Text = "0";
+            // 
+            // tlpCards
+            // 
+            // The dashboard's lists, three across and two down; DashboardHomeForm fills it.
+            this.tlpCards.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tlpCards.ColumnCount = 3;
+            this.tlpCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCards.Location = new System.Drawing.Point(39, 160);
+            this.tlpCards.Name = "tlpCards";
+            this.tlpCards.RowCount = 2;
+            this.tlpCards.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tlpCards.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tlpCards.Size = new System.Drawing.Size(808, 402);
+            this.tlpCards.TabIndex = 6;
             // 
             // DashboardHomeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(889, 574);
+            this.Controls.Add(this.tlpCards);
             this.Controls.Add(this.pnlAwol);
             this.Controls.Add(this.pnlLeave);
             this.Controls.Add(this.pnlHours);
@@ -163,10 +243,15 @@
         private System.Windows.Forms.Panel pnlEmployees;
         private System.Windows.Forms.Label lblEmployeeCount;
         private System.Windows.Forms.Panel pnlHours;
-        private System.Windows.Forms.Label lblHoursToday;
+        private System.Windows.Forms.Label lblHoursWeek;
         private System.Windows.Forms.Panel pnlLeave;
         private System.Windows.Forms.Label lblLeaveToday;
         private System.Windows.Forms.Panel pnlAwol;
-        private System.Windows.Forms.Label lblAwolToday;
+        private System.Windows.Forms.Label lblAwolWeek;
+        private System.Windows.Forms.Label lblEmployeesCaption;
+        private System.Windows.Forms.Label lblHoursCaption;
+        private System.Windows.Forms.Label lblLeaveCaption;
+        private System.Windows.Forms.Label lblAwolCaption;
+        private System.Windows.Forms.TableLayoutPanel tlpCards;
     }
 }
