@@ -1,4 +1,5 @@
 ﻿using EmployeeTimeManagement.Controllers;
+using EmployeeTimeManagement.Database;
 using EmployeeTimeManagement.Models;
 using System;
 using System.Collections.Generic;
@@ -143,8 +144,9 @@ namespace EmployeeTimeManagement.Views
         }
 
         // Fills the six lists of people who need attention. Managers see their own store;
-        // the owner sees every store, with a Store column to tell them apart. Each list loads
-        // on its own, so one failed query does not blank the rest.
+        // the owner sees every store, with a Store column to tell them apart. All six reads go
+        // to the database in one batch, since every trip to the server is slow; each list and
+        // tile still reports its own failure, so one failed query does not blank the rest.
         private void LoadCards()
         {
             bool showStore = CurrentUser.IsAdmin;
@@ -179,19 +181,31 @@ namespace EmployeeTimeManagement.Views
             DateTime date = DateTime.Today;
             DateTime weekStart = DashboardChecks.WeekStart(date);
 
-            FillTile(lblLeaveToday, "on leave today",
-                () => new LeaveController().CountOnLeaveToday(storeID, date).ToString());
-            FillTile(lblAwolWeek, "AWOL this week",
-                () => new DashboardController().CountAwolDays(weekStart, date, storeID).ToString());
+            // The employee overview feeds most of the dashboard, so it goes first: the server
+            // stops at a failing statement, and everything before it still arrives.
+            var dashboard = new DashboardController();
+            var timesheets = new TimesheetController();
+            Query<List<EmployeeOverview>> overviewQuery = dashboard.EmployeeOverviewQuery(storeID);
+            Query<List<TimesheetSummary>> weekHoursQuery = timesheets.SummaryQuery(weekStart, date, storeID);
+            Query<List<EmployeeDayStatus>> dayStatusQuery = timesheets.DayStatusQuery(date, storeID);
+            Query<List<CapturedDay>> capturedQuery = dashboard.CapturedDaysQuery(
+                date.AddDays(-DashboardChecks.MissedDaysLookBack), date.AddDays(-1), storeID);
+            Query<int> onLeaveQuery = new LeaveController().OnLeaveTodayQuery(storeID, date);
+            Query<int> awolQuery = dashboard.AwolDaysQuery(weekStart, date, storeID);
 
-            LoadTodayCard(today, date, storeID);
+            QueryBatch.Run(overviewQuery, weekHoursQuery, dayStatusQuery, capturedQuery, onLeaveQuery, awolQuery);
+
+            FillTile(lblLeaveToday, "on leave today", () => onLeaveQuery.Result.ToString());
+            FillTile(lblAwolWeek, "AWOL this week", () => awolQuery.Result.ToString());
+
+            LoadTodayCard(today, date, dayStatusQuery);
 
             // Hours worked this pay week, for the Hours tile and the Long hours list.
             List<TimesheetSummary> weekHours = null;
             Exception weekHoursError = null;
             try
             {
-                weekHours = new TimesheetController().GetSummary(weekStart, date, storeID);
+                weekHours = weekHoursQuery.Result;
                 lblHoursWeek.Text = weekHours.Sum(summary => summary.TotalHours).ToString("0.#");
             }
             catch (Exception ex)
@@ -203,7 +217,7 @@ namespace EmployeeTimeManagement.Views
             List<EmployeeOverview> employees;
             try
             {
-                employees = new DashboardController().GetEmployeeOverview(storeID);
+                employees = overviewQuery.Result;
             }
             catch (Exception ex)
             {
@@ -228,8 +242,7 @@ namespace EmployeeTimeManagement.Views
 
             try
             {
-                List<CapturedDay> captured = new DashboardController().GetCapturedDays(
-                    date.AddDays(-DashboardChecks.MissedDaysLookBack), date.AddDays(-1), storeID);
+                List<CapturedDay> captured = capturedQuery.Result;
                 missed.ShowAlerts(DashboardChecks.MissedTimesheets(date, employees, captured),
                     "No missed timesheets in the last " + DashboardChecks.MissedDaysLookBack + " days");
             }
@@ -255,13 +268,13 @@ namespace EmployeeTimeManagement.Views
         }
 
         // Everyone employed today whose timesheet has not been saved yet.
-        private static void LoadTodayCard(DashboardListCard card, DateTime date, int? storeID)
+        private static void LoadTodayCard(DashboardListCard card, DateTime date, Query<List<EmployeeDayStatus>> dayStatus)
         {
             try
             {
                 var alerts = new List<DashboardAlert>();
 
-                foreach (EmployeeDayStatus employee in TimesheetCompletion.MissingOn(date, new TimesheetController().GetDayStatus(date, storeID)))
+                foreach (EmployeeDayStatus employee in TimesheetCompletion.MissingOn(date, dayStatus.Result))
                 {
                     // A booked leave day only needs the pre-filled Leave row saved, so say so.
                     alerts.Add(new DashboardAlert(employee.FullName, employee.StoreName, employee.IsOnLeave ? "On leave" : string.Empty));

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using MySqlConnector;
 
 namespace EmployeeTimeManagement.Database
@@ -21,6 +22,7 @@ namespace EmployeeTimeManagement.Database
         private static readonly object LoadLock = new object();
         private static string connectionString;
         private static bool loaded;
+        private static Task warmUp;
 
         // Machine scope, so the app works for whichever Windows account the store PC uses.
         private static ConnectionStringStore CreateStore()
@@ -48,7 +50,7 @@ namespace EmployeeTimeManagement.Database
             lock (LoadLock)
             {
                 CreateStore().Save(newConnectionString);
-                connectionString = newConnectionString.Trim();
+                connectionString = Tune(newConnectionString.Trim());
                 loaded = true;
             }
         }
@@ -58,7 +60,7 @@ namespace EmployeeTimeManagement.Database
         {
             try
             {
-                using (var connection = new MySqlConnection(candidate))
+                using (var connection = new MySqlConnection(Tune(candidate)))
                 {
                     connection.Open();
                 }
@@ -73,7 +75,54 @@ namespace EmployeeTimeManagement.Database
             }
         }
 
+        // Opens the first connection in the background, for the login screen to call while
+        // the PIN is typed. A first connection costs about a second (network, encryption and
+        // login handshakes); once it is in the pool, every later query reuses it.
+        public static void WarmUp()
+        {
+            lock (LoadLock)
+            {
+                if (warmUp != null && !warmUp.IsCompleted)
+                {
+                    return;
+                }
+
+                warmUp = Task.Run(() =>
+                {
+                    try
+                    {
+                        using (OpenConnection())
+                        {
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // The next real query reports the problem; nothing is waiting on this.
+                        System.Diagnostics.Trace.TraceWarning("Could not warm up the database connection: " + ex.Message);
+                    }
+                });
+            }
+        }
+
         public static MySqlConnection GetConnection()
+        {
+            // A warm-up still connecting will finish sooner than a second connection started
+            // now, and leaves its connection in the pool for this one.
+            Task pending;
+            lock (LoadLock)
+            {
+                pending = warmUp;
+            }
+
+            if (pending != null && !pending.IsCompleted)
+            {
+                pending.Wait();
+            }
+
+            return OpenConnection();
+        }
+
+        private static MySqlConnection OpenConnection()
         {
             string current = ConnectionString();
             if (current == null)
@@ -88,6 +137,24 @@ namespace EmployeeTimeManagement.Database
             return connection;
         }
 
+        // By default every connection taken from the pool is first reset on the server, which
+        // costs a whole extra trip to it on every query. Nothing in this app keeps session
+        // state between queries (transactions are always committed or rolled back), so the
+        // reset is turned off. Idle connections are still dropped after 180 seconds, inside
+        // the server's own 300-second timeout, so the pool never hands out a dead one.
+        private static string Tune(string raw)
+        {
+            try
+            {
+                return new MySqlConnectionStringBuilder(raw) { ConnectionReset = false }.ConnectionString;
+            }
+            catch (ArgumentException)
+            {
+                // Left as typed, so opening it reports what is wrong with it.
+                return raw;
+            }
+        }
+
         // Decrypted once and then kept in memory only.
         private static string ConnectionString()
         {
@@ -99,7 +166,8 @@ namespace EmployeeTimeManagement.Database
 
                     try
                     {
-                        connectionString = store.Load();
+                        string saved = store.Load();
+                        connectionString = saved == null ? null : Tune(saved);
                     }
                     catch (CryptographicException)
                     {

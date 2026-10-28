@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using EmployeeTimeManagement.Controllers;
+using EmployeeTimeManagement.Database;
 using EmployeeTimeManagement.Models;
 using EmployeeTimeManagement.Views;
 
@@ -19,6 +20,21 @@ namespace EmployeeTimeManagement.Views
         public LoginForm()
         {
             InitializeComponent();
+
+            // Enter in the PIN box logs in, the same as clicking Login.
+            AcceptButton = btnLogin;
+
+            // Connect to the database while the PIN is typed, so logging in does not also
+            // wait for the first connection. Again after a logout, when the pool may have
+            // let its idle connection go.
+            VisibleChanged += (sender, e) =>
+            {
+                if (Visible)
+                {
+                    DatabaseConnection.WarmUp();
+                }
+            };
+
             ApplyTheme();
             loginController = new LoginController();
         }
@@ -75,21 +91,33 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
-            // Call the login controller
-            Manager manager = loginController.Login(pin);
+            // Checking the PIN and opening the dashboard both wait on the database, so the
+            // cursor shows the program is busy until the dashboard is up.
+            Cursor.Current = Cursors.WaitCursor;
+            lblError.Text = string.Empty;
 
-            // If login failed
-            if (manager == null)
+            try
             {
-                lblError.Text = "Invalid PIN";
-                txtPin.Clear();
-                txtPin.Focus();
-                return;
-            }
+                // Call the login controller
+                Manager manager = loginController.Login(pin);
 
-            // Successful login
-            CurrentUser.Login(manager);
-            OpenDashboard(manager);
+                // If login failed
+                if (manager == null)
+                {
+                    lblError.Text = "Invalid PIN";
+                    txtPin.Clear();
+                    txtPin.Focus();
+                    return;
+                }
+
+                // Successful login
+                CurrentUser.Login(manager);
+                OpenDashboard(manager);
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
         }
 
         private void OpenDashboard(Manager manager)

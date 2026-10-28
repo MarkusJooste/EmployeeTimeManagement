@@ -68,28 +68,43 @@ ORDER BY e.Surname, e.Name;";
         }
 
         // Everything stored about one employee that the contract can use, or null when
-        // the employee does not exist or belongs to a store the user may not see.
+        // the employee does not exist or belongs to a store the user may not see. The six
+        // reads go to the database in one batch, since each trip to the server is slow.
         public ContractSource GetContractSource(int employeeID, int? storeID)
         {
-            using (var connection = DatabaseConnection.GetConnection())
+            Query<ContractSource> employee = EmployeeQuery(employeeID, storeID);
+            Query<EmployeeAddress> address = AddressQuery(employeeID, storeID);
+            Query<EmployeeSpouse> spouse = SpouseQuery(employeeID, storeID);
+            Query<EmployeeContract> contract = LatestContractQuery(employeeID, storeID);
+            Query<List<EmployeeFamilyMember>> family = FamilyQuery(employeeID, storeID);
+            Query<bool> isManager = ActiveManagerQuery(employeeID, storeID);
+
+            QueryBatch.Run(employee, address, spouse, contract, family, isManager);
+
+            ContractSource source = employee.Result;
+            if (source == null)
             {
-                ContractSource source = ReadEmployee(connection, employeeID, storeID);
-                if (source == null)
-                {
-                    return null;
-                }
-
-                source.Address = ReadAddress(connection, employeeID);
-                source.Spouse = ReadSpouse(connection, employeeID);
-                source.Contract = ReadLatestContract(connection, employeeID);
-                source.FamilyMembers.AddRange(ReadFamily(connection, employeeID));
-                source.IsLinkedManager = IsActiveManager(connection, employeeID);
-
-                return source;
+                return null;
             }
+
+            source.Address = address.Result;
+            source.Spouse = spouse.Result;
+            source.Contract = contract.Result;
+            source.FamilyMembers.AddRange(family.Result);
+            source.IsLinkedManager = isManager.Result;
+
+            return source;
         }
 
-        private static ContractSource ReadEmployee(MySqlConnection connection, int employeeID, int? storeID)
+        // Added to the queries below, which are batched with the employee's own read rather
+        // than run after it: each one still only returns rows for an employee in a store the
+        // user may see.
+        private const string InVisibleStore = @"EXISTS (SELECT 1
+              FROM TBL_employees visible
+              WHERE visible.EmployeeID = @EmployeeID
+                AND (@StoreID IS NULL OR visible.StoreID = @StoreID))";
+
+        private static Query<ContractSource> EmployeeQuery(int employeeID, int? storeID)
         {
             const string query = @"SELECT e.EmployeeID, e.StoreID, e.Name, e.Surname, e.IDNumber, e.MobileNumber, s.StoreName
 FROM TBL_employees e
@@ -97,183 +112,153 @@ LEFT JOIN TBL_stores s ON s.StoreID = e.StoreID
 WHERE e.EmployeeID = @EmployeeID
   AND (@StoreID IS NULL OR e.StoreID = @StoreID);";
 
-            using (var command = new MySqlCommand(query, connection))
+            return new Query<ContractSource>(query, reader =>
             {
-                command.Parameters.AddWithValue("@EmployeeID", employeeID);
-                command.Parameters.AddWithValue("@StoreID", storeID.HasValue ? (object)storeID.Value : DBNull.Value);
-
-                using (var reader = command.ExecuteReader())
+                if (!reader.Read())
                 {
-                    if (!reader.Read())
-                    {
-                        return null;
-                    }
-
-                    var source = new ContractSource
-                    {
-                        Employee = new Employee
-                        {
-                            EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID")),
-                            StoreID = reader.GetInt32(reader.GetOrdinal("StoreID")),
-                            Name = ReadString(reader, "Name") ?? string.Empty,
-                            Surname = ReadString(reader, "Surname") ?? string.Empty,
-                            IDNumber = ReadString(reader, "IDNumber"),
-                            MobileNumber = ReadString(reader, "MobileNumber")
-                        },
-                        StoreName = ReadString(reader, "StoreName")
-                    };
-
-                    return source;
+                    return null;
                 }
-            }
+
+                return new ContractSource
+                {
+                    Employee = new Employee
+                    {
+                        EmployeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID")),
+                        StoreID = reader.GetInt32(reader.GetOrdinal("StoreID")),
+                        Name = ReadString(reader, "Name") ?? string.Empty,
+                        Surname = ReadString(reader, "Surname") ?? string.Empty,
+                        IDNumber = ReadString(reader, "IDNumber"),
+                        MobileNumber = ReadString(reader, "MobileNumber")
+                    },
+                    StoreName = ReadString(reader, "StoreName")
+                };
+            }).With("@EmployeeID", employeeID).With("@StoreID", storeID);
         }
 
         // The most recently captured address.
-        private static EmployeeAddress ReadAddress(MySqlConnection connection, int employeeID)
+        private static Query<EmployeeAddress> AddressQuery(int employeeID, int? storeID)
         {
             const string query = @"SELECT AddressID, EmployeeID, HouseFlatNumber, ComplexFlatNumber, StreetName, Town, PostalCode
 FROM TBL_employee_addresses
-WHERE EmployeeID = @EmployeeID
+WHERE EmployeeID = @EmployeeID AND " + InVisibleStore + @"
 ORDER BY AddressID DESC
 LIMIT 1;";
 
-            using (var command = new MySqlCommand(query, connection))
+            return new Query<EmployeeAddress>(query, reader =>
             {
-                command.Parameters.AddWithValue("@EmployeeID", employeeID);
-
-                using (var reader = command.ExecuteReader())
+                if (!reader.Read())
                 {
-                    if (!reader.Read())
-                    {
-                        return null;
-                    }
-
-                    return new EmployeeAddress
-                    {
-                        AddressID = reader.GetInt32(reader.GetOrdinal("AddressID")),
-                        EmployeeID = employeeID,
-                        HouseFlatNumber = ReadString(reader, "HouseFlatNumber"),
-                        ComplexFlatNumber = ReadString(reader, "ComplexFlatNumber"),
-                        StreetName = ReadString(reader, "StreetName"),
-                        Town = ReadString(reader, "Town"),
-                        PostalCode = ReadString(reader, "PostalCode")
-                    };
+                    return null;
                 }
-            }
+
+                return new EmployeeAddress
+                {
+                    AddressID = reader.GetInt32(reader.GetOrdinal("AddressID")),
+                    EmployeeID = employeeID,
+                    HouseFlatNumber = ReadString(reader, "HouseFlatNumber"),
+                    ComplexFlatNumber = ReadString(reader, "ComplexFlatNumber"),
+                    StreetName = ReadString(reader, "StreetName"),
+                    Town = ReadString(reader, "Town"),
+                    PostalCode = ReadString(reader, "PostalCode")
+                };
+            }).With("@EmployeeID", employeeID).With("@StoreID", storeID);
         }
 
         // The most recently captured spouse.
-        private static EmployeeSpouse ReadSpouse(MySqlConnection connection, int employeeID)
+        private static Query<EmployeeSpouse> SpouseQuery(int employeeID, int? storeID)
         {
             const string query = @"SELECT SpouseID, SpouseName, SpouseMobileNumber
 FROM TBL_employee_spouses
-WHERE EmployeeID = @EmployeeID
+WHERE EmployeeID = @EmployeeID AND " + InVisibleStore + @"
 ORDER BY SpouseID DESC
 LIMIT 1;";
 
-            using (var command = new MySqlCommand(query, connection))
+            return new Query<EmployeeSpouse>(query, reader =>
             {
-                command.Parameters.AddWithValue("@EmployeeID", employeeID);
-
-                using (var reader = command.ExecuteReader())
+                if (!reader.Read())
                 {
-                    if (!reader.Read())
-                    {
-                        return null;
-                    }
-
-                    return new EmployeeSpouse
-                    {
-                        SpouseID = reader.GetInt32(reader.GetOrdinal("SpouseID")),
-                        EmployeeID = employeeID,
-                        SpouseName = ReadString(reader, "SpouseName"),
-                        SpouseMobileNumber = ReadString(reader, "SpouseMobileNumber")
-                    };
+                    return null;
                 }
-            }
+
+                return new EmployeeSpouse
+                {
+                    SpouseID = reader.GetInt32(reader.GetOrdinal("SpouseID")),
+                    EmployeeID = employeeID,
+                    SpouseName = ReadString(reader, "SpouseName"),
+                    SpouseMobileNumber = ReadString(reader, "SpouseMobileNumber")
+                };
+            }).With("@EmployeeID", employeeID).With("@StoreID", storeID);
         }
 
         // The contract with the latest start date, which is the one in force.
-        private static EmployeeContract ReadLatestContract(MySqlConnection connection, int employeeID)
+        private static Query<EmployeeContract> LatestContractQuery(int employeeID, int? storeID)
         {
             const string query = @"SELECT ContractID, ContractType, StartDate, EndDate, Department, JobDescription, ReasonForEnding, HourlyRate
 FROM TBL_employee_contracts
-WHERE EmployeeID = @EmployeeID
+WHERE EmployeeID = @EmployeeID AND " + InVisibleStore + @"
 ORDER BY StartDate DESC, ContractID DESC
 LIMIT 1;";
 
-            using (var command = new MySqlCommand(query, connection))
+            return new Query<EmployeeContract>(query, reader =>
             {
-                command.Parameters.AddWithValue("@EmployeeID", employeeID);
-
-                using (var reader = command.ExecuteReader())
+                if (!reader.Read())
                 {
-                    if (!reader.Read())
-                    {
-                        return null;
-                    }
-
-                    return new EmployeeContract
-                    {
-                        ContractID = reader.GetInt32(reader.GetOrdinal("ContractID")),
-                        EmployeeID = employeeID,
-                        ContractType = ReadString(reader, "ContractType"),
-                        StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
-                        EndDate = ReadDate(reader, "EndDate"),
-                        Department = ReadString(reader, "Department"),
-                        JobDescription = ReadString(reader, "JobDescription"),
-                        ReasonForEnding = ReadString(reader, "ReasonForEnding"),
-                        HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate"))
-                    };
+                    return null;
                 }
-            }
+
+                return new EmployeeContract
+                {
+                    ContractID = reader.GetInt32(reader.GetOrdinal("ContractID")),
+                    EmployeeID = employeeID,
+                    ContractType = ReadString(reader, "ContractType"),
+                    StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                    EndDate = ReadDate(reader, "EndDate"),
+                    Department = ReadString(reader, "Department"),
+                    JobDescription = ReadString(reader, "JobDescription"),
+                    ReasonForEnding = ReadString(reader, "ReasonForEnding"),
+                    HourlyRate = reader.GetDecimal(reader.GetOrdinal("HourlyRate"))
+                };
+            }).With("@EmployeeID", employeeID).With("@StoreID", storeID);
         }
 
         // Family members in the order they were captured.
-        private static List<EmployeeFamilyMember> ReadFamily(MySqlConnection connection, int employeeID)
+        private static Query<List<EmployeeFamilyMember>> FamilyQuery(int employeeID, int? storeID)
         {
             const string query = @"SELECT FamilyMemberID, FamilyMemberName, MobileNumber, Relationship
 FROM TBL_employee_family
-WHERE EmployeeID = @EmployeeID
+WHERE EmployeeID = @EmployeeID AND " + InVisibleStore + @"
 ORDER BY FamilyMemberID;";
 
-            var members = new List<EmployeeFamilyMember>();
-
-            using (var command = new MySqlCommand(query, connection))
+            return new Query<List<EmployeeFamilyMember>>(query, reader =>
             {
-                command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                var members = new List<EmployeeFamilyMember>();
 
-                using (var reader = command.ExecuteReader())
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    members.Add(new EmployeeFamilyMember
                     {
-                        members.Add(new EmployeeFamilyMember
-                        {
-                            FamilyMemberID = reader.GetInt32(reader.GetOrdinal("FamilyMemberID")),
-                            EmployeeID = employeeID,
-                            FamilyMemberName = ReadString(reader, "FamilyMemberName"),
-                            MobileNumber = ReadString(reader, "MobileNumber"),
-                            Relationship = ReadString(reader, "Relationship")
-                        });
-                    }
+                        FamilyMemberID = reader.GetInt32(reader.GetOrdinal("FamilyMemberID")),
+                        EmployeeID = employeeID,
+                        FamilyMemberName = ReadString(reader, "FamilyMemberName"),
+                        MobileNumber = ReadString(reader, "MobileNumber"),
+                        Relationship = ReadString(reader, "Relationship")
+                    });
                 }
-            }
 
-            return members;
+                return members;
+            }).With("@EmployeeID", employeeID).With("@StoreID", storeID);
         }
 
         // True when an active manager login is linked to this employee.
-        private static bool IsActiveManager(MySqlConnection connection, int employeeID)
+        private static Query<bool> ActiveManagerQuery(int employeeID, int? storeID)
         {
             const string query = @"SELECT COUNT(*)
 FROM TBL_managers
-WHERE EmployeeID = @EmployeeID AND IsActiveManager = 1;";
+WHERE EmployeeID = @EmployeeID AND IsActiveManager = 1 AND " + InVisibleStore + ";";
 
-            using (var command = new MySqlCommand(query, connection))
-            {
-                command.Parameters.AddWithValue("@EmployeeID", employeeID);
-                return Convert.ToInt64(command.ExecuteScalar()) > 0;
-            }
+            return new Query<bool>(query, reader => QueryBatch.ReadInt(reader) > 0)
+                .With("@EmployeeID", employeeID)
+                .With("@StoreID", storeID);
         }
 
         private static string ReadString(MySqlDataReader reader, string column)

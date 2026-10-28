@@ -91,9 +91,12 @@ namespace EmployeeTimeManagement.Views
         private void ShowHome()
         {
             // Load the default view into the dashboard
-            var home = new DashboardHomeForm();
-            home.OpenEmployeeRequested += OpenEmployee;
-            ShowView(home, btnDashboard);
+            ShowView(() =>
+            {
+                var home = new DashboardHomeForm();
+                home.OpenEmployeeRequested += OpenEmployee;
+                return home;
+            }, btnDashboard);
         }
 
         // Switches to the Employees screen with one employee selected, ready to update. Queued
@@ -103,38 +106,55 @@ namespace EmployeeTimeManagement.Views
         {
             BeginInvoke(new Action(() =>
             {
-                var employees = new EmployeesForm();
-                ShowView(employees, btnEmployees);
+                var employees = (EmployeesForm)ShowView(() => new EmployeesForm(), btnEmployees);
                 employees.ShowEmployee(employeeID);
             }));
         }
 
-        // Shows a screen in the content panel, marks its link in the sidebar and names it in the header.
-        private void ShowView(Form view, Button navButton)
+        // Shows a screen in the content panel, marks its link in the sidebar and names it in the
+        // header. The screen is created here rather than by the caller, because creating it is
+        // what loads its data: the wait cursor goes up first, and the sidebar and header are
+        // redrawn straight away so the click is seen to land while the screen loads.
+        private Form ShowView(Func<Form> createView, Button navButton)
         {
-            foreach (Button button in NavButtons())
+            Cursor.Current = Cursors.WaitCursor;
+
+            try
             {
-                WimpyTheme.SetNavSelected(button, button == navButton);
+                foreach (Button button in NavButtons())
+                {
+                    WimpyTheme.SetNavSelected(button, button == navButton);
+                }
+
+                lblTitle.Text = navButton.Text;
+                pnlSidebar.Update();
+                pnlHeader.Update();
+
+                Form view = createView();
+                WimpyTheme.Apply(view);
+
+                if (currentView != null)
+                {
+                    currentView.Close();
+                    currentView.Dispose();
+                }
+
+                // Set up the new view to display inside the panel
+                currentView = view;
+                view.TopLevel = false;
+                view.FormBorderStyle = FormBorderStyle.None;
+                view.Dock = DockStyle.Fill;
+
+                pnlContent.Controls.Clear();
+                pnlContent.Controls.Add(view);
+                view.Show();
+
+                return view;
             }
-
-            lblTitle.Text = navButton.Text;
-            WimpyTheme.Apply(view);
-
-            if (currentView != null)
+            finally
             {
-                currentView.Close();
-                currentView.Dispose();
+                Cursor.Current = Cursors.Default;
             }
-
-            // Set up the new view to display inside the panel
-            currentView = view;
-            view.TopLevel = false;
-            view.FormBorderStyle = FormBorderStyle.None;
-            view.Dock = DockStyle.Fill;
-
-            pnlContent.Controls.Clear();
-            pnlContent.Controls.Add(view);
-            view.Show();
         }
 
         private void btnDashboard_Click(object sender, EventArgs e)
@@ -144,32 +164,32 @@ namespace EmployeeTimeManagement.Views
 
         private void btnEmployees_Click(object sender, EventArgs e)
         {
-            ShowView(new EmployeesForm(), btnEmployees);
+            ShowView(() => new EmployeesForm(), btnEmployees);
         }
 
         private void btnContracts_Click(object sender, EventArgs e)
         {
-            ShowView(new ContractsForm(), btnContracts);
+            ShowView(() => new ContractsForm(), btnContracts);
         }
 
         private void btnCaptureTimesheets_Click(object sender, EventArgs e)
         {
-            ShowView(new CaptureTimesheetsForm(), btnCaptureTimesheets);
+            ShowView(() => new CaptureTimesheetsForm(), btnCaptureTimesheets);
         }
 
         private void btnViewTimesheets_Click(object sender, EventArgs e)
         {
-            ShowView(new ViewTimesheetsForm(), btnViewTimesheets);
+            ShowView(() => new ViewTimesheetsForm(), btnViewTimesheets);
         }
 
         private void btnLeave_Click(object sender, EventArgs e)
         {
-            ShowView(new LeaveForm(), btnLeave);
+            ShowView(() => new LeaveForm(), btnLeave);
         }
 
         private void btnManagers_Click(object sender, EventArgs e)
         {
-            ShowView(new ManagersForm(), btnManagers);
+            ShowView(() => new ManagersForm(), btnManagers);
         }
 
         private void btnLogout_Click(object sender, EventArgs e)

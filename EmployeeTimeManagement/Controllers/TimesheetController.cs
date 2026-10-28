@@ -15,6 +15,12 @@ namespace EmployeeTimeManagement.Controllers
         // A null storeID covers every store, for the owner's dashboard.
         public List<TimesheetSummary> GetSummary(DateTime fromDate, DateTime toDate, int? storeID)
         {
+            return SummaryQuery(fromDate, toDate, storeID).Run();
+        }
+
+        // The same summary as a Query, so the dashboard can batch it with its other reads.
+        public Query<List<TimesheetSummary>> SummaryQuery(DateTime fromDate, DateTime toDate, int? storeID)
+        {
             const string query = @"SELECT a.EmployeeID,
        MAX(e.Name)              AS Name,
        MAX(e.Surname)           AS Surname,
@@ -49,100 +55,93 @@ WHERE (@StoreID IS NULL OR e.StoreID = @StoreID)
 GROUP BY a.EmployeeID
 ORDER BY MAX(e.Surname), MAX(e.Name);";
 
-            var summaries = new List<TimesheetSummary>();
-
-            using (var connection = DatabaseConnection.GetConnection())
+            return new Query<List<TimesheetSummary>>(query, reader =>
             {
-                using (var command = new MySqlCommand(query, connection))
+                var summaries = new List<TimesheetSummary>();
+
+                int employeeIndex = reader.GetOrdinal("EmployeeID");
+                int nameIndex = reader.GetOrdinal("Name");
+                int surnameIndex = reader.GetOrdinal("Surname");
+                int daysIndex = reader.GetOrdinal("DaysWorked");
+                int totalIndex = reader.GetOrdinal("TotalHours");
+                int sundayIndex = reader.GetOrdinal("SundayExtraHours");
+                int holidayIndex = reader.GetOrdinal("HolidayExtraHours");
+
+                while (reader.Read())
                 {
-                    command.Parameters.AddWithValue("@FromDate", fromDate.Date);
-                    command.Parameters.AddWithValue("@ToDate", toDate.Date);
-                    command.Parameters.AddWithValue("@StoreID", storeID.HasValue ? (object)storeID.Value : DBNull.Value);
+                    var summary = new TimesheetSummary();
 
-                    using (var reader = command.ExecuteReader())
+                    // EmployeeID
+                    summary.EmployeeID = reader.GetInt32(employeeIndex);
+
+                    // Name
+                    if (reader.IsDBNull(nameIndex))
                     {
-                        int employeeIndex = reader.GetOrdinal("EmployeeID");
-                        int nameIndex = reader.GetOrdinal("Name");
-                        int surnameIndex = reader.GetOrdinal("Surname");
-                        int daysIndex = reader.GetOrdinal("DaysWorked");
-                        int totalIndex = reader.GetOrdinal("TotalHours");
-                        int sundayIndex = reader.GetOrdinal("SundayExtraHours");
-                        int holidayIndex = reader.GetOrdinal("HolidayExtraHours");
-
-                        while (reader.Read())
-                        {
-                            var summary = new TimesheetSummary();
-
-                            // EmployeeID
-                            summary.EmployeeID = reader.GetInt32(employeeIndex);
-
-                            // Name
-                            if (reader.IsDBNull(nameIndex))
-                            {
-                                summary.Name = string.Empty;
-                            }
-                            else
-                            {
-                                summary.Name = reader.GetString(nameIndex);
-                            }
-
-                            // Surname
-                            if (reader.IsDBNull(surnameIndex))
-                            {
-                                summary.Surname = string.Empty;
-                            }
-                            else
-                            {
-                                summary.Surname = reader.GetString(surnameIndex);
-                            }
-
-                            // DaysWorked
-                            if (reader.IsDBNull(daysIndex))
-                            {
-                                summary.DaysWorked = 0;
-                            }
-                            else
-                            {
-                                summary.DaysWorked = reader.GetInt32(daysIndex);
-                            }
-
-                            // TotalHours
-                            if (reader.IsDBNull(totalIndex))
-                            {
-                                summary.TotalHours = 0;
-                            }
-                            else
-                            {
-                                summary.TotalHours = reader.GetDecimal(totalIndex);
-                            }
-
-                            // SundayExtraHours
-                            if (reader.IsDBNull(sundayIndex))
-                            {
-                                summary.SundayExtraHours = 0;
-                            }
-                            else
-                            {
-                                summary.SundayExtraHours = reader.GetDecimal(sundayIndex);
-                            }
-
-                            // HolidayExtraHours
-                            if (reader.IsDBNull(holidayIndex))
-                            {
-                                summary.HolidayExtraHours = 0;
-                            }
-                            else
-                            {
-                                summary.HolidayExtraHours = reader.GetDecimal(holidayIndex);
-                            }
-
-                            summaries.Add(summary);
-                        }
-
-                        return summaries;
+                        summary.Name = string.Empty;
                     }
+                    else
+                    {
+                        summary.Name = reader.GetString(nameIndex);
+                    }
+
+                    // Surname
+                    if (reader.IsDBNull(surnameIndex))
+                    {
+                        summary.Surname = string.Empty;
+                    }
+                    else
+                    {
+                        summary.Surname = reader.GetString(surnameIndex);
+                    }
+
+                    // DaysWorked
+                    if (reader.IsDBNull(daysIndex))
+                    {
+                        summary.DaysWorked = 0;
+                    }
+                    else
+                    {
+                        summary.DaysWorked = reader.GetInt32(daysIndex);
+                    }
+
+                    // TotalHours
+                    if (reader.IsDBNull(totalIndex))
+                    {
+                        summary.TotalHours = 0;
+                    }
+                    else
+                    {
+                        summary.TotalHours = reader.GetDecimal(totalIndex);
+                    }
+
+                    // SundayExtraHours
+                    if (reader.IsDBNull(sundayIndex))
+                    {
+                        summary.SundayExtraHours = 0;
+                    }
+                    else
+                    {
+                        summary.SundayExtraHours = reader.GetDecimal(sundayIndex);
+                    }
+
+                    // HolidayExtraHours
+                    if (reader.IsDBNull(holidayIndex))
+                    {
+                        summary.HolidayExtraHours = 0;
+                    }
+                    else
+                    {
+                        summary.HolidayExtraHours = reader.GetDecimal(holidayIndex);
+                    }
+
+                    summaries.Add(summary);
                 }
-            }
+
+                return summaries;
+            })
+            .With("@FromDate", fromDate.Date)
+            .With("@ToDate", toDate.Date)
+            .With("@StoreID", storeID);
         }
 
         // Returns every Timesheet already stored for one employee on one WorkDate. More
@@ -216,7 +215,8 @@ WHERE t.WorkDate = @WorkDate
         // Returns every employee with their latest contract's dates and whether a Timesheet
         // and booked leave exist for one WorkDate, for the dashboard's "not captured yet"
         // list. A null storeID is the owner, who sees every store.
-        public List<EmployeeDayStatus> GetDayStatus(DateTime workDate, int? storeID)
+        // Returned as a Query so the dashboard can batch it with its other reads.
+        public Query<List<EmployeeDayStatus>> DayStatusQuery(DateTime workDate, int? storeID)
         {
             const string query = @"SELECT e.EmployeeID,
        e.StoreID,
@@ -243,50 +243,43 @@ LEFT JOIN TBL_employee_contracts c
                           WHERE latest.EmployeeID = e.EmployeeID)
 WHERE (@StoreID IS NULL OR e.StoreID = @StoreID);";
 
-            var statuses = new List<EmployeeDayStatus>();
-
-            using (var connection = DatabaseConnection.GetConnection())
+            return new Query<List<EmployeeDayStatus>>(query, reader =>
             {
-                using (var command = new MySqlCommand(query, connection))
+                var statuses = new List<EmployeeDayStatus>();
+
+                int employeeIDIndex = reader.GetOrdinal("EmployeeID");
+                int storeIDIndex = reader.GetOrdinal("StoreID");
+                int storeNameIndex = reader.GetOrdinal("StoreName");
+                int nameIndex = reader.GetOrdinal("Name");
+                int surnameIndex = reader.GetOrdinal("Surname");
+                int startDateIndex = reader.GetOrdinal("StartDate");
+                int endDateIndex = reader.GetOrdinal("EndDate");
+                int hasTimesheetIndex = reader.GetOrdinal("HasTimesheet");
+                int isOnLeaveIndex = reader.GetOrdinal("IsOnLeave");
+
+                while (reader.Read())
                 {
-                    command.Parameters.AddWithValue("@WorkDate", workDate.Date);
-                    command.Parameters.AddWithValue("@StoreID", storeID.HasValue ? (object)storeID.Value : DBNull.Value);
-                    command.Parameters.AddWithValue("@AWOL", LeaveType.AWOL.ToDatabaseValue());
-
-                    using (var reader = command.ExecuteReader())
+                    statuses.Add(new EmployeeDayStatus
                     {
-                        int employeeIDIndex = reader.GetOrdinal("EmployeeID");
-                        int storeIDIndex = reader.GetOrdinal("StoreID");
-                        int storeNameIndex = reader.GetOrdinal("StoreName");
-                        int nameIndex = reader.GetOrdinal("Name");
-                        int surnameIndex = reader.GetOrdinal("Surname");
-                        int startDateIndex = reader.GetOrdinal("StartDate");
-                        int endDateIndex = reader.GetOrdinal("EndDate");
-                        int hasTimesheetIndex = reader.GetOrdinal("HasTimesheet");
-                        int isOnLeaveIndex = reader.GetOrdinal("IsOnLeave");
+                        EmployeeID = reader.GetInt32(employeeIDIndex),
+                        StoreID = reader.GetInt32(storeIDIndex),
+                        StoreName = reader.IsDBNull(storeNameIndex) ? string.Empty : reader.GetString(storeNameIndex),
+                        Name = reader.IsDBNull(nameIndex) ? string.Empty : reader.GetString(nameIndex),
+                        Surname = reader.IsDBNull(surnameIndex) ? string.Empty : reader.GetString(surnameIndex),
+                        ContractStartDate = reader.IsDBNull(startDateIndex) ? (DateTime?)null : reader.GetDateTime(startDateIndex),
+                        ContractEndDate = reader.IsDBNull(endDateIndex) ? (DateTime?)null : reader.GetDateTime(endDateIndex),
 
-                        while (reader.Read())
-                        {
-                            statuses.Add(new EmployeeDayStatus
-                            {
-                                EmployeeID = reader.GetInt32(employeeIDIndex),
-                                StoreID = reader.GetInt32(storeIDIndex),
-                                StoreName = reader.IsDBNull(storeNameIndex) ? string.Empty : reader.GetString(storeNameIndex),
-                                Name = reader.IsDBNull(nameIndex) ? string.Empty : reader.GetString(nameIndex),
-                                Surname = reader.IsDBNull(surnameIndex) ? string.Empty : reader.GetString(surnameIndex),
-                                ContractStartDate = reader.IsDBNull(startDateIndex) ? (DateTime?)null : reader.GetDateTime(startDateIndex),
-                                ContractEndDate = reader.IsDBNull(endDateIndex) ? (DateTime?)null : reader.GetDateTime(endDateIndex),
-
-                                // EXISTS comes back as a 0/1 integer.
-                                HasTimesheet = Convert.ToInt64(reader.GetValue(hasTimesheetIndex)) != 0,
-                                IsOnLeave = Convert.ToInt64(reader.GetValue(isOnLeaveIndex)) != 0
-                            });
-                        }
-                    }
+                        // EXISTS comes back as a 0/1 integer.
+                        HasTimesheet = Convert.ToInt64(reader.GetValue(hasTimesheetIndex)) != 0,
+                        IsOnLeave = Convert.ToInt64(reader.GetValue(isOnLeaveIndex)) != 0
+                    });
                 }
-            }
 
-            return statuses;
+                return statuses;
+            })
+            .With("@WorkDate", workDate.Date)
+            .With("@StoreID", storeID)
+            .With("@AWOL", LeaveType.AWOL.ToDatabaseValue());
         }
 
         // Writes a whole day of Timesheets in one transaction, so a failure part way
