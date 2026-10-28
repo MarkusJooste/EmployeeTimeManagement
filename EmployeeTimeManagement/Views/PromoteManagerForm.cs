@@ -69,6 +69,8 @@ namespace EmployeeTimeManagement.Views
 
             AcceptButton = btnOk;
             CancelButton = btnCancel;
+
+            WimpyTheme.Apply(this);
         }
 
         // The PIN the Owner typed, trimmed. Left to the seam to say whether it is valid.

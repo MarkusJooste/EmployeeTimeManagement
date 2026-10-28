@@ -81,6 +81,8 @@ namespace EmployeeTimeManagement.Views
             this.txtContractType = new System.Windows.Forms.TextBox();
             this.lblStartDate = new System.Windows.Forms.Label();
             this.dtpStartDate = new System.Windows.Forms.DateTimePicker();
+            this.lblEndDate = new System.Windows.Forms.Label();
+            this.dtpEndDate = new System.Windows.Forms.DateTimePicker();
             this.lblDepartment = new System.Windows.Forms.Label();
             this.txtDepartment = new System.Windows.Forms.TextBox();
             this.lblJobDescription = new System.Windows.Forms.Label();
@@ -657,6 +659,8 @@ namespace EmployeeTimeManagement.Views
             this.grpContract.Controls.Add(this.txtContractType);
             this.grpContract.Controls.Add(this.lblStartDate);
             this.grpContract.Controls.Add(this.dtpStartDate);
+            this.grpContract.Controls.Add(this.lblEndDate);
+            this.grpContract.Controls.Add(this.dtpEndDate);
             this.grpContract.Controls.Add(this.lblDepartment);
             this.grpContract.Controls.Add(this.txtDepartment);
             this.grpContract.Controls.Add(this.lblJobDescription);
@@ -678,7 +682,7 @@ namespace EmployeeTimeManagement.Views
             // lblContractType
             //
             this.lblContractType.AutoSize = true;
-            this.lblContractType.Location = new System.Drawing.Point(10, 28);
+            this.lblContractType.Location = new System.Drawing.Point(10, 25);
             this.lblContractType.Name = "lblContractType";
             this.lblContractType.Size = new System.Drawing.Size(74, 13);
             this.lblContractType.TabIndex = 0;
@@ -688,16 +692,16 @@ namespace EmployeeTimeManagement.Views
             //
             this.txtContractType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtContractType.Location = new System.Drawing.Point(115, 25);
+            this.txtContractType.Location = new System.Drawing.Point(128, 22);
             this.txtContractType.MaxLength = 30;
             this.txtContractType.Name = "txtContractType";
-            this.txtContractType.Size = new System.Drawing.Size(155, 20);
+            this.txtContractType.Size = new System.Drawing.Size(142, 20);
             this.txtContractType.TabIndex = 1;
             //
             // lblStartDate
             //
             this.lblStartDate.AutoSize = true;
-            this.lblStartDate.Location = new System.Drawing.Point(10, 57);
+            this.lblStartDate.Location = new System.Drawing.Point(10, 51);
             this.lblStartDate.Name = "lblStartDate";
             this.lblStartDate.Size = new System.Drawing.Size(54, 13);
             this.lblStartDate.TabIndex = 2;
@@ -708,15 +712,35 @@ namespace EmployeeTimeManagement.Views
             this.dtpStartDate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dtpStartDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpStartDate.Location = new System.Drawing.Point(115, 54);
+            this.dtpStartDate.Location = new System.Drawing.Point(128, 48);
             this.dtpStartDate.Name = "dtpStartDate";
-            this.dtpStartDate.Size = new System.Drawing.Size(155, 20);
+            this.dtpStartDate.Size = new System.Drawing.Size(142, 20);
             this.dtpStartDate.TabIndex = 3;
+            //
+            // lblEndDate
+            //
+            this.lblEndDate.AutoSize = true;
+            this.lblEndDate.Location = new System.Drawing.Point(10, 77);
+            this.lblEndDate.Name = "lblEndDate";
+            this.lblEndDate.Size = new System.Drawing.Size(52, 13);
+            this.lblEndDate.TabIndex = 4;
+            this.lblEndDate.Text = "End Date";
+            //
+            // dtpEndDate
+            //
+            this.dtpEndDate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dtpEndDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpEndDate.Location = new System.Drawing.Point(128, 74);
+            this.dtpEndDate.Name = "dtpEndDate";
+            this.dtpEndDate.ShowCheckBox = true;
+            this.dtpEndDate.Size = new System.Drawing.Size(142, 20);
+            this.dtpEndDate.TabIndex = 4;
             //
             // lblDepartment
             //
             this.lblDepartment.AutoSize = true;
-            this.lblDepartment.Location = new System.Drawing.Point(10, 86);
+            this.lblDepartment.Location = new System.Drawing.Point(10, 103);
             this.lblDepartment.Name = "lblDepartment";
             this.lblDepartment.Size = new System.Drawing.Size(62, 13);
             this.lblDepartment.TabIndex = 4;
@@ -726,16 +750,16 @@ namespace EmployeeTimeManagement.Views
             //
             this.txtDepartment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDepartment.Location = new System.Drawing.Point(115, 83);
+            this.txtDepartment.Location = new System.Drawing.Point(128, 100);
             this.txtDepartment.MaxLength = 100;
             this.txtDepartment.Name = "txtDepartment";
-            this.txtDepartment.Size = new System.Drawing.Size(155, 20);
+            this.txtDepartment.Size = new System.Drawing.Size(142, 20);
             this.txtDepartment.TabIndex = 5;
             //
             // lblJobDescription
             //
             this.lblJobDescription.AutoSize = true;
-            this.lblJobDescription.Location = new System.Drawing.Point(10, 115);
+            this.lblJobDescription.Location = new System.Drawing.Point(10, 129);
             this.lblJobDescription.Name = "lblJobDescription";
             this.lblJobDescription.Size = new System.Drawing.Size(80, 13);
             this.lblJobDescription.TabIndex = 6;
@@ -745,16 +769,16 @@ namespace EmployeeTimeManagement.Views
             //
             this.txtJobDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtJobDescription.Location = new System.Drawing.Point(115, 112);
+            this.txtJobDescription.Location = new System.Drawing.Point(128, 126);
             this.txtJobDescription.MaxLength = 100;
             this.txtJobDescription.Name = "txtJobDescription";
-            this.txtJobDescription.Size = new System.Drawing.Size(155, 20);
+            this.txtJobDescription.Size = new System.Drawing.Size(142, 20);
             this.txtJobDescription.TabIndex = 7;
             //
             // lblHourlyRate
             //
             this.lblHourlyRate.AutoSize = true;
-            this.lblHourlyRate.Location = new System.Drawing.Point(10, 144);
+            this.lblHourlyRate.Location = new System.Drawing.Point(10, 155);
             this.lblHourlyRate.Name = "lblHourlyRate";
             this.lblHourlyRate.Size = new System.Drawing.Size(62, 13);
             this.lblHourlyRate.TabIndex = 8;
@@ -764,15 +788,15 @@ namespace EmployeeTimeManagement.Views
             //
             this.txtHourlyRate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtHourlyRate.Location = new System.Drawing.Point(115, 141);
+            this.txtHourlyRate.Location = new System.Drawing.Point(128, 152);
             this.txtHourlyRate.Name = "txtHourlyRate";
-            this.txtHourlyRate.Size = new System.Drawing.Size(155, 20);
+            this.txtHourlyRate.Size = new System.Drawing.Size(142, 20);
             this.txtHourlyRate.TabIndex = 9;
             //
             // lblOpeningPTODays
             //
             this.lblOpeningPTODays.AutoSize = true;
-            this.lblOpeningPTODays.Location = new System.Drawing.Point(10, 173);
+            this.lblOpeningPTODays.Location = new System.Drawing.Point(10, 181);
             this.lblOpeningPTODays.Name = "lblOpeningPTODays";
             this.lblOpeningPTODays.Size = new System.Drawing.Size(102, 13);
             this.lblOpeningPTODays.TabIndex = 10;
@@ -782,15 +806,15 @@ namespace EmployeeTimeManagement.Views
             //
             this.txtOpeningPTODays.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtOpeningPTODays.Location = new System.Drawing.Point(115, 170);
+            this.txtOpeningPTODays.Location = new System.Drawing.Point(128, 178);
             this.txtOpeningPTODays.Name = "txtOpeningPTODays";
-            this.txtOpeningPTODays.Size = new System.Drawing.Size(155, 20);
+            this.txtOpeningPTODays.Size = new System.Drawing.Size(142, 20);
             this.txtOpeningPTODays.TabIndex = 11;
             //
             // lblOpeningBalanceAsAt
             //
             this.lblOpeningBalanceAsAt.AutoSize = true;
-            this.lblOpeningBalanceAsAt.Location = new System.Drawing.Point(10, 202);
+            this.lblOpeningBalanceAsAt.Location = new System.Drawing.Point(10, 207);
             this.lblOpeningBalanceAsAt.Name = "lblOpeningBalanceAsAt";
             this.lblOpeningBalanceAsAt.Size = new System.Drawing.Size(102, 13);
             this.lblOpeningBalanceAsAt.TabIndex = 12;
@@ -801,10 +825,10 @@ namespace EmployeeTimeManagement.Views
             this.dtpOpeningBalanceAsAt.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dtpOpeningBalanceAsAt.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpOpeningBalanceAsAt.Location = new System.Drawing.Point(115, 199);
+            this.dtpOpeningBalanceAsAt.Location = new System.Drawing.Point(128, 204);
             this.dtpOpeningBalanceAsAt.Name = "dtpOpeningBalanceAsAt";
             this.dtpOpeningBalanceAsAt.ShowCheckBox = true;
-            this.dtpOpeningBalanceAsAt.Size = new System.Drawing.Size(155, 20);
+            this.dtpOpeningBalanceAsAt.Size = new System.Drawing.Size(142, 20);
             this.dtpOpeningBalanceAsAt.TabIndex = 13;
             //
             // grpSpouse
@@ -1074,6 +1098,8 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.TextBox txtContractType;
         private System.Windows.Forms.Label lblStartDate;
         private System.Windows.Forms.DateTimePicker dtpStartDate;
+        private System.Windows.Forms.Label lblEndDate;
+        private System.Windows.Forms.DateTimePicker dtpEndDate;
         private System.Windows.Forms.Label lblDepartment;
         private System.Windows.Forms.TextBox txtDepartment;
         private System.Windows.Forms.Label lblJobDescription;

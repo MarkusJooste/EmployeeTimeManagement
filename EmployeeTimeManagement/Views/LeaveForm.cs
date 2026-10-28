@@ -32,6 +32,11 @@ namespace EmployeeTimeManagement.Views
         // dgvHistory_SelectionChanged does not treat it as the manager picking a row to edit.
         private bool suppressSelectionEvent;
 
+        // The employee whose history and balances are on screen, or null for none. The picker
+        // reports the same selection several times while it first appears, and each report
+        // would otherwise re-read the history and Timesheets from the database.
+        private int? shownEmployeeID;
+
         public LeaveForm()
         {
             InitializeComponent();
@@ -96,6 +101,7 @@ namespace EmployeeTimeManagement.Views
         // Clears the history panel back to its no-selection state.
         private void ShowNoSelection()
         {
+            shownEmployeeID = null;
             selectedEmployeeHistory = new List<Absence>();
             lblSelectedEmployee.Text = "Select an employee to see their Absence history";
             cboLeaveType.Enabled = false;
@@ -115,6 +121,7 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
+            shownEmployeeID = employee.EmployeeID;
             lblSelectedEmployee.Text = "Absence history: " + employee.FullName;
             cboLeaveType.Enabled = true;
 
@@ -457,6 +464,13 @@ namespace EmployeeTimeManagement.Views
             if (selected == null)
             {
                 ShowNoSelection();
+                return;
+            }
+
+            // Already on screen. Saving or deleting an Absence reloads by calling
+            // ShowHistoryFor directly, so skipping here never leaves stale figures.
+            if (selected.EmployeeID == shownEmployeeID)
+            {
                 return;
             }
 

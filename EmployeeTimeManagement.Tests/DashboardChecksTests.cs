@@ -188,6 +188,61 @@ namespace EmployeeTimeManagement.Tests
         }
 
         // ------------------------------------------------------------------
+        // Contracts to renew
+        // ------------------------------------------------------------------
+
+        [TestCase(1, "Ended Tue 27 Oct (yesterday)")]
+        [TestCase(8, "Ended Tue 20 Oct (8 days ago)")]
+        public void FixedTermContractsThatRanOutAreListed(int daysSinceEnd, string note)
+        {
+            EmployeeOverview employee = Build(1, Today.AddYears(-1), Today.AddDays(-daysSinceEnd));
+
+            Assert.That(DashboardChecks.ContractsToRenew(Today, new[] { employee }).Single().Note, Is.EqualTo(note));
+        }
+
+        [Test]
+        public void TerminatedOpenAndStillRunningContractsAreNotListed()
+        {
+            EmployeeOverview terminated = Build(1, Today.AddYears(-1), Today.AddDays(-5));
+            terminated.ReasonForEnding = "Resigned";
+            EmployeeOverview open = Build(2, Today.AddYears(-1));
+            EmployeeOverview endsToday = Build(3, Today.AddYears(-1), Today);
+            EmployeeOverview noContract = Build(4);
+
+            Assert.That(DashboardChecks.ContractsToRenew(Today, new[] { terminated, open, endsToday, noContract }), Is.Empty);
+        }
+
+        [Test]
+        public void ABlankReasonStillCountsAsNotTerminated()
+        {
+            EmployeeOverview employee = Build(1, Today.AddYears(-1), Today.AddDays(-3));
+            employee.ReasonForEnding = "  ";
+
+            Assert.That(DashboardChecks.ContractsToRenew(Today, new[] { employee }), Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void TheTileNamesEveryoneMostUrgentFirst()
+        {
+            DashboardAlert first = new DashboardAlert("Lerato Khumalo", "", "");
+            DashboardAlert second = new DashboardAlert("Pieter Smit", "", "");
+            DashboardAlert third = new DashboardAlert("Amy Adams", "", "");
+
+            Assert.That(DashboardChecks.NamesSummary(new List<DashboardAlert>()), Is.EqualTo(string.Empty));
+            Assert.That(DashboardChecks.NamesSummary(new[] { first }), Is.EqualTo("Lerato Khumalo"));
+            Assert.That(DashboardChecks.NamesSummary(new[] { first, second, third }), Is.EqualTo("Lerato Khumalo, Pieter Smit, Amy Adams"));
+        }
+
+        [Test]
+        public void LongestOverdueIsFirst()
+        {
+            EmployeeOverview recent = Build(1, Today.AddYears(-1), Today.AddDays(-2));
+            EmployeeOverview overdue = Build(2, Today.AddYears(-1), Today.AddDays(-40));
+
+            Assert.That(IDs(DashboardChecks.ContractsToRenew(Today, new[] { recent, overdue })), Is.EqualTo(new[] { 2, 1 }));
+        }
+
+        // ------------------------------------------------------------------
         // Long hours
         // ------------------------------------------------------------------
 

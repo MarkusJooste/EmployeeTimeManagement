@@ -56,5 +56,15 @@ namespace EmployeeTimeManagement.Models
 
             return contractEndDate == null || workDate.Date <= contractEndDate.Value.Date;
         }
+
+        // Whether a fixed-term contract has run out and is waiting to be renewed: its end date
+        // has passed and nobody terminated it. Terminate always records a reason for ending, so
+        // an end date with no reason is a term that simply lapsed.
+        public static bool NeedsRenewal(DateTime? contractEndDate, string reasonForEnding, DateTime today)
+        {
+            return contractEndDate.HasValue
+                && contractEndDate.Value.Date < today.Date
+                && string.IsNullOrWhiteSpace(reasonForEnding);
+        }
     }
 }

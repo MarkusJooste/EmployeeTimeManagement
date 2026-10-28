@@ -52,6 +52,9 @@ namespace EmployeeTimeManagement.Models
 
         public string ContractType { get; set; }
         public DateTime? StartDate { get; set; }
+
+        // The last day of a fixed-term contract, or null for one that runs until notice is given.
+        public DateTime? EndDate { get; set; }
         public string Department { get; set; }
         public string JobDescription { get; set; }
         public string HourlyRate { get; set; }
@@ -244,8 +247,9 @@ namespace EmployeeTimeManagement.Models
             return bank;
         }
 
-        // Assembles the TBL_employee_contracts row. A contract captured here is live, so it
-        // ends nowhere and carries no reason; Terminate is what fills those in.
+        // Assembles the TBL_employee_contracts row. A fixed-term contract carries the end date
+        // agreed up front; the reason for ending stays empty, since only Terminate writes one,
+        // and an end date with no reason is how a fixed term is told apart from a termination.
         private static EmployeeContract BuildContract(EmployeeCaptureInput input, List<EmployeeFieldError> errors)
         {
             var contract = new EmployeeContract
@@ -255,7 +259,7 @@ namespace EmployeeTimeManagement.Models
                 ContractType = Required(input.ContractType, "ContractType", "A contract type is required.", errors),
                 Department = Required(input.Department, "Department", "A department is required.", errors),
                 JobDescription = Required(input.JobDescription, "JobDescription", "A job description is required.", errors),
-                EndDate = null,
+                EndDate = input.EndDate.HasValue ? input.EndDate.Value.Date : (DateTime?)null,
                 ReasonForEnding = string.Empty,
                 HourlyRate = ValidateHourlyRate(input.HourlyRate, errors),
                 OpeningPTODays = ValidateOpeningPTODays(input.OpeningPTODays, errors),
@@ -269,6 +273,11 @@ namespace EmployeeTimeManagement.Models
             else
             {
                 contract.StartDate = input.StartDate.Value.Date;
+
+                if (contract.EndDate.HasValue && contract.EndDate.Value <= contract.StartDate)
+                {
+                    errors.Add(new EmployeeFieldError("EndDate", "The end date must be after the start date."));
+                }
             }
 
             return contract;

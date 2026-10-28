@@ -5,7 +5,9 @@ using System.Windows.Forms;
 namespace EmployeeTimeManagement.Views
 {
     // Asks for the end date and reason Terminate writes to the employee's contract. There
-    // is no fixed list of reasons, so the reason is free text rather than a dropdown.
+    // is no fixed list of reasons, so the reason is free text rather than a dropdown. The
+    // reason is required: an end date with no reason is how a fixed-term contract that ran
+    // out is recognised, so a termination without one would be mistaken for it.
     public class TerminateEmployeeForm : Form
     {
         private readonly DateTimePicker dtpEndDate;
@@ -69,6 +71,22 @@ namespace EmployeeTimeManagement.Views
 
             AcceptButton = btnOk;
             CancelButton = btnCancel;
+            FormClosing += RequireReason;
+
+            WimpyTheme.Apply(this);
+        }
+
+        private void RequireReason(object sender, FormClosingEventArgs e)
+        {
+            if (DialogResult != DialogResult.OK || Reason.Length > 0)
+            {
+                return;
+            }
+
+            e.Cancel = true;
+            MessageBox.Show(this, "Enter a reason for ending the contract.", "Terminate employee",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            txtReason.Focus();
         }
 
         // The end date the manager chose, defaulting to today.

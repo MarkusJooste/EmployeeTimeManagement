@@ -278,6 +278,10 @@
     <Compile Include="Models\TimesheetReport.cs" />
     <Compile Include="Views\AccessRevokedPrompt.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
+    <Compile Include="Database\ConnectionStringStore.cs" />
+    <Compile Include="Views\ConnectionSetupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Models\Timesheet.cs" />
     <Compile Include="Models\TimesheetCapture.cs" />
     <Compile Include="Models\Employee.cs" />
@@ -326,6 +330,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Views\ContractPdf.cs" />
+    <Compile Include="Views\WimpyTheme.cs" />
     <Compile Include="Views\DashboardListCard.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -407,7 +412,9 @@
     <EmbeddedResource Include="Views\ViewTimesheetsForm.resx">
       <DependentUpon>ViewTimesheetsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include=".env">
+    <!-- Debug builds only: the app imports it into its encrypted store and deletes the copy.
+         A Release build must never carry the connection string in plain text. -->
+    <None Include=".env" Condition="'$(Configuration)' == 'Debug'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

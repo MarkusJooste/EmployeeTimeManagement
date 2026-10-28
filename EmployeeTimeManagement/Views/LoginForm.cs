@@ -19,7 +19,50 @@ namespace EmployeeTimeManagement.Views
         public LoginForm()
         {
             InitializeComponent();
+            ApplyTheme();
             loginController = new LoginController();
+        }
+
+        // Red like the website's header, with the white button it uses on red.
+        private void ApplyTheme()
+        {
+            WimpyTheme.Apply(this);
+            BackColor = WimpyTheme.Red;
+            Text = "Employee Time Management";
+
+            lblTitle.ForeColor = Color.White;
+            lblTitle.Left = (ClientSize.Width - lblTitle.Width) / 2;
+            lblTitle.Top = 80;
+
+            lblPin.ForeColor = Color.White;
+            lblPin.Font = WimpyTheme.BodyBold;
+            lblPin.Text = "Enter your 4-digit PIN";
+            lblPin.Left = (ClientSize.Width - lblPin.Width) / 2;
+            lblPin.Top = txtPin.Top - lblPin.Height - 8;
+
+            txtPin.Font = WimpyTheme.Heading(14F);
+            txtPin.TextAlign = HorizontalAlignment.Center;
+            txtPin.Width = 160;
+            txtPin.Left = (ClientSize.Width - txtPin.Width) / 2;
+            lblPin.Top = txtPin.Top - lblPin.Height - 8;
+
+            WimpyTheme.StyleButton(btnLogin, ButtonRole.Secondary);
+            btnLogin.Font = WimpyTheme.Heading(12F);
+            btnLogin.FlatAppearance.BorderColor = Color.White;
+            btnLogin.Height = 40;
+            btnLogin.Width = txtPin.Width;
+            btnLogin.Left = txtPin.Left;
+            btnLogin.Top = txtPin.Bottom + 16;
+
+            // Centred across the form, since its text changes length.
+            lblError.AutoSize = false;
+            lblError.Left = 0;
+            lblError.Width = ClientSize.Width;
+            lblError.Top = btnLogin.Bottom + 16;
+            lblError.TextAlign = ContentAlignment.MiddleCenter;
+            lblError.ForeColor = Color.White;
+            lblError.Font = WimpyTheme.BodyBold;
+            lblError.Text = string.Empty;
         }
 
         private void btnLogin_Click(object sender, EventArgs e)

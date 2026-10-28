@@ -38,6 +38,10 @@ namespace EmployeeTimeManagement.Views
             this.lblHoursWeek = new System.Windows.Forms.Label();
             this.lblLeaveToday = new System.Windows.Forms.Label();
             this.lblAwolWeek = new System.Windows.Forms.Label();
+            this.pnlRenew = new System.Windows.Forms.Panel();
+            this.lblRenewCount = new System.Windows.Forms.Label();
+            this.lblRenewCaption = new System.Windows.Forms.Label();
+            this.lblRenewNames = new System.Windows.Forms.Label();
             this.lblEmployeesCaption = new System.Windows.Forms.Label();
             this.lblHoursCaption = new System.Windows.Forms.Label();
             this.lblLeaveCaption = new System.Windows.Forms.Label();
@@ -47,6 +51,7 @@ namespace EmployeeTimeManagement.Views
             this.pnlHours.SuspendLayout();
             this.pnlLeave.SuspendLayout();
             this.pnlAwol.SuspendLayout();
+            this.pnlRenew.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblWelcome
@@ -75,7 +80,7 @@ namespace EmployeeTimeManagement.Views
             this.pnlEmployees.Controls.Add(this.lblEmployeesCaption);
             this.pnlEmployees.Location = new System.Drawing.Point(39, 75);
             this.pnlEmployees.Name = "pnlEmployees";
-            this.pnlEmployees.Size = new System.Drawing.Size(190, 70);
+            this.pnlEmployees.Size = new System.Drawing.Size(148, 86);
             this.pnlEmployees.TabIndex = 2;
             // 
             // lblEmployeesCaption
@@ -104,9 +109,9 @@ namespace EmployeeTimeManagement.Views
             this.pnlHours.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlHours.Controls.Add(this.lblHoursWeek);
             this.pnlHours.Controls.Add(this.lblHoursCaption);
-            this.pnlHours.Location = new System.Drawing.Point(241, 75);
+            this.pnlHours.Location = new System.Drawing.Point(201, 75);
             this.pnlHours.Name = "pnlHours";
-            this.pnlHours.Size = new System.Drawing.Size(190, 70);
+            this.pnlHours.Size = new System.Drawing.Size(148, 86);
             this.pnlHours.TabIndex = 3;
             // 
             // lblHoursCaption
@@ -135,9 +140,9 @@ namespace EmployeeTimeManagement.Views
             this.pnlLeave.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlLeave.Controls.Add(this.lblLeaveToday);
             this.pnlLeave.Controls.Add(this.lblLeaveCaption);
-            this.pnlLeave.Location = new System.Drawing.Point(443, 75);
+            this.pnlLeave.Location = new System.Drawing.Point(363, 75);
             this.pnlLeave.Name = "pnlLeave";
-            this.pnlLeave.Size = new System.Drawing.Size(190, 70);
+            this.pnlLeave.Size = new System.Drawing.Size(148, 86);
             this.pnlLeave.TabIndex = 4;
             // 
             // lblLeaveCaption
@@ -166,9 +171,9 @@ namespace EmployeeTimeManagement.Views
             this.pnlAwol.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlAwol.Controls.Add(this.lblAwolWeek);
             this.pnlAwol.Controls.Add(this.lblAwolCaption);
-            this.pnlAwol.Location = new System.Drawing.Point(645, 75);
+            this.pnlAwol.Location = new System.Drawing.Point(525, 75);
             this.pnlAwol.Name = "pnlAwol";
-            this.pnlAwol.Size = new System.Drawing.Size(190, 70);
+            this.pnlAwol.Size = new System.Drawing.Size(148, 86);
             this.pnlAwol.TabIndex = 5;
             // 
             // lblAwolCaption
@@ -190,6 +195,46 @@ namespace EmployeeTimeManagement.Views
             this.lblAwolWeek.Size = new System.Drawing.Size(26, 29);
             this.lblAwolWeek.TabIndex = 1;
             this.lblAwolWeek.Text = "0";
+            //
+            // pnlRenew
+            //
+            this.pnlRenew.BackColor = System.Drawing.Color.White;
+            this.pnlRenew.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlRenew.Controls.Add(this.lblRenewCount);
+            this.pnlRenew.Controls.Add(this.lblRenewCaption);
+            this.pnlRenew.Controls.Add(this.lblRenewNames);
+            this.pnlRenew.Location = new System.Drawing.Point(687, 75);
+            this.pnlRenew.Name = "pnlRenew";
+            this.pnlRenew.Size = new System.Drawing.Size(148, 86);
+            this.pnlRenew.TabIndex = 7;
+            //
+            // lblRenewCaption
+            //
+            this.lblRenewCaption.AutoSize = true;
+            this.lblRenewCaption.ForeColor = System.Drawing.Color.DimGray;
+            this.lblRenewCaption.Location = new System.Drawing.Point(10, 8);
+            this.lblRenewCaption.Name = "lblRenewCaption";
+            this.lblRenewCaption.Size = new System.Drawing.Size(60, 13);
+            this.lblRenewCaption.TabIndex = 0;
+            this.lblRenewCaption.Text = "Contracts to renew";
+            //
+            // lblRenewCount
+            //
+            this.lblRenewCount.AutoSize = true;
+            this.lblRenewCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRenewCount.Location = new System.Drawing.Point(8, 28);
+            this.lblRenewCount.Name = "lblRenewCount";
+            this.lblRenewCount.Size = new System.Drawing.Size(26, 29);
+            this.lblRenewCount.TabIndex = 1;
+            this.lblRenewCount.Text = "0";
+            //
+            // lblRenewNames
+            // Who the count is, filled in by DashboardHomeForm.
+            this.lblRenewNames.AutoEllipsis = true;
+            this.lblRenewNames.Location = new System.Drawing.Point(18, 64);
+            this.lblRenewNames.Name = "lblRenewNames";
+            this.lblRenewNames.Size = new System.Drawing.Size(124, 16);
+            this.lblRenewNames.TabIndex = 2;
             // 
             // tlpCards
             // 
@@ -201,12 +246,12 @@ namespace EmployeeTimeManagement.Views
             this.tlpCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tlpCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tlpCards.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpCards.Location = new System.Drawing.Point(39, 160);
+            this.tlpCards.Location = new System.Drawing.Point(39, 174);
             this.tlpCards.Name = "tlpCards";
             this.tlpCards.RowCount = 2;
             this.tlpCards.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpCards.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpCards.Size = new System.Drawing.Size(808, 402);
+            this.tlpCards.Size = new System.Drawing.Size(808, 388);
             this.tlpCards.TabIndex = 6;
             // 
             // DashboardHomeForm
@@ -215,6 +260,7 @@ namespace EmployeeTimeManagement.Views
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(889, 574);
             this.Controls.Add(this.tlpCards);
+            this.Controls.Add(this.pnlRenew);
             this.Controls.Add(this.pnlAwol);
             this.Controls.Add(this.pnlLeave);
             this.Controls.Add(this.pnlHours);
@@ -231,6 +277,8 @@ namespace EmployeeTimeManagement.Views
             this.pnlLeave.PerformLayout();
             this.pnlAwol.ResumeLayout(false);
             this.pnlAwol.PerformLayout();
+            this.pnlRenew.ResumeLayout(false);
+            this.pnlRenew.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -252,6 +300,10 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.Label lblHoursCaption;
         private System.Windows.Forms.Label lblLeaveCaption;
         private System.Windows.Forms.Label lblAwolCaption;
+        private System.Windows.Forms.Panel pnlRenew;
+        private System.Windows.Forms.Label lblRenewCount;
+        private System.Windows.Forms.Label lblRenewCaption;
+        private System.Windows.Forms.Label lblRenewNames;
         private System.Windows.Forms.TableLayoutPanel tlpCards;
     }
 }

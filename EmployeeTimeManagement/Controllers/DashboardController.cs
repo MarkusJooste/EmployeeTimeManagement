@@ -22,6 +22,7 @@ namespace EmployeeTimeManagement.Controllers
        e.IDNumber,
        c.StartDate,
        c.EndDate,
+       c.ReasonForEnding,
        c.HourlyRate,
        EXISTS (SELECT 1
                FROM TBL_employee_addresses a
@@ -61,6 +62,7 @@ WHERE (@StoreID IS NULL OR e.StoreID = @StoreID);";
                         int idNumberIndex = reader.GetOrdinal("IDNumber");
                         int startDateIndex = reader.GetOrdinal("StartDate");
                         int endDateIndex = reader.GetOrdinal("EndDate");
+                        int reasonForEndingIndex = reader.GetOrdinal("ReasonForEnding");
                         int hourlyRateIndex = reader.GetOrdinal("HourlyRate");
                         int hasAddressIndex = reader.GetOrdinal("HasAddress");
                         int hasNextOfKinIndex = reader.GetOrdinal("HasNextOfKin");
@@ -77,6 +79,7 @@ WHERE (@StoreID IS NULL OR e.StoreID = @StoreID);";
                                 IDNumber = ReadText(reader, idNumberIndex),
                                 ContractStartDate = reader.IsDBNull(startDateIndex) ? (DateTime?)null : reader.GetDateTime(startDateIndex),
                                 ContractEndDate = reader.IsDBNull(endDateIndex) ? (DateTime?)null : reader.GetDateTime(endDateIndex),
+                                ReasonForEnding = ReadText(reader, reasonForEndingIndex),
                                 HourlyRate = reader.IsDBNull(hourlyRateIndex) ? (decimal?)null : reader.GetDecimal(hourlyRateIndex),
 
                                 // EXISTS comes back as a 0/1 integer.
