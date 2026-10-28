@@ -65,6 +65,8 @@ namespace EmployeeTimeManagement.Views
 
             AcceptButton = btnOk;
             CancelButton = btnCancel;
+
+            WimpyTheme.Apply(this);
         }
 
         // The Timesheet the manager chose, or null if they cancelled.

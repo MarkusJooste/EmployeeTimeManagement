@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using EmployeeTimeManagement.Controllers;
+using EmployeeTimeManagement.Database;
 using EmployeeTimeManagement.Models;
 using EmployeeTimeManagement.Views;
 
@@ -19,7 +20,65 @@ namespace EmployeeTimeManagement.Views
         public LoginForm()
         {
             InitializeComponent();
+
+            // Enter in the PIN box logs in, the same as clicking Login.
+            AcceptButton = btnLogin;
+
+            // Connect to the database while the PIN is typed, so logging in does not also
+            // wait for the first connection. Again after a logout, when the pool may have
+            // let its idle connection go.
+            VisibleChanged += (sender, e) =>
+            {
+                if (Visible)
+                {
+                    DatabaseConnection.WarmUp();
+                }
+            };
+
+            ApplyTheme();
             loginController = new LoginController();
+        }
+
+        // Red like the website's header, with the white button it uses on red.
+        private void ApplyTheme()
+        {
+            WimpyTheme.Apply(this);
+            BackColor = WimpyTheme.Red;
+            Text = "Employee Time Management";
+
+            lblTitle.ForeColor = Color.White;
+            lblTitle.Left = (ClientSize.Width - lblTitle.Width) / 2;
+            lblTitle.Top = 80;
+
+            lblPin.ForeColor = Color.White;
+            lblPin.Font = WimpyTheme.BodyBold;
+            lblPin.Text = "Enter your 4-digit PIN";
+            lblPin.Left = (ClientSize.Width - lblPin.Width) / 2;
+            lblPin.Top = txtPin.Top - lblPin.Height - 8;
+
+            txtPin.Font = WimpyTheme.Heading(14F);
+            txtPin.TextAlign = HorizontalAlignment.Center;
+            txtPin.Width = 160;
+            txtPin.Left = (ClientSize.Width - txtPin.Width) / 2;
+            lblPin.Top = txtPin.Top - lblPin.Height - 8;
+
+            WimpyTheme.StyleButton(btnLogin, ButtonRole.Secondary);
+            btnLogin.Font = WimpyTheme.Heading(12F);
+            btnLogin.FlatAppearance.BorderColor = Color.White;
+            btnLogin.Height = 40;
+            btnLogin.Width = txtPin.Width;
+            btnLogin.Left = txtPin.Left;
+            btnLogin.Top = txtPin.Bottom + 16;
+
+            // Centred across the form, since its text changes length.
+            lblError.AutoSize = false;
+            lblError.Left = 0;
+            lblError.Width = ClientSize.Width;
+            lblError.Top = btnLogin.Bottom + 16;
+            lblError.TextAlign = ContentAlignment.MiddleCenter;
+            lblError.ForeColor = Color.White;
+            lblError.Font = WimpyTheme.BodyBold;
+            lblError.Text = string.Empty;
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -32,21 +91,33 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
-            // Call the login controller
-            Manager manager = loginController.Login(pin);
+            // Checking the PIN and opening the dashboard both wait on the database, so the
+            // cursor shows the program is busy until the dashboard is up.
+            Cursor.Current = Cursors.WaitCursor;
+            lblError.Text = string.Empty;
 
-            // If login failed
-            if (manager == null)
+            try
             {
-                lblError.Text = "Invalid PIN";
-                txtPin.Clear();
-                txtPin.Focus();
-                return;
-            }
+                // Call the login controller
+                Manager manager = loginController.Login(pin);
 
-            // Successful login
-            CurrentUser.Login(manager);
-            OpenDashboard(manager);
+                // If login failed
+                if (manager == null)
+                {
+                    lblError.Text = "Invalid PIN";
+                    txtPin.Clear();
+                    txtPin.Focus();
+                    return;
+                }
+
+                // Successful login
+                CurrentUser.Login(manager);
+                OpenDashboard(manager);
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
         }
 
         private void OpenDashboard(Manager manager)

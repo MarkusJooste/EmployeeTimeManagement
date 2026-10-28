@@ -21,6 +21,7 @@ namespace EmployeeTimeManagement.Controllers
        c.JobDescription,
        c.StartDate,
        c.EndDate,
+       c.ReasonForEnding,
        c.OpeningPTODays,
        c.OpeningBalanceAsAt
 FROM TBL_employees e
@@ -51,6 +52,7 @@ ORDER BY e.Surname, e.Name;";
                         int jobIndex = reader.GetOrdinal("JobDescription");
                         int startDateIndex = reader.GetOrdinal("StartDate");
                         int endDateIndex = reader.GetOrdinal("EndDate");
+                        int reasonForEndingIndex = reader.GetOrdinal("ReasonForEnding");
                         int openingPTODaysIndex = reader.GetOrdinal("OpeningPTODays");
                         int openingBalanceAsAtIndex = reader.GetOrdinal("OpeningBalanceAsAt");
 
@@ -79,6 +81,8 @@ ORDER BY e.Surname, e.Name;";
                             {
                                 item.ContractEndDate = reader.GetDateTime(endDateIndex);
                             }
+
+                            item.ReasonForEnding = ReadText(reader, reasonForEndingIndex);
 
                             // An employee with no contract row has no Opening Balance to read, which reads as zero.
                             item.OpeningPTODays = reader.IsDBNull(openingPTODaysIndex) ? 0 : reader.GetInt32(openingPTODaysIndex);
@@ -511,8 +515,10 @@ WHERE BankID = @BankID;";
         }
 
         // Updates the contract in place if one is on record, or inserts one if this is the
-        // first time it has been captured. EndDate and ReasonForEnding are deliberately left
-        // out of the SET list: they are off this form, and Terminate is what owns them.
+        // first time it has been captured. ReasonForEnding is left out of the SET list, as
+        // Terminate owns it. The end date is written only while there is no reason: on a live
+        // or fixed-term contract it is the agreed end, but once Terminate has filled in a
+        // reason it is the day the employee left, and editing the employee must not move it.
         private static void UpsertContract(MySqlConnection connection, MySqlTransaction transaction, EmployeeContract contract)
         {
             if (!contract.ContractID.HasValue)
@@ -522,7 +528,8 @@ WHERE BankID = @BankID;";
             }
 
             const string query = @"UPDATE TBL_employee_contracts SET
-    ContractType = @ContractType, StartDate = @StartDate, Department = @Department,
+    ContractType = @ContractType, StartDate = @StartDate,
+    EndDate = IF(ReasonForEnding = '', @EndDate, EndDate), Department = @Department,
     JobDescription = @JobDescription, HourlyRate = @HourlyRate,
     OpeningPTODays = @OpeningPTODays, OpeningBalanceAsAt = @OpeningBalanceAsAt
 WHERE ContractID = @ContractID;";
@@ -532,6 +539,7 @@ WHERE ContractID = @ContractID;";
                 command.Parameters.AddWithValue("@ContractID", contract.ContractID.Value);
                 command.Parameters.AddWithValue("@ContractType", contract.ContractType);
                 command.Parameters.AddWithValue("@StartDate", contract.StartDate.Date);
+                command.Parameters.AddWithValue("@EndDate", ToParameter(contract.EndDate));
                 command.Parameters.AddWithValue("@Department", contract.Department);
                 command.Parameters.AddWithValue("@JobDescription", contract.JobDescription);
                 command.Parameters.AddWithValue("@HourlyRate", contract.HourlyRate);

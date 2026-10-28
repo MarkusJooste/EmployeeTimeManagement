@@ -59,16 +59,12 @@ namespace EmployeeTimeManagement.Views
             SetPeriod(first, first.AddMonths(1).AddDays(-1));
         }
 
-        // Bolds the active period button, or clears every button when a custom range is used
+        // Fills the active period button red, or outlines every button when a custom range is used
         private void HighlightPeriod(Button active)
         {
             foreach (Button button in new[] { btnDaily, btnWeekly, btnMonthly })
             {
-                bool isActive = button == active;
-                button.Font = new Font(button.Font, isActive ? FontStyle.Bold : FontStyle.Regular);
-                button.BackColor = isActive ? SystemColors.Highlight : SystemColors.Control;
-                button.ForeColor = isActive ? SystemColors.HighlightText : SystemColors.ControlText;
-                button.UseVisualStyleBackColor = !isActive;
+                WimpyTheme.SetToggleSelected(button, button == active);
             }
         }
 

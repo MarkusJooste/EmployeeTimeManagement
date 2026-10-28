@@ -21,6 +21,9 @@ namespace EmployeeTimeManagement.Models
         public DateTime? ContractEndDate { get; set; }
         public decimal? HourlyRate { get; set; }
 
+        // Empty unless Terminate ended the contract.
+        public string ReasonForEnding { get; set; }
+
         public bool HasAddress { get; set; }
 
         // A named family member or spouse, either of whom can be put down as next of kin.
@@ -195,6 +198,36 @@ namespace EmployeeTimeManagement.Models
             }
 
             return Sorted(alerts);
+        }
+
+        // Fixed-term contracts that have run out without being renewed or terminated, the
+        // longest overdue first. Renewing moves the end date on in the Employees screen;
+        // Terminate records that the employee left instead.
+        public static List<DashboardAlert> ContractsToRenew(DateTime today, IEnumerable<EmployeeOverview> employees)
+        {
+            var alerts = new List<DashboardAlert>();
+
+            foreach (EmployeeOverview employee in employees)
+            {
+                if (!Employee.NeedsRenewal(employee.ContractEndDate, employee.ReasonForEnding, today))
+                {
+                    continue;
+                }
+
+                DateTime ended = employee.ContractEndDate.Value.Date;
+                int daysAgo = (today.Date - ended).Days;
+                string note = "Ended " + ShortDate(ended) + (daysAgo == 1 ? " (yesterday)" : " (" + daysAgo + " days ago)");
+                alerts.Add(new DashboardAlert(employee, note, ended));
+            }
+
+            return Sorted(alerts);
+        }
+
+        // Who a tile counts, most urgent first. The tile's own number gives the total, so a
+        // list too long for the tile can simply trail off. Empty when there is nobody.
+        public static string NamesSummary(IList<DashboardAlert> alerts)
+        {
+            return string.Join(", ", alerts.Select(alert => alert.EmployeeName));
         }
 
         // Employees who have worked LongHoursWarning hours or more this pay week, most

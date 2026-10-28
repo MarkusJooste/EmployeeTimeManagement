@@ -22,11 +22,17 @@ namespace EmployeeTimeManagement.Views
             this.title = title;
             Dock = DockStyle.Fill;
             Margin = new Padding(0, 0, 12, 12);
+            Padding = new Padding(1);
+            BackColor = WimpyTheme.Line;
 
             lblTitle = new Label();
             lblTitle.Dock = DockStyle.Top;
-            lblTitle.Height = 20;
-            lblTitle.Font = new Font(Font, FontStyle.Bold);
+            lblTitle.Height = 42;
+            lblTitle.Padding = new Padding(10, 0, 0, 0);
+            lblTitle.TextAlign = ContentAlignment.MiddleLeft;
+            lblTitle.BackColor = WimpyTheme.Card;
+            lblTitle.ForeColor = WimpyTheme.Text;
+            lblTitle.Font = WimpyTheme.Heading(10.5F);
             lblTitle.Text = title;
 
             colEmployee = new ColumnHeader { Text = "Employee", Width = 115 };
@@ -40,6 +46,15 @@ namespace EmployeeTimeManagement.Views
             lvAlerts.MultiSelect = false;
             lvAlerts.HideSelection = false;
             lvAlerts.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+            lvAlerts.BorderStyle = BorderStyle.None;
+            lvAlerts.Font = WimpyTheme.TableBody;
+            lvAlerts.ForeColor = WimpyTheme.Text;
+
+            // Charcoal headers to match the tables on the other screens.
+            lvAlerts.OwnerDraw = true;
+            lvAlerts.DrawColumnHeader += DrawHeader;
+            lvAlerts.DrawItem += (sender, e) => e.DrawDefault = true;
+            lvAlerts.DrawSubItem += (sender, e) => e.DrawDefault = true;
 
             // Notes such as a list of missed days can be longer than the column.
             lvAlerts.ShowItemToolTips = true;
@@ -88,6 +103,23 @@ namespace EmployeeTimeManagement.Views
         {
             lvAlerts.Items.Clear();
             lblTitle.Text = title + ": " + message;
+        }
+
+        private void DrawHeader(object sender, DrawListViewColumnHeaderEventArgs e)
+        {
+            using (var background = new SolidBrush(WimpyTheme.Charcoal))
+            {
+                e.Graphics.FillRectangle(background, e.Bounds);
+            }
+
+            if (e.Bounds.Width == 0)
+            {
+                return;
+            }
+
+            Rectangle text = Rectangle.Inflate(e.Bounds, -6, 0);
+            TextRenderer.DrawText(e.Graphics, e.Header.Text, WimpyTheme.TableBold, text, Color.White,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
 
         // The Note column takes whatever width the other two leave.
