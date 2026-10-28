@@ -39,6 +39,8 @@
     <Compile Include="..\EmployeeTimeManagement\Models\LeaveBalance.cs" Link="Seams\LeaveBalance.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\AWOLMirror.cs" Link="Seams\AWOLMirror.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\LeavePrefill.cs" Link="Seams\LeavePrefill.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\TimesheetCompletion.cs" Link="Seams\TimesheetCompletion.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\DashboardChecks.cs" Link="Seams\DashboardChecks.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Manager.cs" Link="Seams\Manager.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\ManagerAccess.cs" Link="Seams\ManagerAccess.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\ContractBlanks.cs" Link="Seams\ContractBlanks.cs" />
