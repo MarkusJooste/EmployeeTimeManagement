@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -94,6 +95,18 @@ namespace EmployeeTimeManagement.Views
             lblError.ForeColor = Color.White;
             lblError.Font = WimpyTheme.BodyBold;
             lblError.Text = string.Empty;
+
+            // Footer, so a change request can cite the build. Version comes from AssemblyInfo.cs.
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            lblVersion.AutoSize = false;
+            lblVersion.Left = 0;
+            lblVersion.Width = ClientSize.Width;
+            lblVersion.Height = 20;
+            lblVersion.Top = ClientSize.Height - lblVersion.Height - 8;
+            lblVersion.TextAlign = ContentAlignment.MiddleCenter;
+            lblVersion.ForeColor = Color.White;
+            lblVersion.Font = WimpyTheme.Body;
+            lblVersion.Text = "Version " + version.ToString(3);
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
