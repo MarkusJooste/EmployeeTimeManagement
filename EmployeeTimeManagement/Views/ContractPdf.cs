@@ -32,6 +32,94 @@ namespace EmployeeTimeManagement.Views
         {
             return Path.Combine(FolderName, storeID.ToString(), template + ".pdf");
         }
+
+        // The PDF to fill in for a store: its own, or while the client has not supplied that
+        // one, another store's PDF of the same type, with this store's name, hours and town
+        // read from this store's other contract and written over the other store's. Null
+        // when there is neither.
+        public static ContractTemplateSource Find(int storeID, ContractTemplate template)
+        {
+            string own = PathFor(storeID, template);
+            if (File.Exists(own))
+            {
+                return new ContractTemplateSource(storeID, template, storeID, null);
+            }
+
+            ContractTemplate other = template == ContractTemplate.General ? ContractTemplate.Manager : ContractTemplate.General;
+            if (!File.Exists(PathFor(storeID, other)))
+            {
+                return null;
+            }
+
+            string root = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FolderName);
+            if (!Directory.Exists(root))
+            {
+                return null;
+            }
+
+            foreach (int otherStore in Directory.GetDirectories(root)
+                .Select(folder => Path.GetFileName(folder))
+                .Select(name => { int id; return int.TryParse(name, out id) ? id : -1; })
+                .Where(id => id > 0 && id != storeID)
+                .OrderBy(id => id))
+            {
+                if (File.Exists(PathFor(otherStore, template)))
+                {
+                    return new ContractTemplateSource(storeID, template, otherStore, other);
+                }
+            }
+
+            return null;
+        }
+    }
+
+    // Which PDF a contract is filled in from, and where its store's wording comes from when
+    // that PDF is another store's.
+    internal class ContractTemplateSource
+    {
+        public ContractTemplateSource(int storeID, ContractTemplate template, int templateStoreID, ContractTemplate? wordingTemplate)
+        {
+            StoreID = storeID;
+            Template = template;
+            TemplateStoreID = templateStoreID;
+            WordingTemplate = wordingTemplate;
+        }
+
+        public int StoreID { get; private set; }
+        public ContractTemplate Template { get; private set; }
+        public int TemplateStoreID { get; private set; }
+
+        // This store's other contract, which its wording is read from; null when the PDF is
+        // the store's own.
+        public ContractTemplate? WordingTemplate { get; private set; }
+
+        public bool IsBorrowed
+        {
+            get { return WordingTemplate.HasValue; }
+        }
+
+        public string TemplatePath
+        {
+            get { return ContractTemplateFiles.PathFor(TemplateStoreID, Template); }
+        }
+
+        public string WordingPath
+        {
+            get { return IsBorrowed ? ContractTemplateFiles.PathFor(StoreID, WordingTemplate.Value) : null; }
+        }
+
+        public string Describe()
+        {
+            string template = ContractTemplateFiles.DisplayPath(TemplateStoreID, Template);
+            if (!IsBorrowed)
+            {
+                return template;
+            }
+
+            return template + " with this store's details from "
+                + ContractTemplateFiles.DisplayPath(StoreID, WordingTemplate.Value)
+                + " (" + ContractTemplateFiles.DisplayPath(StoreID, Template) + " not supplied yet)";
+        }
     }
 
     // A contract filled in from a store's template PDF. The template's pages are kept as
@@ -47,9 +135,18 @@ namespace EmployeeTimeManagement.Views
         public byte[] Bytes { get; private set; }
         public ContractFillPlan Plan { get; private set; }
 
-        public static ContractPdf Create(string templatePath, ContractData data)
+        public static ContractPdf Create(ContractTemplateSource source, ContractData data)
         {
-            byte[] template = File.ReadAllBytes(templatePath);
+            byte[] template = File.ReadAllBytes(source.TemplatePath);
+
+            Dictionary<string, string> storeWording = null;
+            if (source.IsBorrowed)
+            {
+                using (var own = PdfiumViewer.PdfDocument.Load(new MemoryStream(File.ReadAllBytes(source.WordingPath))))
+                {
+                    storeWording = ContractStoreWording.Read(new PdfiumTemplateText(own));
+                }
+            }
 
             ContractFillPlan plan;
             Dictionary<ContractFill, Color> coverColours;
@@ -57,7 +154,7 @@ namespace EmployeeTimeManagement.Views
             using (var measurer = new SharpTextMeasurer())
             using (var pdfium = PdfiumViewer.PdfDocument.Load(new MemoryStream(template)))
             {
-                plan = ContractBlanks.Plan(data, new PdfiumTemplateText(pdfium), measurer);
+                plan = ContractBlanks.Plan(data, new PdfiumTemplateText(pdfium), measurer, storeWording);
                 coverColours = SampleCoverColours(pdfium, plan);
             }
 
@@ -266,10 +363,59 @@ namespace EmployeeTimeManagement.Views
                 return graphics.MeasureString(text, Font(bold, size)).Width;
             }
 
+            // Windows' "A" width for the character: the gap between where it is drawn from
+            // and where its ink starts. Measured on a 1000 pixel Arial and scaled.
+            public double LeftBearing(char character, bool bold, double size)
+            {
+                const float EmPixels = 1000;
+
+                using (var font = new Font("Arial", EmPixels, bold ? FontStyle.Bold : FontStyle.Regular, GraphicsUnit.Pixel))
+                using (Graphics screen = Graphics.FromHwnd(IntPtr.Zero))
+                {
+                    IntPtr hdc = screen.GetHdc();
+                    IntPtr hfont = font.ToHfont();
+
+                    try
+                    {
+                        IntPtr previous = NativeMethods.SelectObject(hdc, hfont);
+                        var widths = new NativeMethods.ABCFLOAT[1];
+                        bool measured = NativeMethods.GetCharABCWidthsFloat(hdc, character, character, widths);
+                        NativeMethods.SelectObject(hdc, previous);
+
+                        return measured ? widths[0].abcfA / EmPixels * size : 0;
+                    }
+                    finally
+                    {
+                        NativeMethods.DeleteObject(hfont);
+                        screen.ReleaseHdc(hdc);
+                    }
+                }
+            }
+
             public void Dispose()
             {
                 graphics.Dispose();
             }
+        }
+
+        private static class NativeMethods
+        {
+            [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+            public struct ABCFLOAT
+            {
+                public float abcfA;
+                public float abcfB;
+                public float abcfC;
+            }
+
+            [System.Runtime.InteropServices.DllImport("gdi32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+            public static extern bool GetCharABCWidthsFloat(IntPtr hdc, uint first, uint last, [System.Runtime.InteropServices.Out] ABCFLOAT[] widths);
+
+            [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+            public static extern IntPtr SelectObject(IntPtr hdc, IntPtr gdiObject);
+
+            [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+            public static extern bool DeleteObject(IntPtr gdiObject);
         }
     }
 }

@@ -80,7 +80,7 @@ namespace EmployeeTimeManagement.Views
             this.employeePicker.Location = new System.Drawing.Point(0, 0);
             this.employeePicker.Name = "employeePicker";
             this.employeePicker.Size = new System.Drawing.Size(320, 551);
-            this.employeePicker.TabIndex = 1;
+            this.employeePicker.TabIndex = 0;
             this.employeePicker.SelectionChanged += new System.EventHandler(this.employeePicker_SelectionChanged);
             this.employeePicker.FilterChanged += new System.EventHandler(this.employeePicker_FilterChanged);
             //
@@ -94,7 +94,7 @@ namespace EmployeeTimeManagement.Views
             this.pnlHistory.Location = new System.Drawing.Point(320, 0);
             this.pnlHistory.Name = "pnlHistory";
             this.pnlHistory.Size = new System.Drawing.Size(569, 551);
-            this.pnlHistory.TabIndex = 0;
+            this.pnlHistory.TabIndex = 1;
             //
             // pnlBooking
             //
@@ -119,7 +119,7 @@ namespace EmployeeTimeManagement.Views
             this.pnlBooking.Location = new System.Drawing.Point(0, 136);
             this.pnlBooking.Name = "pnlBooking";
             this.pnlBooking.Size = new System.Drawing.Size(569, 146);
-            this.pnlBooking.TabIndex = 3;
+            this.pnlBooking.TabIndex = 0;
             //
             // pnlBalances
             //
@@ -132,7 +132,7 @@ namespace EmployeeTimeManagement.Views
             this.pnlBalances.Location = new System.Drawing.Point(0, 40);
             this.pnlBalances.Name = "pnlBalances";
             this.pnlBalances.Size = new System.Drawing.Size(569, 96);
-            this.pnlBalances.TabIndex = 2;
+            this.pnlBalances.TabIndex = 1;
             //
             // lblPTOBalance
             //
@@ -329,7 +329,7 @@ namespace EmployeeTimeManagement.Views
             this.dgvHistory.RowHeadersVisible = false;
             this.dgvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvHistory.Size = new System.Drawing.Size(569, 343);
-            this.dgvHistory.TabIndex = 1;
+            this.dgvHistory.TabIndex = 3;
             this.dgvHistory.SelectionChanged += new System.EventHandler(this.dgvHistory_SelectionChanged);
             //
             // colLeaveType
@@ -403,7 +403,7 @@ namespace EmployeeTimeManagement.Views
             this.pnlHistoryTop.Location = new System.Drawing.Point(0, 0);
             this.pnlHistoryTop.Name = "pnlHistoryTop";
             this.pnlHistoryTop.Size = new System.Drawing.Size(569, 40);
-            this.pnlHistoryTop.TabIndex = 0;
+            this.pnlHistoryTop.TabIndex = 2;
             //
             // cboLeaveType
             //

@@ -9,8 +9,22 @@ using System.Windows.Forms;
 
 namespace EmployeeTimeManagement.Views
 {
-    public partial class LeaveForm : Form
+    public partial class LeaveForm : Form, IHasShortcuts
     {
+
+        // Ctrl+S books the absence being entered and Ctrl+N starts a new one. Listed on the
+        // F1 shortcuts list.
+        IEnumerable<Shortcut> IHasShortcuts.Shortcuts
+        {
+            get
+            {
+                return new[]
+                {
+                    new Shortcut(Keys.Control | Keys.S, btnBookAbsence),
+                    new Shortcut(Keys.Control | Keys.N, btnNewAbsence)
+                };
+            }
+        }
         // Shown as the first item of the Leave Type filter, standing for no filter at all.
         private const string AllLeaveTypesLabel = "All Leave Types";
 

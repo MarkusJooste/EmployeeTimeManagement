@@ -40,11 +40,13 @@
     <Compile Include="..\EmployeeTimeManagement\Models\AWOLMirror.cs" Link="Seams\AWOLMirror.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\LeavePrefill.cs" Link="Seams\LeavePrefill.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\TimesheetCompletion.cs" Link="Seams\TimesheetCompletion.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\TimesheetSignOff.cs" Link="Seams\TimesheetSignOff.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\DashboardChecks.cs" Link="Seams\DashboardChecks.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\Manager.cs" Link="Seams\Manager.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\ManagerAccess.cs" Link="Seams\ManagerAccess.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\ContractBlanks.cs" Link="Seams\ContractBlanks.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\ContractData.cs" Link="Seams\ContractData.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Models\ContractStoreWording.cs" Link="Seams\ContractStoreWording.cs" />
     <Compile Include="..\EmployeeTimeManagement\Database\ConnectionStringStore.cs" Link="Seams\ConnectionStringStore.cs" />
   </ItemGroup>
 

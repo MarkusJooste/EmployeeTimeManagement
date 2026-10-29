@@ -11,6 +11,16 @@ namespace EmployeeTimeManagement.Models
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
 
+        // The store the rows belong to, from the rows themselves.
+        public string StoreName
+        {
+            get
+            {
+                return Rows.Select(row => row.StoreName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+                    ?? string.Empty;
+            }
+        }
+
         public List<TimesheetSummary> Rows { get; set; } =
             new List<TimesheetSummary>();
 
@@ -37,11 +47,6 @@ namespace EmployeeTimeManagement.Models
         public int TotalDaysWorked
         {
             get { return Rows.Sum(row => row.DaysWorked); }
-        }
-
-        public decimal TotalPay
-        {
-            get { return TotalPayableHours; }
         }
     }
 }

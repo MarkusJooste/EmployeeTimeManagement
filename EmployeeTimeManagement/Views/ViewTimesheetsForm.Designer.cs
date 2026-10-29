@@ -41,12 +41,14 @@ namespace EmployeeTimeManagement.Views
             this.lblStatus = new System.Windows.Forms.Label();
             this.dgvTimesheets = new System.Windows.Forms.DataGridView();
             this.btnPrint = new System.Windows.Forms.Button();
+            this.btnSignOff = new System.Windows.Forms.Button();
             this.pnlTop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTimesheets)).BeginInit();
             this.SuspendLayout();
             // 
             // pnlTop
             // 
+            this.pnlTop.Controls.Add(this.btnSignOff);
             this.pnlTop.Controls.Add(this.btnPrint);
             this.pnlTop.Controls.Add(this.lblPeriod);
             this.pnlTop.Controls.Add(this.txtSearch);
@@ -163,7 +165,7 @@ namespace EmployeeTimeManagement.Views
             this.dgvTimesheets.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvTimesheets.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvTimesheets.Location = new System.Drawing.Point(0, 80);
-            this.dgvTimesheets.MultiSelect = false;
+            this.dgvTimesheets.MultiSelect = true;
             this.dgvTimesheets.Name = "dgvTimesheets";
             this.dgvTimesheets.ReadOnly = true;
             this.dgvTimesheets.RowHeadersVisible = false;
@@ -173,13 +175,25 @@ namespace EmployeeTimeManagement.Views
             // 
             // btnPrint
             // 
-            this.btnPrint.Location = new System.Drawing.Point(713, 43);
+            this.btnPrint.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnPrint.Location = new System.Drawing.Point(638, 9);
             this.btnPrint.Name = "btnPrint";
-            this.btnPrint.Size = new System.Drawing.Size(75, 23);
-            this.btnPrint.TabIndex = 9;
-            this.btnPrint.Text = "Print";
+            this.btnPrint.Size = new System.Drawing.Size(150, 25);
+            this.btnPrint.TabIndex = 10;
+            this.btnPrint.Text = "Store summary PDF";
             this.btnPrint.UseVisualStyleBackColor = true;
             this.btnPrint.Click += new System.EventHandler(this.btnPrint_Click);
+            //
+            // btnSignOff
+            //
+            this.btnSignOff.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSignOff.Location = new System.Drawing.Point(638, 43);
+            this.btnSignOff.Name = "btnSignOff";
+            this.btnSignOff.Size = new System.Drawing.Size(150, 25);
+            this.btnSignOff.TabIndex = 9;
+            this.btnSignOff.Text = "Print sign-off sheet";
+            this.btnSignOff.UseVisualStyleBackColor = true;
+            this.btnSignOff.Click += new System.EventHandler(this.btnSignOff_Click);
             // 
             // ViewTimesheetsForm
             // 
@@ -220,5 +234,6 @@ namespace EmployeeTimeManagement.Views
         private System.Windows.Forms.DataGridViewTextBoxColumn colHolidayExtraHours;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPayableHours;
         private System.Windows.Forms.Button btnPrint;
+        private System.Windows.Forms.Button btnSignOff;
     }
 }

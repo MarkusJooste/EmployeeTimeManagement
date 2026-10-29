@@ -13,8 +13,23 @@ namespace EmployeeTimeManagement.Views
     // Fills in an employee's employment contract on their store's copy of the client's
     // contract PDF, with every blank the system has data for written in, ready to
     // preview, print or save.
-    public partial class ContractsForm : Form
+    public partial class ContractsForm : Form, IHasShortcuts
     {
+
+        // Enter on the list previews the chosen employee's contract; Ctrl+P prints it and
+        // Ctrl+S saves it as a PDF. Listed on the F1 shortcuts list.
+        IEnumerable<Shortcut> IHasShortcuts.Shortcuts
+        {
+            get
+            {
+                return new[]
+                {
+                    new Shortcut(Keys.Enter, btnPreview, dgvEmployees, "Preview the contract"),
+                    new Shortcut(Keys.Control | Keys.P, btnPrint, null, "Print the contract"),
+                    new Shortcut(Keys.Control | Keys.S, btnSavePdf, null, "Save the contract as a PDF")
+                };
+            }
+        }
         private readonly ContractController contractController;
 
         private List<ContractListItem> allEmployees = new List<ContractListItem>();
@@ -216,12 +231,12 @@ namespace EmployeeTimeManagement.Views
             }
 
             ContractData data = BuildData();
-            string templatePath = ContractTemplateFiles.DisplayPath(data.StoreID, data.Template);
+            ContractTemplateSource source = ContractTemplateFiles.Find(data.StoreID, data.Template);
 
             var text = new StringBuilder();
-            AppendLine(text, "Contract PDF", File.Exists(ContractTemplateFiles.PathFor(data.StoreID, data.Template))
-                ? templatePath
-                : templatePath + " - MISSING, add this store's PDF there");
+            AppendLine(text, "Contract PDF", source != null
+                ? source.Describe()
+                : ContractTemplateFiles.DisplayPath(data.StoreID, data.Template) + " - MISSING, add this store's PDF there");
             AppendLine(text, "Name", data.FullName);
             AppendLine(text, "ID number", data.IDNumber);
             AppendLine(text, "Address", JoinLines(data.AddressLine1, data.AddressLine2));
@@ -287,14 +302,16 @@ namespace EmployeeTimeManagement.Views
         private ContractPdf CreateContract(out ContractData data)
         {
             data = BuildData();
-            string path = ContractTemplateFiles.PathFor(data.StoreID, data.Template);
+            ContractTemplateSource source = ContractTemplateFiles.Find(data.StoreID, data.Template);
 
-            if (!File.Exists(path))
+            // Another store's PDF needs this store's wording from its other contract, so with
+            // neither of this store's PDFs there is nothing to print from.
+            if (source == null)
             {
                 MessageBox.Show(
                     "There is no " + data.Template.DisplayName().ToLowerInvariant() + " contract PDF for "
                     + (data.StoreName ?? "store " + data.StoreID) + " yet.\n\n"
-                    + "Save the store's contract PDF as:\n" + path,
+                    + "Save the store's contract PDF as:\n" + ContractTemplateFiles.PathFor(data.StoreID, data.Template),
                     "Contracts", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return null;
             }
@@ -303,7 +320,7 @@ namespace EmployeeTimeManagement.Views
             try
             {
                 Cursor = Cursors.WaitCursor;
-                contract = ContractPdf.Create(path, data);
+                contract = ContractPdf.Create(source, data);
             }
             catch (Exception ex)
             {
@@ -318,7 +335,7 @@ namespace EmployeeTimeManagement.Views
             if (contract.Plan.NotFound.Count > 0)
             {
                 MessageBox.Show(
-                    "These blanks could not be found in " + ContractTemplateFiles.DisplayPath(data.StoreID, data.Template)
+                    "These blanks could not be found in " + ContractTemplateFiles.DisplayPath(source.TemplateStoreID, data.Template)
                     + ", so they were not filled in:\n\n  - " + string.Join("\n  - ", contract.Plan.NotFound.Distinct())
                     + "\n\nCheck that the PDF is the client's contract, or fill these in by hand.",
                     "Contracts", MessageBoxButtons.OK, MessageBoxIcon.Warning);

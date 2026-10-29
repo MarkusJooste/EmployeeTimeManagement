@@ -108,6 +108,12 @@ namespace EmployeeTimeManagement.Tests
         {
             return text.Length * FakeTemplate.CharacterWidth * size / 11;
         }
+
+        // The fake template's character boxes start where the characters are drawn from.
+        public double LeftBearing(char character, bool bold, double size)
+        {
+            return 0;
+        }
     }
 
     [TestFixture]
