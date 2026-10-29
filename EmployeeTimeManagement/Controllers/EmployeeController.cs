@@ -529,7 +529,7 @@ WHERE BankID = @BankID;";
 
             const string query = @"UPDATE TBL_employee_contracts SET
     ContractType = @ContractType, StartDate = @StartDate,
-    EndDate = IF(ReasonForEnding = '', @EndDate, EndDate), Department = @Department,
+    EndDate = IF(COALESCE(TRIM(ReasonForEnding), '') = '', @EndDate, EndDate), Department = @Department,
     JobDescription = @JobDescription, HourlyRate = @HourlyRate,
     OpeningPTODays = @OpeningPTODays, OpeningBalanceAsAt = @OpeningBalanceAsAt
 WHERE ContractID = @ContractID;";

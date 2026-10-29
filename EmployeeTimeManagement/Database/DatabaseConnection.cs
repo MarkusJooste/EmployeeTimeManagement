@@ -38,10 +38,19 @@ namespace EmployeeTimeManagement.Database
         // Set when an imported .env could not be deleted, for the startup check to show.
         public static string ImportWarning { get; private set; }
 
-        // Whether this PC has a connection string saved (or a .env to import).
-        public static bool IsConfigured
+        // Checks the connection on launch, importing any .env first. See StartupConnectionFlow.
+        public static StartupResult RunStartupFlow(Func<StartupProblem, string, StartupChoice> prompt, Func<bool> create)
         {
-            get { return ConnectionString() != null; }
+            var flow = new StartupConnectionFlow(CreateStore(), TryConnect, prompt, create);
+            StartupResult result = flow.Run();
+
+            // The flow read the store itself, so let the next query load what it left there.
+            lock (LoadLock)
+            {
+                loaded = false;
+            }
+
+            return result;
         }
 
         // Encrypts and saves a connection string typed in at first-run setup.
@@ -163,6 +172,7 @@ namespace EmployeeTimeManagement.Database
                 if (!loaded)
                 {
                     ConnectionStringStore store = CreateStore();
+                    string loadError = null;
 
                     try
                     {
@@ -175,8 +185,15 @@ namespace EmployeeTimeManagement.Database
                         // it, so treat the PC as not set up and let setup replace the file.
                         connectionString = null;
                     }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                    {
+                        // Another Windows account owns connection.dat, or ProgramData is locked down.
+                        connectionString = null;
+                        loadError = ex.Message;
+                    }
 
-                    ImportWarning = store.ImportWarning;
+                    ImportWarning = store.ImportWarning
+                        ?? (loadError == null ? null : "The saved database connection could not be read or written: " + loadError);
                     loaded = true;
                 }
 

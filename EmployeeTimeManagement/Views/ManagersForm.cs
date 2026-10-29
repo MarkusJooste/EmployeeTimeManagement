@@ -77,7 +77,7 @@ namespace EmployeeTimeManagement.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not load Managers: " + ex.Message, "Managers", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorDialog.Show("Managers", "Could not load Managers: " + ex.Message, ex);
                 BindLists(new List<Employee>(), new List<ManagerListItem>());
                 return;
             }
@@ -226,7 +226,7 @@ namespace EmployeeTimeManagement.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not check existing PINs: " + ex.Message, "Promote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorDialog.Show("Promote", "Could not check existing PINs: " + ex.Message, ex);
                     return;
                 }
 
@@ -260,7 +260,7 @@ namespace EmployeeTimeManagement.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not promote " + selected.FullName + ": " + ex.Message, "Promote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorDialog.Show("Promote", "Could not promote " + selected.FullName + ": " + ex.Message, ex);
                     return;
                 }
 
@@ -297,7 +297,7 @@ namespace EmployeeTimeManagement.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not load Managers: " + ex.Message, "Demote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorDialog.Show("Demote", "Could not load Managers: " + ex.Message, ex);
                 return;
             }
 
@@ -331,7 +331,7 @@ namespace EmployeeTimeManagement.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not demote " + fullName + ": " + ex.Message, "Demote", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorDialog.Show("Demote", "Could not demote " + fullName + ": " + ex.Message, ex);
                 return;
             }
 

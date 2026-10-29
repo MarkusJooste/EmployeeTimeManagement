@@ -48,6 +48,8 @@
     <Compile Include="..\EmployeeTimeManagement\Models\ContractData.cs" Link="Seams\ContractData.cs" />
     <Compile Include="..\EmployeeTimeManagement\Models\ContractStoreWording.cs" Link="Seams\ContractStoreWording.cs" />
     <Compile Include="..\EmployeeTimeManagement\Database\ConnectionStringStore.cs" Link="Seams\ConnectionStringStore.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Database\StartupConnectionFlow.cs" Link="Seams\StartupConnectionFlow.cs" />
+    <Compile Include="..\EmployeeTimeManagement\Database\ErrorLog.cs" Link="Seams\ErrorLog.cs" />
   </ItemGroup>
 
 </Project>

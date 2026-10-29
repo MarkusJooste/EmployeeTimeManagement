@@ -1,0 +1,73 @@
+CLEAN-MACHINE VERIFICATION CHECKLIST
+====================================
+Ticket 07. Run once per OS: Windows 7 SP1 (also test no-SP1), Windows 10, Windows 11.
+Record results in the table at the bottom. Re-run after any installer change.
+
+SETUP
+-----
+- Use a REAL stick from `powershell installer\build-release.ps1` with REAL prerequisite
+  binaries (not dummies) and a real .env filled in.
+- Machine: fresh VM or snapshot, no .NET 4.8, no program installed, no ProgramData\EmployeeTimeManagement.
+  Win7: snapshot at SP1 without KB3140245/KB4474419/KB4490628.
+- Make two builds: version N (e.g. 1.0.0.0) and N+1 (bump AssemblyVersion, rebuild to a 2nd stick folder).
+- Test with network disconnected (offline).
+
+1. FRESH INSTALL (stick N)
+   [ ] Run Setup.exe as admin; completes (accept reboot prompt on Win7/.NET if asked; setup resumes)
+   [ ] Start menu + desktop shortcuts "Employee Time Management" exist
+   [ ] Program launches at end of setup
+   [ ] Version shown in Programs & Features == login footer "Version x.y.z" == stick version
+   [ ] .env was copied to the install folder (then consumed/deleted by first launch, see 5)
+
+2. UPGRADE KEEPS CONNECTION (stick N+1 over N)
+   Pre: N installed, connected OK, log has an entry. Leave the program RUNNING.
+   [ ] Setup.exe N+1 runs without uninstalling first
+   [ ] Running program closed automatically before files replaced
+   [ ] Same install folder, single Programs & Features entry, new version
+   [ ] Program starts straight in, no setup form (connection store kept)
+   [ ] ProgramData\EmployeeTimeManagement\logs\errors.log still has old entries
+
+3. DOWNGRADE REFUSED (stick N over N+1)
+   [ ] Clear message says a newer version is installed, use newest stick
+   [ ] Nothing changed: version still N+1, program still works
+
+4. PREREQUISITES OFFLINE
+   Win7 no SP1:
+   [ ] Clear "needs Service Pack 1" message, setup stops
+   Win7 SP1 (x86 AND x64 if possible):
+   [ ] TLS 1.2 updates installed from stick, correct arch variant, order OK, reboot handled
+   [ ] Re-run setup: already-present KBs skipped
+   Win7/10/11 without .NET 4.8:
+   [ ] .NET 4.8 installed from stick, no internet used
+   Win10/11 with .NET 4.8:
+   [ ] No prerequisite step, Win7-only items skipped
+   [ ] Missing prereq file on stick: setup aborts naming the path
+
+5. .env PATHS (startup connection flow)
+   a. Valid .env on stick, DB reachable:
+      [ ] Program continues straight in; .env deleted from install folder; connection kept after restart
+   b. .env present, DB unreachable (wrong host / network off):
+      [ ] Dialog offers Retry / Continue for now (+ Copy diagnostics)
+      [ ] Retry re-tests; after fixing network, Retry succeeds
+      [ ] Continue for now shows clear not-connected state, no crash
+   c. No .env on stick (and no saved connection):
+      [ ] Dialog offers Create / Continue for now
+      [ ] Create opens existing setup form; saving works
+      [ ] Continue for now shows not-connected state, no crash
+   d. Test .env connect on real TLS 1.2 DB endpoint from Win7:
+      [ ] Connects
+
+6. ERROR LOG + COPY DIAGNOSTICS
+   [ ] Force an error (e.g. 5b); entry in ProgramData\EmployeeTimeManagement\logs\errors.log with time + version
+   [ ] Copy diagnostics button copies text to clipboard (paste into Notepad)
+   [ ] Pasted text and log contain NO password / connection string
+   [ ] Log survives upgrade (see 2)
+
+RESULTS (fill in)
+-----------------
+Date | OS / build | Arch | Tester | 1 | 2 | 3 | 4 | 5 | 6 | Notes / defects
+-----|------------|------|--------|---|---|---|---|---|---|----------------
+     | Win7 SP1   | x86  |        |   |   |   |   |   |   |
+     | Win7 SP1   | x64  |        |   |   |   |   |   |   |
+     | Win10      | x64  |        |   |   |   |   |   |   |
+     | Win11      | x64  |        |   |   |   |   |   |   |

@@ -433,3 +433,6 @@ FodyWeavers.xsd
 # EmployeeTimeManagement/ContractTemplates/README.txt).
 EmployeeTimeManagement/ContractTemplates/**/*.pdf
 /schema.csv
+installer/Output/
+installer/Stick/
+installer/prerequisites/

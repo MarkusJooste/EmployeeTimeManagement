@@ -19,25 +19,57 @@ namespace EmployeeTimeManagement
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // A new PC is set up once with the database connection, saved encrypted.
-            if (!DatabaseConnection.IsConfigured)
+            // Anything not caught in a view ends up here: log it and show it with Copy
+            // diagnostics rather than the stock Windows crash box.
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            bool showingError = false;
+            Application.ThreadException += (sender, e) =>
             {
-                using (var setup = new ConnectionSetupForm())
+                ErrorLog.Default.Write("Unexpected error", e.Exception);
+                if (showingError)
                 {
-                    if (setup.ShowDialog() != DialogResult.OK)
-                    {
-                        return;
-                    }
+                    return;
                 }
-            }
 
-            if (DatabaseConnection.ImportWarning != null)
+                showingError = true;
+                try
+                {
+                    ErrorDialog.Show("Unexpected error", "Something went wrong: " + e.Exception.Message, e.Exception);
+                }
+                finally
+                {
+                    showingError = false;
+                }
+            };
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+                ErrorLog.Default.Write("Unhandled error", e.ExceptionObject as Exception);
+
+            // Test the saved connection (importing any .env first) and let the user retry,
+            // set it up, or carry on without it.
+            StartupResult startup = DatabaseConnection.RunStartupFlow(
+                (problem, detail) =>
+                {
+                    using (var choice = new StartupChoiceForm(problem, detail))
+                    {
+                        choice.ShowDialog();
+                        return choice.Choice;
+                    }
+                },
+                () =>
+                {
+                    using (var setup = new ConnectionSetupForm())
+                    {
+                        return setup.ShowDialog() == DialogResult.OK;
+                    }
+                });
+
+            if (startup.ImportWarning != null)
             {
-                MessageBox.Show(DatabaseConnection.ImportWarning, "Database connection",
+                MessageBox.Show(startup.ImportWarning, "Database connection",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
-            Application.Run(new LoginForm());
+            Application.Run(new LoginForm(startup.Connected ? null : startup.Reason));
         }
     }
 }
