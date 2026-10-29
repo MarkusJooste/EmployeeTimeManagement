@@ -10,8 +10,22 @@ namespace EmployeeTimeManagement.Views
     // Lists who could have a login and who does, for an Owner to Promote or Demote. Holds no
     // rules of its own: both lists and every refusal come from ManagerAccess, matching
     // EmployeesForm's list-and-buttons shape. Demote gains behaviour in a later ticket.
-    public partial class ManagersForm : Form
+    public partial class ManagersForm : Form, IHasShortcuts
     {
+
+        // Enter on either list moves the chosen person across, as the button between the
+        // lists does. Listed on the F1 shortcuts list.
+        IEnumerable<Shortcut> IHasShortcuts.Shortcuts
+        {
+            get
+            {
+                return new[]
+                {
+                    new Shortcut(Keys.Enter, btnPromote, dgvEmployees, "Promote the chosen employee"),
+                    new Shortcut(Keys.Enter, btnDemote, dgvManagers, "Demote the chosen manager")
+                };
+            }
+        }
         private const string MaskedPin = "****";
 
         private readonly EmployeeController employeeController;

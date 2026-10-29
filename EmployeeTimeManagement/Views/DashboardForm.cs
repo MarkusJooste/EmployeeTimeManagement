@@ -17,10 +17,15 @@ namespace EmployeeTimeManagement.Views
         private Form currentView;
         // Distunguishes between logout and exit
         private bool isLoggingOut = false;
+
+        // Each sidebar link's shortcut, shown when the mouse rests on it.
+        private readonly ToolTip navTips = new ToolTip();
+
         public DashboardForm()
         {
             InitializeComponent();
             ApplyTheme();
+            AddKeyboardHints();
             LoadUserInformation();
             ConfigurePermissions();
             ShowHome();
@@ -70,6 +75,117 @@ namespace EmployeeTimeManagement.Views
         private Button[] NavButtons()
         {
             return new[] { btnDashboard, btnEmployees, btnContracts, btnCaptureTimesheets, btnViewTimesheets, btnLeave, btnManagers };
+        }
+
+        // Ctrl+1 to Ctrl+7 open the sidebar's screens in order, and F1 lists every shortcut.
+        // Both are shown where they will be seen: on the sidebar and in the header.
+        private void AddKeyboardHints()
+        {
+            Button[] nav = NavButtons();
+            for (int index = 0; index < nav.Length; index++)
+            {
+                navTips.SetToolTip(nav[index], nav[index].Text + " (Ctrl+" + (index + 1) + ")");
+            }
+
+            var hint = new Label
+            {
+                Text = "F1  Keyboard shortcuts",
+                Dock = DockStyle.Right,
+                Width = 170,
+                Padding = new Padding(0, 0, 16, 0),
+                TextAlign = ContentAlignment.MiddleRight,
+                Font = WimpyTheme.Body,
+                ForeColor = WimpyTheme.MutedText,
+                Cursor = Cursors.Hand
+            };
+            hint.Click += (sender, e) => ShowShortcuts();
+            pnlHeader.Controls.Add(hint);
+
+            // Docked after the red line under the header, so the line still runs full width.
+            hint.BringToFront();
+
+            Disposed += (sender, e) => navTips.Dispose();
+        }
+
+        // Keys that work on every screen come first, then the screen's own, then moving
+        // between fields. Each screen sees a key before this does, so a list or a drop-down
+        // that uses a key itself still gets it.
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            Control focused = KeyboardNavigation.Focused(this);
+
+            int screen = ScreenNumber(keyData);
+            if (screen >= 0)
+            {
+                Button nav = NavButtons()[screen];
+                if (nav.Visible && nav.Enabled)
+                {
+                    nav.PerformClick();
+                }
+
+                return true;
+            }
+
+            if (keyData == Keys.F1)
+            {
+                ShowShortcuts();
+                return true;
+            }
+
+            if (keyData == (Keys.Control | Keys.F) && currentView != null && KeyboardNavigation.FocusSearch(currentView))
+            {
+                return true;
+            }
+
+            var shortcuts = currentView as IHasShortcuts;
+            if (shortcuts != null && KeyboardNavigation.RunShortcut(shortcuts, keyData, focused))
+            {
+                return true;
+            }
+
+            if (KeyboardNavigation.Move(focused, keyData))
+            {
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        // Which sidebar screen Ctrl+1 to Ctrl+7 (on either row of number keys) opens, or -1.
+        private int ScreenNumber(Keys keyData)
+        {
+            if ((keyData & Keys.Modifiers) != Keys.Control)
+            {
+                return -1;
+            }
+
+            Keys key = keyData & Keys.KeyCode;
+            int number = key >= Keys.D1 && key <= Keys.D9 ? key - Keys.D1
+                : key >= Keys.NumPad1 && key <= Keys.NumPad9 ? key - Keys.NumPad1
+                : -1;
+
+            return number < NavButtons().Length ? number : -1;
+        }
+
+        private void ShowShortcuts()
+        {
+            var screens = NavButtons()
+                .Select((button, index) => new { button, index })
+                .Where(nav => nav.button.Visible)
+                .Select(nav => new KeyValuePair<string, string>("Ctrl+" + (nav.index + 1), nav.button.Text));
+
+            var shortcuts = currentView as IHasShortcuts;
+            var thisScreen = shortcuts == null
+                ? Enumerable.Empty<KeyValuePair<string, string>>()
+                : shortcuts.Shortcuts
+                    .GroupBy(shortcut => KeyboardNavigation.Describe(shortcut.Keys) + "|" + shortcut.Explain())
+                    .Select(group => group.First())
+                    .Select(shortcut => new KeyValuePair<string, string>(KeyboardNavigation.Describe(shortcut.Keys), shortcut.Explain()));
+
+            using (var dialog = new KeyboardShortcutsForm(lblTitle.Text, screens, thisScreen))
+            {
+                dialog.ShowDialog(this);
+            }
         }
 
         private void LoadUserInformation()
@@ -148,6 +264,10 @@ namespace EmployeeTimeManagement.Views
                 pnlContent.Controls.Clear();
                 pnlContent.Controls.Add(view);
                 view.Show();
+
+                // Ready to type into, so a screen opened from the keyboard can be used at once.
+                KeyboardNavigation.LetTabLeaveLists(view);
+                KeyboardNavigation.FocusFirstField(view);
 
                 return view;
             }

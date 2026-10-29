@@ -24,6 +24,12 @@ namespace EmployeeTimeManagement.Views
             InitializeComponent();
         }
 
+        // The list itself, for keys that act on the chosen row.
+        internal DataGridView List
+        {
+            get { return dgvEmployees; }
+        }
+
         // The rows currently on screen, after the search text and former-employee toggle narrow them.
         internal List<EmployeeListItem> VisibleEmployees { get; private set; } = new List<EmployeeListItem>();
 

@@ -62,6 +62,10 @@ namespace EmployeeTimeManagement.Models
     internal interface IContractTextMeasurer
     {
         double Width(string text, bool bold, double size);
+
+        // How far the character's ink starts to the right of where it is drawn from. A
+        // character's box in the template starts at its ink, so this finds where it was drawn.
+        double LeftBearing(char character, bool bold, double size);
     }
 
     // One piece of text to draw. X and Baseline are in points from the top-left corner.
@@ -231,6 +235,10 @@ namespace EmployeeTimeManagement.Models
         // short of that. A line ending within 2 points of it was justified.
         private const double JustifiedRightMargin = 53;
 
+        // Where Word's justified lines end, from the right of the page: the furthest a line
+        // carrying another store's longer wording may run before words move to the next line.
+        private const double TextRightMargin = 48;
+
         // Characters that sit on the baseline, used to find a line's baseline.
         private const string BaselineCharacters = "ABCDEFGHIKLMNORSTUVWXZ0123456789abcdefhiklmnorstuvwxz.…";
 
@@ -254,7 +262,7 @@ namespace EmployeeTimeManagement.Models
             @"remuneration of\s*(?<monthly>R\s?\d+(?:[  ]\d{3})*(?:[.,]\d+)?)\s*per month\s*\(R(?<hourly>\d+(?:[.,]\d+)?)\s*per\s+hour");
 
         private static readonly Regex Signing = new Regex(
-            @"(?<bold>SIGNED IN .*? ON THIS\s*(?<day>" + Dots + @")\s*DAY OF\s*(?<month>…[….]*?)(?<decade>202)(?<year>\.+))");
+            @"(?<bold>SIGNED IN (?<town>.*?) ON THIS\s*(?<day>" + Dots + @")\s*DAY OF\s*(?<month>…[….]*?)(?<decade>202)(?<year>\.+))");
 
         // The blanks that will be left for handwriting because there is no data for them.
         public static List<string> MissingFields(ContractData data)
@@ -302,10 +310,13 @@ namespace EmployeeTimeManagement.Models
             return missing;
         }
 
-        // Works out every change to make to the template for this employee.
-        public static ContractFillPlan Plan(ContractData data, IContractTemplateText template, IContractTextMeasurer measurer)
+        // Works out every change to make to the template for this employee. storeWording is
+        // the employee's store's own wording (ContractStoreWording.Read) when the template is
+        // another store's PDF; where it differs it is written over the template's.
+        public static ContractFillPlan Plan(ContractData data, IContractTemplateText template, IContractTextMeasurer measurer,
+            IDictionary<string, string> storeWording = null)
         {
-            return new Planner(data, template, measurer).Run();
+            return new Planner(data, template, measurer, storeWording).Run();
         }
 
         private static bool IsBlank(string value)
@@ -337,12 +348,15 @@ namespace EmployeeTimeManagement.Models
             private readonly IContractTemplateText template;
             private readonly IContractTextMeasurer measurer;
             private readonly ContractFillPlan plan = new ContractFillPlan();
+            private readonly IDictionary<string, string> storeWording;
 
-            public Planner(ContractData data, IContractTemplateText template, IContractTextMeasurer measurer)
+            public Planner(ContractData data, IContractTemplateText template, IContractTextMeasurer measurer,
+                IDictionary<string, string> storeWording)
             {
                 this.data = data;
                 this.template = template;
                 this.measurer = measurer;
+                this.storeWording = storeWording ?? new Dictionary<string, string>();
             }
 
             public ContractFillPlan Run()
@@ -362,6 +376,7 @@ namespace EmployeeTimeManagement.Models
                 }
 
                 FillSigningLines();
+                SwapStoreWording();
                 return plan;
             }
 
@@ -608,10 +623,22 @@ namespace EmployeeTimeManagement.Models
                         found = true;
 
                         // The month's dots run straight into the printed "202", hence the space.
-                        FillLine(SigningDateField, page, match, BlankStyle.Dotted,
+                        var replacements = new List<Replacement>
+                        {
                             new Replacement(match.Groups["day"], ContractFormat.Ordinal(date.Day), true),
                             new Replacement(match.Groups["month"], ContractFormat.MonthName(date) + " ", true),
-                            YearReplacement(match.Groups["decade"], match.Groups["year"], date.Year, true));
+                            YearReplacement(match.Groups["decade"], match.Groups["year"], date.Year, true)
+                        };
+
+                        // Another store's PDF is signed in that store's town.
+                        string town;
+                        if (storeWording.TryGetValue(ContractStoreWording.TownField, out town)
+                            && town != ContractStoreWording.Tidy(match.Groups["town"].Value))
+                        {
+                            replacements.Insert(0, new Replacement(match.Groups["town"], town, true));
+                        }
+
+                        FillLine(SigningDateField, page, match, BlankStyle.Dotted, replacements.ToArray());
                     }
                 }
 
@@ -619,6 +646,185 @@ namespace EmployeeTimeManagement.Models
                 {
                     plan.NotFound.Add(SigningDateField);
                 }
+            }
+
+            // Another store's PDF: this store's name, workplace and hours written over that
+            // store's. The signing town is changed with the signing lines above.
+
+            private void SwapStoreWording()
+            {
+                foreach (KeyValuePair<string, string> wording in storeWording)
+                {
+                    if (wording.Key == ContractStoreWording.TownField)
+                    {
+                        continue;
+                    }
+
+                    int page;
+                    Match match = FindFirst(ContractStoreWording.PatternFor(wording.Key), out page);
+                    if (match == null)
+                    {
+                        plan.NotFound.Add(wording.Key);
+                        continue;
+                    }
+
+                    Group old = match.Groups["value"];
+                    if (ContractStoreWording.Tidy(old.Value) != wording.Value)
+                    {
+                        ReplaceWrapped(wording.Key, page, old.Index, old.Length, wording.Value);
+                    }
+                }
+            }
+
+            // Writes new wording over old, which may run onto the next line. The lines are
+            // wrapped again from there as Word would: words that no longer fit move to the start
+            // of the next line, and a justified line left short takes words up from the next,
+            // for as many lines as it takes. A line with nowhere to pass words on is set smaller
+            // instead. Lines Word justified stay justified.
+            private void ReplaceWrapped(string field, int page, int start, int length, string newText)
+            {
+                string text = template.PageText(page);
+                int oldEnd = LineEnd(text, start + length - 1);
+
+                // The words still to set: the new wording, then whatever followed the old on
+                // its last line.
+                string carry = newText + text.Substring(start + length, oldEnd - (start + length));
+                int lineStart = start;
+
+                // Whether carry already holds the next line's words.
+                bool hasNextLine = false;
+
+                while (true)
+                {
+                    int lineEnd = LineEnd(text, lineStart);
+
+                    // A later line still holds some of the old wording, so it is rewritten
+                    // whatever happens to this one.
+                    bool oldContinues = lineEnd < oldEnd;
+
+                    int nextStart = NextLineStart(text, lineEnd);
+                    bool canCarry = oldContinues || nextStart >= 0;
+
+                    // A line Word wrapped fills up again with words from the next line, which
+                    // is the rest of its paragraph.
+                    if (!oldContinues && !hasNextLine && nextStart >= 0 && WrapsInto(page, lineStart, lineEnd, nextStart))
+                    {
+                        carry += " " + text.Substring(nextStart, LineEnd(text, nextStart) - nextStart);
+                        hasNextLine = true;
+                    }
+
+                    List<string> words = carry.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    int fit;
+                    if (!SetWrappedLine(field, page, lineStart, lineEnd, words, canCarry, out fit))
+                    {
+                        return;
+                    }
+
+                    List<string> rest = words.Skip(fit).ToList();
+
+                    if (oldContinues || hasNextLine)
+                    {
+                        // The next line's words are in rest, or were all taken up; either
+                        // way it is set again.
+                        carry = string.Join(" ", rest);
+                        lineStart = nextStart;
+                        hasNextLine = false;
+                        continue;
+                    }
+
+                    if (rest.Count == 0)
+                    {
+                        return;
+                    }
+
+                    int nextEnd = LineEnd(text, nextStart);
+                    carry = string.Join(" ", rest) + " " + text.Substring(nextStart, nextEnd - nextStart);
+                    lineStart = nextStart;
+                }
+            }
+
+            // Sets as many of the words as fit on the line from lineStart, painting over what
+            // was there. When the line cannot pass words on, all of them are set, smaller if
+            // need be. Returns false, noting the field, if the line cannot be found.
+            private bool SetWrappedLine(string field, int page, int lineStart, int lineEnd, List<string> words, bool canCarry, out int fit)
+            {
+                string text = template.PageText(page);
+                int end = lineEnd;
+                while (end > lineStart && char.IsWhiteSpace(text[end - 1]))
+                {
+                    end--;
+                }
+
+                fit = 0;
+                PdfBox? found = template.Bounds(page, lineStart, end - lineStart);
+                if (!found.HasValue)
+                {
+                    plan.NotFound.Add(field);
+                    return false;
+                }
+
+                PdfBox line = found.Value;
+                double baseline = Baseline(page, lineStart, end - lineStart);
+                bool justified = IsJustified(page, lineStart);
+                double rightEdge = template.PageWidth(page) - TextRightMargin;
+
+                // A justified line's spaces may close up a little to take one more word, as
+                // the spaces before the new wording are already spread and cannot be.
+                double spaceWidth = measurer.Width(" ", false, FontSize) * (justified ? 0.8 : 1);
+
+                double used = 0;
+                while (fit < words.Count)
+                {
+                    double width = measurer.Width(words[fit], false, FontSize) + (fit > 0 ? spaceWidth : 0);
+                    if (line.Left + used + width > rightEdge)
+                    {
+                        break;
+                    }
+
+                    used += width;
+                    fit++;
+                }
+
+                if (!canCarry || (fit == 0 && words.Count > 0))
+                {
+                    fit = words.Count;
+                }
+
+                List<string> set = words.Take(fit).ToList();
+
+                double size = FontSize;
+                double wordsWidth = set.Sum(word => measurer.Width(word, false, size));
+                while (size > SmallestSize
+                    && line.Left + wordsWidth + measurer.Width(" ", false, size) * Math.Max(0, set.Count - 1) > rightEdge)
+                {
+                    size -= 0.5;
+                    wordsWidth = set.Sum(word => measurer.Width(word, false, size));
+                }
+
+                double gap = measurer.Width(" ", false, size);
+                if (justified && set.Count > 1)
+                {
+                    gap = Math.Max(gap * 0.5, (line.Right - line.Left - wordsWidth) / (set.Count - 1));
+                }
+
+                // Drawn from where the old first character was drawn from, so the new line
+                // starts level with the lines above and below it.
+                double origin = line.Left - measurer.LeftBearing(text[lineStart], false, FontSize);
+
+                var runs = new List<ContractTextRun>();
+                double x = origin;
+                foreach (string word in set)
+                {
+                    runs.Add(new ContractTextRun(x, baseline, word, false, size));
+                    x += measurer.Width(word, false, size) + gap;
+                }
+
+                PdfBox cover = CoverFor(line, baseline);
+                double newRight = x - gap;
+                cover = new PdfBox(cover.Left, cover.Top, Math.Max(cover.Right, newRight + 0.5), cover.Bottom);
+
+                plan.Fills.Add(new ContractFill(field, page, cover, runs));
+                return true;
             }
 
             // Drawing values into blanks
@@ -970,6 +1176,62 @@ namespace EmployeeTimeManagement.Models
             {
                 int newline = index == 0 ? -1 : text.LastIndexOfAny(new[] { '\r', '\n' }, index - 1);
                 return newline + 1;
+            }
+
+            // Whether Word broke the line only because the next line's first word did not fit
+            // on it, so the two are one paragraph. A line that ends a paragraph would have had
+            // room for it.
+            private bool WrapsInto(int page, int lineStart, int lineEnd, int nextStart)
+            {
+                string text = template.PageText(page);
+                int last = lineEnd - 1;
+                while (last > lineStart && char.IsWhiteSpace(text[last]))
+                {
+                    last--;
+                }
+
+                PdfBox? lastBox = template.Bounds(page, last, 1);
+                if (!lastBox.HasValue)
+                {
+                    return false;
+                }
+
+                int wordEnd = nextStart;
+                while (wordEnd < text.Length && !char.IsWhiteSpace(text[wordEnd]))
+                {
+                    wordEnd++;
+                }
+
+                // The box ends at the ink, a little short of where Word measured the line to, so
+                // a word that would only just have fitted is taken as not fitting.
+                const double Leeway = 4;
+
+                double needed = measurer.Width(" " + text.Substring(nextStart, wordEnd - nextStart), false, FontSize);
+                return lastBox.Value.Right + needed > template.PageWidth(page) - TextRightMargin - Leeway;
+            }
+
+            // Where the first text of the line after the one ending at lineEnd starts, or -1
+            // when that line is blank or there is none: wording is not carried over a gap.
+            private static int NextLineStart(string text, int lineEnd)
+            {
+                int index = lineEnd;
+                if (index < text.Length && text[index] == '\r')
+                {
+                    index++;
+                }
+
+                if (index < text.Length && text[index] == '\n')
+                {
+                    index++;
+                }
+
+                int nextEnd = LineEnd(text, index);
+                while (index < nextEnd && char.IsWhiteSpace(text[index]))
+                {
+                    index++;
+                }
+
+                return index < nextEnd ? index : -1;
             }
 
             // Where the line holding text[index] ends.

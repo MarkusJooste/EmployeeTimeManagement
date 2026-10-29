@@ -9,8 +9,24 @@ using System.Windows.Forms;
 
 namespace EmployeeTimeManagement.Views
 {
-    public partial class EmployeesForm : Form
+    public partial class EmployeesForm : Form, IHasShortcuts
     {
+
+        // Ctrl+N adds, Enter on the list updates the chosen employee, and in the editor
+        // Ctrl+S saves and Esc cancels. Listed on the F1 shortcuts list.
+        IEnumerable<Shortcut> IHasShortcuts.Shortcuts
+        {
+            get
+            {
+                return new[]
+                {
+                    new Shortcut(Keys.Control | Keys.N, btnAdd),
+                    new Shortcut(Keys.Enter, btnUpdate, employeePicker.List, "Update the chosen employee"),
+                    new Shortcut(Keys.Control | Keys.S, btnSave),
+                    new Shortcut(Keys.Escape, btnCancel)
+                };
+            }
+        }
         private readonly EmployeeController employeeController;
 
         // Every field the capture seam can refuse, by the name it refuses them under.
@@ -248,6 +264,17 @@ namespace EmployeeTimeManagement.Views
         {
             pnlEditor.Visible = false;
             pnlList.Visible = true;
+
+            // Back on the list, on the employee just edited, so Enter opens them again;
+            // or in the search box when the list is empty.
+            if (employeePicker.List.Rows.Count > 0)
+            {
+                employeePicker.List.Focus();
+            }
+            else
+            {
+                KeyboardNavigation.FocusSearch(this);
+            }
         }
 
         // Empties every field of the editor, leaving marital status unset and one blank family
