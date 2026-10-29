@@ -163,6 +163,7 @@ namespace EmployeeTimeManagement.Database
                 if (!loaded)
                 {
                     ConnectionStringStore store = CreateStore();
+                    string loadError = null;
 
                     try
                     {
@@ -175,8 +176,15 @@ namespace EmployeeTimeManagement.Database
                         // it, so treat the PC as not set up and let setup replace the file.
                         connectionString = null;
                     }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                    {
+                        // Another Windows account owns connection.dat, or ProgramData is locked down.
+                        connectionString = null;
+                        loadError = ex.Message;
+                    }
 
-                    ImportWarning = store.ImportWarning;
+                    ImportWarning = store.ImportWarning
+                        ?? (loadError == null ? null : "The saved database connection could not be read or written: " + loadError);
                     loaded = true;
                 }
 
