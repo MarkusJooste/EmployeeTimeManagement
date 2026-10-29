@@ -19,25 +19,32 @@ namespace EmployeeTimeManagement
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // A new PC is set up once with the database connection, saved encrypted.
-            if (!DatabaseConnection.IsConfigured)
-            {
-                using (var setup = new ConnectionSetupForm())
+            // Test the saved connection (importing any .env first) and let the user retry,
+            // set it up, or carry on without it.
+            StartupResult startup = DatabaseConnection.RunStartupFlow(
+                (problem, detail) =>
                 {
-                    if (setup.ShowDialog() != DialogResult.OK)
+                    using (var choice = new StartupChoiceForm(problem, detail))
                     {
-                        return;
+                        choice.ShowDialog();
+                        return choice.Choice;
                     }
-                }
-            }
+                },
+                () =>
+                {
+                    using (var setup = new ConnectionSetupForm())
+                    {
+                        return setup.ShowDialog() == DialogResult.OK;
+                    }
+                });
 
-            if (DatabaseConnection.ImportWarning != null)
+            if (startup.ImportWarning != null)
             {
-                MessageBox.Show(DatabaseConnection.ImportWarning, "Database connection",
+                MessageBox.Show(startup.ImportWarning, "Database connection",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
-            Application.Run(new LoginForm());
+            Application.Run(new LoginForm(startup.Connected ? null : startup.Reason));
         }
     }
 }

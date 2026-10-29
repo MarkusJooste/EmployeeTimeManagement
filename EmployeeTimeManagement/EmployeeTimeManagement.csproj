@@ -279,6 +279,10 @@
     <Compile Include="Views\AccessRevokedPrompt.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
     <Compile Include="Database\ConnectionStringStore.cs" />
+    <Compile Include="Database\StartupConnectionFlow.cs" />
+    <Compile Include="Views\StartupChoiceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Database\Query.cs" />
     <Compile Include="Views\ConnectionSetupForm.cs">
       <SubType>Form</SubType>

@@ -17,9 +17,14 @@ namespace EmployeeTimeManagement.Views
     public partial class LoginForm : Form
     {
         private readonly LoginController loginController;
-        public LoginForm()
+        private readonly bool notConnected;
+
+        // notConnectedReason is set when the program was opened with "Continue for now": the
+        // login stays disabled and says why, instead of failing on the first query.
+        public LoginForm(string notConnectedReason = null)
         {
             InitializeComponent();
+            notConnected = notConnectedReason != null;
 
             // Enter in the PIN box logs in, the same as clicking Login.
             AcceptButton = btnLogin;
@@ -29,7 +34,7 @@ namespace EmployeeTimeManagement.Views
             // let its idle connection go.
             VisibleChanged += (sender, e) =>
             {
-                if (Visible)
+                if (Visible && !notConnected)
                 {
                     DatabaseConnection.WarmUp();
                 }
@@ -37,6 +42,16 @@ namespace EmployeeTimeManagement.Views
 
             ApplyTheme();
             loginController = new LoginController();
+
+            if (notConnected)
+            {
+                lblError.Height = 80;
+                lblError.Text = "Not connected to the database, so there is no data to show.\r\n"
+                    + "Restart the program to try again or set up the connection.\r\n\r\n"
+                    + notConnectedReason;
+                txtPin.Enabled = false;
+                btnLogin.Enabled = false;
+            }
         }
 
         // Red like the website's header, with the white button it uses on red.
