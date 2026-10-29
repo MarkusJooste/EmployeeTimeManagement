@@ -434,3 +434,5 @@ FodyWeavers.xsd
 EmployeeTimeManagement/ContractTemplates/**/*.pdf
 /schema.csv
 installer/Output/
+installer/Stick/
+installer/prerequisites/
