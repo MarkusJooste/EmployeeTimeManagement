@@ -15,6 +15,9 @@ namespace EmployeeTimeManagement.Models
         public DateTime? ContractStartDate { get; set; }
         public DateTime? ContractEndDate { get; set; }
 
+        // Empty unless Terminate ended the contract.
+        public string ReasonForEnding { get; set; }
+
         // PTO's Opening Balance, from the latest contract. Zero and null respectively when
         // the employee has no contract row at all.
         public int OpeningPTODays { get; set; }
@@ -35,10 +38,26 @@ namespace EmployeeTimeManagement.Models
             get { return ContractEndDate == null || ContractEndDate.Value.Date > DateTime.Today; }
         }
 
+        // Whether Terminate ended the contract, which always records a reason. A fixed-term
+        // contract that ran out has an end date but no reason, and is waiting to be renewed
+        // or terminated rather than finished with.
+        public bool IsTerminated
+        {
+            get { return !string.IsNullOrWhiteSpace(ReasonForEnding); }
+        }
+
         // How the employee's standing is shown in the Status column.
         public string Status
         {
-            get { return IsActive ? "Active" : "Former"; }
+            get
+            {
+                if (IsActive)
+                {
+                    return "Active";
+                }
+
+                return IsTerminated ? "Former" : "Contract ended";
+            }
         }
     }
 }

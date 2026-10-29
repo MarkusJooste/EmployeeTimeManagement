@@ -8,8 +8,86 @@ using System.Windows.Forms;
 
 namespace EmployeeTimeManagement.Views
 {
-    public partial class CaptureTimesheetsForm : Form
+    public partial class CaptureTimesheetsForm : Form, IHasShortcuts
     {
+
+        // Ctrl+S saves. Enter in the grid is handled in ProcessCmdKey below and only listed
+        // here, for the F1 shortcuts list.
+        IEnumerable<Shortcut> IHasShortcuts.Shortcuts
+        {
+            get
+            {
+                return new[]
+                {
+                    new Shortcut(Keys.Control | Keys.S, btnSave),
+                    new Shortcut(Keys.Enter, null, dgvCapture, "Next cell along the row"),
+                    new Shortcut(Keys.Shift | Keys.Enter, null, dgvCapture, "Previous cell")
+                };
+            }
+        }
+
+        // Enter in the grid moves along the row, the way a timesheet is read, rather than
+        // down to the next employee, skipping cells that cannot be filled in. From the last
+        // cell it goes to the start of the next row.
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            bool forward = keyData == Keys.Enter;
+            if ((forward || keyData == (Keys.Shift | Keys.Enter)) && dgvCapture.ContainsFocus && dgvCapture.CurrentCell != null)
+            {
+                // An open drop-down takes Enter to choose its item.
+                var dropDown = dgvCapture.EditingControl as ComboBox;
+                if (dropDown == null || !dropDown.DroppedDown)
+                {
+                    MoveAlongRow(forward);
+                    return true;
+                }
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void MoveAlongRow(bool forward)
+        {
+            int columns = dgvCapture.Columns.Count;
+            int row = dgvCapture.CurrentCell.RowIndex;
+            int column = dgvCapture.CurrentCell.ColumnIndex;
+
+            for (int step = 0; step < columns * 2; step++)
+            {
+                column += forward ? 1 : -1;
+                if (column >= columns)
+                {
+                    column = 0;
+                    row++;
+                }
+                else if (column < 0)
+                {
+                    column = columns - 1;
+                    row--;
+                }
+
+                if (row < 0 || row >= dgvCapture.Rows.Count)
+                {
+                    return;
+                }
+
+                DataGridViewCell cell = dgvCapture.Rows[row].Cells[column];
+                if (cell.Visible && !cell.ReadOnly)
+                {
+                    // Moving the current cell saves what was typed in the one being left. If
+                    // that value is refused, the cursor stays to have it corrected.
+                    try
+                    {
+                        dgvCapture.CurrentCell = cell;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                    }
+
+                    return;
+                }
+            }
+        }
         private const string ColumnEmployee = "colEmployee";
         private const string ColumnStatus = "colStatus";
         private const string ColumnDayType = "colDayType";

@@ -241,6 +241,32 @@ namespace EmployeeTimeManagement.Tests
         }
 
         [Test]
+        public void AFixedTermEndDateIsKeptWithNoReasonForEnding()
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.EndDate = new DateTime(2026, 1, 5, 14, 30, 0);
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.True, FailingFields(result));
+            Assert.That(result.Record.Contract.EndDate, Is.EqualTo(new DateTime(2026, 1, 5)));
+            Assert.That(result.Record.Contract.ReasonForEnding, Is.EqualTo(string.Empty));
+        }
+
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void AnEndDateOnOrBeforeTheStartDateIsRejected(int daysAfterStart)
+        {
+            EmployeeCaptureInput input = SingleEmployee();
+            input.EndDate = input.StartDate.Value.AddDays(daysAfterStart);
+
+            EmployeeCaptureResult result = Build(input);
+
+            Assert.That(result.IsValid, Is.False);
+            Assert.That(HasErrorFor(result, "EndDate"), Is.True, FailingFields(result));
+        }
+
+        [Test]
         public void AnEmptyComplexFlatNumberIsAccepted()
         {
             EmployeeCaptureInput input = SingleEmployee();

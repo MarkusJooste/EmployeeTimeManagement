@@ -9,6 +9,11 @@ namespace EmployeeTimeManagement.Models
     internal class TimesheetSummary
     {
         public int EmployeeID { get; set; }
+
+        // For the store summary PDF's heading; hidden, so the grid does not show a column of it.
+        [System.ComponentModel.Browsable(false)]
+        public string StoreName { get; set; }
+
         public string Name { get; set; }
         public string Surname { get; set; }
         public int DaysWorked { get; set; }

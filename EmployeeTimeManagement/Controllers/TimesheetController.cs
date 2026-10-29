@@ -12,7 +12,14 @@ namespace EmployeeTimeManagement.Controllers
     internal class TimesheetController
     {
         // Returns per-employee hours worked between two dates for one store, net of breaks, with Sunday and public-holiday premium hours broken out.
-        public List<TimesheetSummary> GetSummary(DateTime fromDate, DateTime toDate, int storeID)
+        // A null storeID covers every store, for the owner's dashboard.
+        public List<TimesheetSummary> GetSummary(DateTime fromDate, DateTime toDate, int? storeID)
+        {
+            return SummaryQuery(fromDate, toDate, storeID).Run();
+        }
+
+        // The same summary as a Query, so the dashboard can batch it with its other reads.
+        public Query<List<TimesheetSummary>> SummaryQuery(DateTime fromDate, DateTime toDate, int? storeID)
         {
             const string query = @"SELECT a.EmployeeID,
        MAX(e.Name)              AS Name,
@@ -20,7 +27,8 @@ namespace EmployeeTimeManagement.Controllers
        MAX(a.DaysWorked)        AS DaysWorked,
        MAX(a.TotalHours)        AS TotalHours,
        MAX(a.SundayExtraHours)  AS SundayExtraHours,
-       MAX(a.HolidayExtraHours) AS HolidayExtraHours
+       MAX(a.HolidayExtraHours) AS HolidayExtraHours,
+       MAX(s.StoreName)         AS StoreName
 FROM (
     SELECT r.EmployeeID,
            COUNT(DISTINCT r.WorkDate) AS DaysWorked,
@@ -44,104 +52,179 @@ FROM (
     GROUP BY r.EmployeeID
 ) a
 INNER JOIN TBL_employees e ON e.EmployeeID = a.EmployeeID
-WHERE e.StoreID = @StoreID
+LEFT JOIN TBL_stores s ON s.StoreID = e.StoreID
+WHERE (@StoreID IS NULL OR e.StoreID = @StoreID)
 GROUP BY a.EmployeeID
 ORDER BY MAX(e.Surname), MAX(e.Name);";
 
-            var summaries = new List<TimesheetSummary>();
-
-            using (var connection = DatabaseConnection.GetConnection())
+            return new Query<List<TimesheetSummary>>(query, reader =>
             {
-                using (var command = new MySqlCommand(query, connection))
+                var summaries = new List<TimesheetSummary>();
+
+                int employeeIndex = reader.GetOrdinal("EmployeeID");
+                int nameIndex = reader.GetOrdinal("Name");
+                int surnameIndex = reader.GetOrdinal("Surname");
+                int daysIndex = reader.GetOrdinal("DaysWorked");
+                int totalIndex = reader.GetOrdinal("TotalHours");
+                int sundayIndex = reader.GetOrdinal("SundayExtraHours");
+                int holidayIndex = reader.GetOrdinal("HolidayExtraHours");
+                int storeNameIndex = reader.GetOrdinal("StoreName");
+
+                while (reader.Read())
                 {
-                    command.Parameters.AddWithValue("@FromDate", fromDate.Date);
-                    command.Parameters.AddWithValue("@ToDate", toDate.Date);
-                    command.Parameters.AddWithValue("@StoreID", storeID);
+                    var summary = new TimesheetSummary();
 
-                    using (var reader = command.ExecuteReader())
+                    // EmployeeID
+                    summary.EmployeeID = reader.GetInt32(employeeIndex);
+
+                    // Name
+                    if (reader.IsDBNull(nameIndex))
                     {
-                        int employeeIndex = reader.GetOrdinal("EmployeeID");
-                        int nameIndex = reader.GetOrdinal("Name");
-                        int surnameIndex = reader.GetOrdinal("Surname");
-                        int daysIndex = reader.GetOrdinal("DaysWorked");
-                        int totalIndex = reader.GetOrdinal("TotalHours");
-                        int sundayIndex = reader.GetOrdinal("SundayExtraHours");
-                        int holidayIndex = reader.GetOrdinal("HolidayExtraHours");
+                        summary.Name = string.Empty;
+                    }
+                    else
+                    {
+                        summary.Name = reader.GetString(nameIndex);
+                    }
 
-                        while (reader.Read())
+                    // Surname
+                    if (reader.IsDBNull(surnameIndex))
+                    {
+                        summary.Surname = string.Empty;
+                    }
+                    else
+                    {
+                        summary.Surname = reader.GetString(surnameIndex);
+                    }
+
+                    // DaysWorked
+                    if (reader.IsDBNull(daysIndex))
+                    {
+                        summary.DaysWorked = 0;
+                    }
+                    else
+                    {
+                        summary.DaysWorked = reader.GetInt32(daysIndex);
+                    }
+
+                    // TotalHours
+                    if (reader.IsDBNull(totalIndex))
+                    {
+                        summary.TotalHours = 0;
+                    }
+                    else
+                    {
+                        summary.TotalHours = reader.GetDecimal(totalIndex);
+                    }
+
+                    // SundayExtraHours
+                    if (reader.IsDBNull(sundayIndex))
+                    {
+                        summary.SundayExtraHours = 0;
+                    }
+                    else
+                    {
+                        summary.SundayExtraHours = reader.GetDecimal(sundayIndex);
+                    }
+
+                    // HolidayExtraHours
+                    if (reader.IsDBNull(holidayIndex))
+                    {
+                        summary.HolidayExtraHours = 0;
+                    }
+                    else
+                    {
+                        summary.HolidayExtraHours = reader.GetDecimal(holidayIndex);
+                    }
+
+                    // StoreName
+                    summary.StoreName = reader.IsDBNull(storeNameIndex) ? string.Empty : reader.GetString(storeNameIndex);
+
+                    summaries.Add(summary);
+                }
+
+                return summaries;
+            })
+            .With("@FromDate", fromDate.Date)
+            .With("@ToDate", toDate.Date)
+            .With("@StoreID", storeID);
+        }
+
+        // A sign-off sheet for each of the given employees, listing every day from fromDate to
+        // toDate. Employees outside the store are left out, so a manager can only print their
+        // own staff. One query covers every employee, since each trip to the server is slow.
+        public List<SignOffSheet> GetSignOffSheets(DateTime fromDate, DateTime toDate, int? storeID, IList<int> employeeIDs)
+        {
+            if (employeeIDs.Count == 0)
+            {
+                return new List<SignOffSheet>();
+            }
+
+            var names = new List<string>();
+            for (int index = 0; index < employeeIDs.Count; index++)
+            {
+                names.Add("@Employee" + index);
+            }
+
+            // Every timesheet column comes from t, except EmployeeID, so ReadTimesheet can
+            // read the joined rows; an employee with nothing captured has one row of nulls.
+            string query = @"SELECT e.EmployeeID, e.Name, e.Surname, s.StoreName,
+       t.TimesheetID, t.WorkDate, t.TimeIn, t.TimeOut,
+       t.Break1Start, t.Break1End, t.Break2Start, t.Break2End,
+       t.DayType, t.Status, t.CapturedBy, t.BusinessDate, t.Notes
+FROM TBL_employees e
+LEFT JOIN TBL_stores s ON s.StoreID = e.StoreID
+LEFT JOIN TBL_timesheets t
+       ON t.EmployeeID = e.EmployeeID
+      AND t.WorkDate BETWEEN @FromDate AND @ToDate
+WHERE e.EmployeeID IN (" + string.Join(", ", names) + @")
+  AND (@StoreID IS NULL OR e.StoreID = @StoreID)
+ORDER BY e.Surname, e.Name, e.EmployeeID, t.WorkDate, t.TimesheetID;";
+
+            var signOff = new Query<List<SignOffSheet>>(query, reader =>
+            {
+                // Kept in the query's order, which is by surname, as on View Timesheets.
+                var employees = new List<int>();
+                var details = new Dictionary<int, string[]>();
+                var timesheets = new List<Timesheet>();
+
+                int timesheetIndex = reader.GetOrdinal("TimesheetID");
+
+                while (reader.Read())
+                {
+                    int employeeID = reader.GetInt32(reader.GetOrdinal("EmployeeID"));
+
+                    if (!details.ContainsKey(employeeID))
+                    {
+                        employees.Add(employeeID);
+                        details[employeeID] = new[]
                         {
-                            var summary = new TimesheetSummary();
+                            (ReadText(reader, "Name") + " " + ReadText(reader, "Surname")).Trim(),
+                            ReadText(reader, "StoreName")
+                        };
+                    }
 
-                            // EmployeeID
-                            summary.EmployeeID = reader.GetInt32(employeeIndex);
-
-                            // Name
-                            if (reader.IsDBNull(nameIndex))
-                            {
-                                summary.Name = string.Empty;
-                            }
-                            else
-                            {
-                                summary.Name = reader.GetString(nameIndex);
-                            }
-
-                            // Surname
-                            if (reader.IsDBNull(surnameIndex))
-                            {
-                                summary.Surname = string.Empty;
-                            }
-                            else
-                            {
-                                summary.Surname = reader.GetString(surnameIndex);
-                            }
-
-                            // DaysWorked
-                            if (reader.IsDBNull(daysIndex))
-                            {
-                                summary.DaysWorked = 0;
-                            }
-                            else
-                            {
-                                summary.DaysWorked = reader.GetInt32(daysIndex);
-                            }
-
-                            // TotalHours
-                            if (reader.IsDBNull(totalIndex))
-                            {
-                                summary.TotalHours = 0;
-                            }
-                            else
-                            {
-                                summary.TotalHours = reader.GetDecimal(totalIndex);
-                            }
-
-                            // SundayExtraHours
-                            if (reader.IsDBNull(sundayIndex))
-                            {
-                                summary.SundayExtraHours = 0;
-                            }
-                            else
-                            {
-                                summary.SundayExtraHours = reader.GetDecimal(sundayIndex);
-                            }
-
-                            // HolidayExtraHours
-                            if (reader.IsDBNull(holidayIndex))
-                            {
-                                summary.HolidayExtraHours = 0;
-                            }
-                            else
-                            {
-                                summary.HolidayExtraHours = reader.GetDecimal(holidayIndex);
-                            }
-
-                            summaries.Add(summary);
-                        }
-
-                        return summaries;
+                    if (!reader.IsDBNull(timesheetIndex))
+                    {
+                        timesheets.Add(ReadTimesheet(reader));
                     }
                 }
+
+                return employees
+                    .Select(employeeID => TimesheetSignOff.Build(
+                        employeeID, details[employeeID][0], details[employeeID][1], fromDate, toDate, timesheets, DateTime.Today))
+                    .ToList();
+            })
+            .With("@FromDate", fromDate.Date)
+            .With("@ToDate", toDate.Date)
+            .With("@StoreID", storeID);
+
+            for (int index = 0; index < employeeIDs.Count; index++)
+            {
+                signOff.With(names[index], employeeIDs[index]);
             }
+
+            return signOff.Run();
         }
 
         // Returns every Timesheet already stored for one employee on one WorkDate. More
@@ -210,6 +293,76 @@ WHERE t.WorkDate = @WorkDate
             }
 
             return employeeIDs;
+        }
+
+        // Returns every employee with their latest contract's dates and whether a Timesheet
+        // and booked leave exist for one WorkDate, for the dashboard's "not captured yet"
+        // list. A null storeID is the owner, who sees every store.
+        // Returned as a Query so the dashboard can batch it with its other reads.
+        public Query<List<EmployeeDayStatus>> DayStatusQuery(DateTime workDate, int? storeID)
+        {
+            const string query = @"SELECT e.EmployeeID,
+       e.StoreID,
+       s.StoreName,
+       e.Name,
+       e.Surname,
+       c.StartDate,
+       c.EndDate,
+       EXISTS (SELECT 1
+               FROM TBL_timesheets t
+               WHERE t.EmployeeID = e.EmployeeID
+                 AND t.WorkDate = @WorkDate) AS HasTimesheet,
+       EXISTS (SELECT 1
+               FROM TBL_leave l
+               WHERE l.EmployeeID = e.EmployeeID
+                 AND l.LeaveType != @AWOL
+                 AND @WorkDate BETWEEN l.StartDate AND l.EndDate) AS IsOnLeave
+FROM TBL_employees e
+LEFT JOIN TBL_stores s ON s.StoreID = e.StoreID
+LEFT JOIN TBL_employee_contracts c
+       ON c.EmployeeID = e.EmployeeID
+      AND c.ContractID = (SELECT MAX(latest.ContractID)
+                          FROM TBL_employee_contracts latest
+                          WHERE latest.EmployeeID = e.EmployeeID)
+WHERE (@StoreID IS NULL OR e.StoreID = @StoreID);";
+
+            return new Query<List<EmployeeDayStatus>>(query, reader =>
+            {
+                var statuses = new List<EmployeeDayStatus>();
+
+                int employeeIDIndex = reader.GetOrdinal("EmployeeID");
+                int storeIDIndex = reader.GetOrdinal("StoreID");
+                int storeNameIndex = reader.GetOrdinal("StoreName");
+                int nameIndex = reader.GetOrdinal("Name");
+                int surnameIndex = reader.GetOrdinal("Surname");
+                int startDateIndex = reader.GetOrdinal("StartDate");
+                int endDateIndex = reader.GetOrdinal("EndDate");
+                int hasTimesheetIndex = reader.GetOrdinal("HasTimesheet");
+                int isOnLeaveIndex = reader.GetOrdinal("IsOnLeave");
+
+                while (reader.Read())
+                {
+                    statuses.Add(new EmployeeDayStatus
+                    {
+                        EmployeeID = reader.GetInt32(employeeIDIndex),
+                        StoreID = reader.GetInt32(storeIDIndex),
+                        StoreName = reader.IsDBNull(storeNameIndex) ? string.Empty : reader.GetString(storeNameIndex),
+                        Name = reader.IsDBNull(nameIndex) ? string.Empty : reader.GetString(nameIndex),
+                        Surname = reader.IsDBNull(surnameIndex) ? string.Empty : reader.GetString(surnameIndex),
+                        ContractStartDate = reader.IsDBNull(startDateIndex) ? (DateTime?)null : reader.GetDateTime(startDateIndex),
+                        ContractEndDate = reader.IsDBNull(endDateIndex) ? (DateTime?)null : reader.GetDateTime(endDateIndex),
+
+                        // EXISTS comes back as a 0/1 integer.
+                        HasTimesheet = Convert.ToInt64(reader.GetValue(hasTimesheetIndex)) != 0,
+                        IsOnLeave = Convert.ToInt64(reader.GetValue(isOnLeaveIndex)) != 0
+                    });
+                }
+
+                return statuses;
+            })
+            .With("@WorkDate", workDate.Date)
+            .With("@StoreID", storeID)
+            .With("@AWOL", LeaveType.AWOL.ToDatabaseValue());
         }
 
         // Writes a whole day of Timesheets in one transaction, so a failure part way
@@ -380,6 +533,13 @@ WHERE TimesheetID = @TimesheetID AND EmployeeID = @EmployeeID;";
             }
 
             return timesheet;
+        }
+
+        // Reads a nullable text column, as an empty string when it is null.
+        private static string ReadText(MySqlDataReader reader, string columnName)
+        {
+            int index = reader.GetOrdinal(columnName);
+            return reader.IsDBNull(index) ? string.Empty : reader.GetString(index);
         }
 
         // Reads a nullable time column.

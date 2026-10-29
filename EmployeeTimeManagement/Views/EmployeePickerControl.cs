@@ -24,6 +24,12 @@ namespace EmployeeTimeManagement.Views
             InitializeComponent();
         }
 
+        // The list itself, for keys that act on the chosen row.
+        internal DataGridView List
+        {
+            get { return dgvEmployees; }
+        }
+
         // The rows currently on screen, after the search text and former-employee toggle narrow them.
         internal List<EmployeeListItem> VisibleEmployees { get; private set; } = new List<EmployeeListItem>();
 
@@ -46,6 +52,39 @@ namespace EmployeeTimeManagement.Views
 
                 return dgvEmployees.CurrentRow.DataBoundItem as EmployeeListItem;
             }
+        }
+
+        // Selects one employee's row, first showing former employees if that is where they
+        // are, and clearing a search that would hide them. False when they are not in the list.
+        internal bool SelectEmployee(int employeeID)
+        {
+            EmployeeListItem target = allEmployees.FirstOrDefault(employee => employee.EmployeeID == employeeID);
+
+            if (target == null)
+            {
+                return false;
+            }
+
+            if (!target.IsActive && !chkShowFormer.Checked)
+            {
+                chkShowFormer.Checked = true;
+            }
+
+            if (!VisibleEmployees.Contains(target))
+            {
+                txtSearch.Text = string.Empty;
+            }
+
+            foreach (DataGridViewRow row in dgvEmployees.Rows)
+            {
+                if (row.DataBoundItem == target)
+                {
+                    dgvEmployees.CurrentCell = row.Cells[dgvEmployees.Columns.GetFirstColumn(DataGridViewElementStates.Visible).Index];
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // Replaces the full list of employees to choose from and reapplies the current search and toggle state.

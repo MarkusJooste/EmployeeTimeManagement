@@ -225,25 +225,20 @@ WHERE l.LeaveID = @LeaveID
 
         // Counts employees at one store with an Absence, of any Leave Type, covering today -
         // the same question the Leave view answers for one employee at a time, so the
-        // dashboard's tile and this screen can never disagree.
-        public int CountOnLeaveToday(int storeID, DateTime today)
+        // dashboard's tile and this screen can never disagree. A null storeID counts every
+        // store, for the owner.
+        // Returned as a Query so the dashboard can batch it with its other reads.
+        public Query<int> OnLeaveTodayQuery(int? storeID, DateTime today)
         {
             const string query = @"SELECT COUNT(DISTINCT l.EmployeeID)
 FROM TBL_leave l
 JOIN TBL_employees e ON e.EmployeeID = l.EmployeeID
-WHERE e.StoreID = @StoreID
+WHERE (@StoreID IS NULL OR e.StoreID = @StoreID)
   AND @Today BETWEEN l.StartDate AND l.EndDate;";
 
-            using (var connection = DatabaseConnection.GetConnection())
-            {
-                using (var command = new MySqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@StoreID", storeID);
-                    command.Parameters.AddWithValue("@Today", today.Date);
-
-                    return Convert.ToInt32(command.ExecuteScalar());
-                }
-            }
+            return new Query<int>(query, QueryBatch.ReadInt)
+                .With("@StoreID", storeID)
+                .With("@Today", today.Date);
         }
 
         // Converts an absent value to the DBNull the driver expects.

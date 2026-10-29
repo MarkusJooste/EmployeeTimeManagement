@@ -9,8 +9,22 @@ using System.Windows.Forms;
 
 namespace EmployeeTimeManagement.Views
 {
-    public partial class LeaveForm : Form
+    public partial class LeaveForm : Form, IHasShortcuts
     {
+
+        // Ctrl+S books the absence being entered and Ctrl+N starts a new one. Listed on the
+        // F1 shortcuts list.
+        IEnumerable<Shortcut> IHasShortcuts.Shortcuts
+        {
+            get
+            {
+                return new[]
+                {
+                    new Shortcut(Keys.Control | Keys.S, btnBookAbsence),
+                    new Shortcut(Keys.Control | Keys.N, btnNewAbsence)
+                };
+            }
+        }
         // Shown as the first item of the Leave Type filter, standing for no filter at all.
         private const string AllLeaveTypesLabel = "All Leave Types";
 
@@ -31,6 +45,11 @@ namespace EmployeeTimeManagement.Views
         // Set while the grid's DataSource or selection is being changed programmatically, so
         // dgvHistory_SelectionChanged does not treat it as the manager picking a row to edit.
         private bool suppressSelectionEvent;
+
+        // The employee whose history and balances are on screen, or null for none. The picker
+        // reports the same selection several times while it first appears, and each report
+        // would otherwise re-read the history and Timesheets from the database.
+        private int? shownEmployeeID;
 
         public LeaveForm()
         {
@@ -96,6 +115,7 @@ namespace EmployeeTimeManagement.Views
         // Clears the history panel back to its no-selection state.
         private void ShowNoSelection()
         {
+            shownEmployeeID = null;
             selectedEmployeeHistory = new List<Absence>();
             lblSelectedEmployee.Text = "Select an employee to see their Absence history";
             cboLeaveType.Enabled = false;
@@ -115,6 +135,7 @@ namespace EmployeeTimeManagement.Views
                 return;
             }
 
+            shownEmployeeID = employee.EmployeeID;
             lblSelectedEmployee.Text = "Absence history: " + employee.FullName;
             cboLeaveType.Enabled = true;
 
@@ -457,6 +478,13 @@ namespace EmployeeTimeManagement.Views
             if (selected == null)
             {
                 ShowNoSelection();
+                return;
+            }
+
+            // Already on screen. Saving or deleting an Absence reloads by calling
+            // ShowHistoryFor directly, so skipping here never leaves stale figures.
+            if (selected.EmployeeID == shownEmployeeID)
+            {
                 return;
             }
 

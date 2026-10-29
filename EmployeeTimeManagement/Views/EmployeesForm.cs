@@ -9,8 +9,24 @@ using System.Windows.Forms;
 
 namespace EmployeeTimeManagement.Views
 {
-    public partial class EmployeesForm : Form
+    public partial class EmployeesForm : Form, IHasShortcuts
     {
+
+        // Ctrl+N adds, Enter on the list updates the chosen employee, and in the editor
+        // Ctrl+S saves and Esc cancels. Listed on the F1 shortcuts list.
+        IEnumerable<Shortcut> IHasShortcuts.Shortcuts
+        {
+            get
+            {
+                return new[]
+                {
+                    new Shortcut(Keys.Control | Keys.N, btnAdd),
+                    new Shortcut(Keys.Enter, btnUpdate, employeePicker.List, "Update the chosen employee"),
+                    new Shortcut(Keys.Control | Keys.S, btnSave),
+                    new Shortcut(Keys.Escape, btnCancel)
+                };
+            }
+        }
         private readonly EmployeeController employeeController;
 
         // Every field the capture seam can refuse, by the name it refuses them under.
@@ -66,6 +82,25 @@ namespace EmployeeTimeManagement.Views
             employeePicker.SetEmployees(employees);
         }
 
+        // Selects one employee in the list, for the dashboard's renew tile. Queued until the
+        // screen has finished appearing, since the grid picks its own first row as it is shown
+        // and would otherwise undo the selection.
+        public void ShowEmployee(int employeeID)
+        {
+            BeginInvoke(new Action(() =>
+            {
+                if (CurrentUser.StoreID == null)
+                {
+                    return;
+                }
+
+                if (!employeePicker.SelectEmployee(employeeID))
+                {
+                    lblStatus.Text = "That employee is at another store, so they are not in this list.";
+                }
+            }));
+        }
+
         // Summarises the displayed rows in the status label
         private void ShowCount(List<EmployeeListItem> employees)
         {
@@ -87,7 +122,9 @@ namespace EmployeeTimeManagement.Views
             bool hasSelection = selected != null;
 
             btnUpdate.Enabled = hasSelection;
-            btnTerminate.Enabled = hasSelection && selected.IsActive;
+            // A lapsed fixed-term contract can still be terminated, to record that the
+            // employee left rather than renewing it.
+            btnTerminate.Enabled = hasSelection && (selected.IsActive || !selected.IsTerminated);
             btnReactivate.Enabled = hasSelection && !selected.IsActive;
         }
 
@@ -199,6 +236,13 @@ namespace EmployeeTimeManagement.Views
                 // Unchecked reads as "use the contract start date", matching a stored null.
                 dtpOpeningBalanceAsAt.Checked = record.Contract.OpeningBalanceAsAt.HasValue;
                 dtpOpeningBalanceAsAt.Value = record.Contract.OpeningBalanceAsAt ?? record.Contract.StartDate;
+
+                // Unchecked is a contract with no end date. Once Terminate has recorded a
+                // reason the date is the day the employee left, which only Terminate and
+                // Reactivate change, so it is shown but cannot be edited here.
+                dtpEndDate.Checked = record.Contract.EndDate.HasValue;
+                dtpEndDate.Value = record.Contract.EndDate ?? record.Contract.StartDate.AddYears(1);
+                dtpEndDate.Enabled = string.IsNullOrWhiteSpace(record.Contract.ReasonForEnding);
             }
 
             dgvFamily.Rows.Clear();
@@ -220,6 +264,17 @@ namespace EmployeeTimeManagement.Views
         {
             pnlEditor.Visible = false;
             pnlList.Visible = true;
+
+            // Back on the list, on the employee just edited, so Enter opens them again;
+            // or in the search box when the list is empty.
+            if (employeePicker.List.Rows.Count > 0)
+            {
+                employeePicker.List.Focus();
+            }
+            else
+            {
+                KeyboardNavigation.FocusSearch(this);
+            }
         }
 
         // Empties every field of the editor, leaving marital status unset and one blank family
@@ -235,12 +290,16 @@ namespace EmployeeTimeManagement.Views
                 {
                     picker.Value = DateTime.Today;
 
-                    // Unchecked reads as "use the contract start date", the default for a new starter.
+                    // Unchecked is the default for a new starter: the Opening Balance counts from
+                    // the contract start date, and the contract has no end date.
                     if (picker.ShowCheckBox)
                     {
                         picker.Checked = false;
                     }
                 });
+
+            // FillEditor locks the end date of a terminated contract; a new one is editable.
+            dtpEndDate.Enabled = true;
 
             dgvFamily.Rows.Clear();
             dgvFamily.Rows.Add();
@@ -469,6 +528,7 @@ namespace EmployeeTimeManagement.Views
 
                 ContractType = txtContractType.Text,
                 StartDate = dtpStartDate.Value.Date,
+                EndDate = dtpEndDate.Checked ? dtpEndDate.Value.Date : (DateTime?)null,
                 Department = txtDepartment.Text,
                 JobDescription = txtJobDescription.Text,
                 HourlyRate = txtHourlyRate.Text,
@@ -530,6 +590,7 @@ namespace EmployeeTimeManagement.Views
 
                 { "ContractType", new EditorField(txtContractType, "Contract type") },
                 { "StartDate", new EditorField(dtpStartDate, "Start date") },
+                { "EndDate", new EditorField(dtpEndDate, "End date") },
                 { "Department", new EditorField(txtDepartment, "Department") },
                 { "JobDescription", new EditorField(txtJobDescription, "Job description") },
                 { "HourlyRate", new EditorField(txtHourlyRate, "Hourly rate") },
