@@ -1,6 +1,7 @@
 using EmployeeTimeManagement.Database;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace EmployeeTimeManagement.Views
@@ -104,7 +105,7 @@ namespace EmployeeTimeManagement.Views
             {
                 DatabaseConnection.Configure(candidate);
             }
-            catch (Exception ex) when (ex is System.IO.IOException || ex is UnauthorizedAccessException)
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
                 lblError.Text = "Connected, but the connection could not be saved on this PC: " + ex.Message;
                 return;
