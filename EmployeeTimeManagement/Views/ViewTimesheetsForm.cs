@@ -332,7 +332,7 @@ namespace EmployeeTimeManagement.Views
                 ? "Could not save the PDF. If an earlier copy is open in a PDF reader, close it and try again.\n\n" + ex.Message
                 : "Could not create the PDF:\n\n" + ex.Message;
 
-            MessageBox.Show(message, "Report Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ErrorDialog.Show("Report Error", message, ex);
         }
 
         private static void OfferToOpen(string filePath, string what)

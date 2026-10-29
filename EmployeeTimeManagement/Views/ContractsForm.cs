@@ -324,7 +324,7 @@ namespace EmployeeTimeManagement.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not fill in the contract: " + ex.Message, "Contracts", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorDialog.Show("Contracts", "Could not fill in the contract: " + ex.Message, ex);
                 return null;
             }
             finally
@@ -372,7 +372,7 @@ namespace EmployeeTimeManagement.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not preview the contract: " + ex.Message, "Contracts", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorDialog.Show("Contracts", "Could not preview the contract: " + ex.Message, ex);
             }
         }
 
@@ -419,7 +419,7 @@ namespace EmployeeTimeManagement.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not print the contract: " + ex.Message, "Contracts", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorDialog.Show("Contracts", "Could not print the contract: " + ex.Message, ex);
             }
         }
 
@@ -462,7 +462,7 @@ namespace EmployeeTimeManagement.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not save the PDF: " + ex.Message, "Save as PDF", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorDialog.Show("Save as PDF", "Could not save the PDF: " + ex.Message, ex);
             }
         }
 

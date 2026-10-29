@@ -49,7 +49,13 @@ namespace EmployeeTimeManagement.Views
                 DialogResult = DialogResult.Cancel;
             };
 
+            ErrorLog.Default.Write("Startup connection (" + problem + ")", detail);
+            Button btnCopy = ErrorDialog.CopyDiagnosticsButton(
+                ErrorLog.Default.BuildDiagnostics("Startup connection (" + problem + ")", detail),
+                new Point(12, 110));
+
             Controls.Add(lblDetail);
+            Controls.Add(btnCopy);
             Controls.Add(btnPrimary);
             Controls.Add(btnContinue);
 

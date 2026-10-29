@@ -19,6 +19,31 @@ namespace EmployeeTimeManagement
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            // Anything not caught in a view ends up here: log it and show it with Copy
+            // diagnostics rather than the stock Windows crash box.
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            bool showingError = false;
+            Application.ThreadException += (sender, e) =>
+            {
+                ErrorLog.Default.Write("Unexpected error", e.Exception);
+                if (showingError)
+                {
+                    return;
+                }
+
+                showingError = true;
+                try
+                {
+                    ErrorDialog.Show("Unexpected error", "Something went wrong: " + e.Exception.Message, e.Exception);
+                }
+                finally
+                {
+                    showingError = false;
+                }
+            };
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+                ErrorLog.Default.Write("Unhandled error", e.ExceptionObject as Exception);
+
             // Test the saved connection (importing any .env first) and let the user retry,
             // set it up, or carry on without it.
             StartupResult startup = DatabaseConnection.RunStartupFlow(
